@@ -1,0 +1,6 @@
+nohup: ignoring input
+[1;38;5;208m=== BUILD — 11-STATE BOUNDARIES ===[0m
+Started: 2026-10-20T13:18:42-07:00
+Build root: /home/forsgrenryan2025/Prospectors_Exploration_Map/builds/boundaries-11-state-2025
+No deployment, upload, deletion, or road-build modification is performed.
+STOP: required command is unavailable: unzip

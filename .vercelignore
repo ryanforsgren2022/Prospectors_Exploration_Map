@@ -1,0 +1,27 @@
+# Current frontend deployment exclusions
+.git/
+.claude/
+.agents/
+node_modules/
+.venv/
+snapshots/
+audit/
+road-style-audit/
+*.before-*
+*.backup-*
+*.backup
+*.bak
+*.orig
+*.failed-*
+*CHECKPOINT*
+*.old
+satellite-build/
+vector-build/
+*.tar
+*.tar.gz
+*.zip
+source-dist/data/roads.pmtiles
+source-dist/data/satellite.pmtiles
+public/**/data/roads.pmtiles
+public/**/data/satellite.pmtiles
+source-dist/data/historic-mines-arizona.geojson

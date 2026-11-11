@@ -1,0 +1,47 @@
+
+.research-location__page-shell {
+  display:grid;
+  gap:8px;
+}
+
+.research-location__page-title {
+  color:#f6f8f6;
+  font-size:14px;
+  font-weight:800;
+  padding-bottom:6px;
+  border-bottom:1px solid rgba(255,255,255,.12);
+}
+
+.research-location__results {
+  min-height:120px;
+}
+
+.research-location__pager {
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:8px;
+  margin-top:4px;
+}
+
+.research-location__pager button {
+  min-height:34px;
+  padding:6px 8px;
+  font-size:12px;
+}
+
+.research-location__pager button:last-child {
+  justify-self:stretch;
+}
+
+.research-location__pager span {
+  color:#c9d7cc;
+  font-size:12px;
+  font-weight:700;
+  white-space:nowrap;
+}
+
+.research-location__pager button:disabled {
+  opacity:.4;
+  cursor:default;
+}

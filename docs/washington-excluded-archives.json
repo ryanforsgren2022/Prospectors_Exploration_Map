@@ -1,0 +1,66 @@
+[
+  {
+    "id": 117,
+    "state": "wa",
+    "currentFilename": "wa-plss-government-lots.mbtiles",
+    "oldPath": "/root/LIVE_SITE_CASHE/live-mvt/data/wa/plss/tiles/wa-plss-government-lots.mbtiles",
+    "auditPath": "/root/LIVE_SITE_CASHE/live-mvt/data/wa/plss/tiles/wa-plss-government-lots.mbtiles",
+    "scope": "EXCLUDED \u2014 UNIQUENESS UNVERIFIED",
+    "datasetGroups": [
+      "plssGovernmentLots"
+    ],
+    "sourceLayers": [
+      "plss_government_lots"
+    ],
+    "proposedFilename": "wa-plss-government-lots.mbtiles",
+    "proposedCanonicalPath": null,
+    "namingBlocker": null,
+    "newPath": "/root/LIVE_SITE_CASHE/live-mvt/data/wa/plss/tiles/wa-plss-government-lots.mbtiles",
+    "action": "RETAIN PHYSICAL FILE UNCHANGED; no migration registration",
+    "duplicates": "No content equivalence established",
+    "sameLayerAlternativesNotProvenDuplicates": [
+      "/root/LIVE_SITE_CASHE/live-mvt/data/wa/plss/tiles/wa-plss-government-lots-blm-authoritative.mbtiles"
+    ],
+    "backendReferences": "No selected local runtime registration",
+    "discoveryRoutes": [],
+    "auditErrors": [],
+    "sha256": null,
+    "sha256Status": "Not measured: source archives unavailable locally",
+    "fileIdentity": "64769:1311539",
+    "bytes": 143360,
+    "destinationCollision": null,
+    "deletionEligible": false
+  },
+  {
+    "id": 119,
+    "state": "wa",
+    "currentFilename": "wa-plss-quarter-quarter-sections.mbtiles",
+    "oldPath": "/root/LIVE_SITE_CASHE/live-mvt/data/wa/plss/tiles/wa-plss-quarter-quarter-sections.mbtiles",
+    "auditPath": "/root/LIVE_SITE_CASHE/live-mvt/data/wa/plss/tiles/wa-plss-quarter-quarter-sections.mbtiles",
+    "scope": "EXCLUDED \u2014 UNIQUENESS UNVERIFIED",
+    "datasetGroups": [
+      "plssQuarterQuarterSections"
+    ],
+    "sourceLayers": [
+      "plss_quarter_quarter_sections"
+    ],
+    "proposedFilename": "wa-plss-quarter-quarter-sections.mbtiles",
+    "proposedCanonicalPath": null,
+    "namingBlocker": null,
+    "newPath": "/root/LIVE_SITE_CASHE/live-mvt/data/wa/plss/tiles/wa-plss-quarter-quarter-sections.mbtiles",
+    "action": "RETAIN PHYSICAL FILE UNCHANGED; no migration registration",
+    "duplicates": "No content equivalence established",
+    "sameLayerAlternativesNotProvenDuplicates": [
+      "/root/LIVE_SITE_CASHE/live-mvt/data/wa/plss/tiles/wa-plss-quarter-quarter-sections-blm-authoritative.mbtiles"
+    ],
+    "backendReferences": "No selected local runtime registration",
+    "discoveryRoutes": [],
+    "auditErrors": [],
+    "sha256": null,
+    "sha256Status": "Not measured: source archives unavailable locally",
+    "fileIdentity": "64769:1311534",
+    "bytes": 90112,
+    "destinationCollision": null,
+    "deletionEligible": false
+  }
+]

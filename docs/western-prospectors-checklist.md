@@ -1,0 +1,19 @@
+# Western Prospectors state/layer checklist
+
+Audit-backed local registrations, 2026-10-24. Production changes are not deployed. PASS refers to local direct-handler/renderer tests, not live verification. See [remediation report](data-archive-remediation.md).
+
+| State | Registered VM families | Gaps / pending verification |
+| --- | --- | --- |
+| AZ | statewide claims, government lots, quarter-quarter sections, quarter sections, sections, special surveys, survey points, townships, surface management, authorized/pending withdrawals | boundary (present, metadata missing), intersected surveys, second divisions |
+| CA | boundary, statewide claims, government lots, quarter-quarter sections, quarter sections, sections, special surveys, survey points, townships, surface management, authorized/pending withdrawals | intersected surveys, second divisions |
+| CO | boundary, parcels, government lots, quarter-quarter sections, quarter sections, sections, special surveys, survey points, townships, surface management, authorized/pending withdrawals | statewide claims, intersected surveys, second divisions |
+| ID | boundary, claimsBlmLands, government lots, intersected surveys, quarter-quarter sections, quarter sections, sections, townships, surface management, authorized/pending withdrawals | statewide claims (BLM-only control registered separately), special surveys, survey points, second divisions |
+| MT | boundary, statewide claims (canonical mt-claims.mbtiles), intersected surveys, second divisions, sections, special surveys, survey points, townships, surface management, authorized/pending withdrawals | government lots, quarter sections, quarter-quarter sections |
+| NM | boundary, statewide claims, government lots, intersected surveys, second divisions, sections, special surveys, survey points, townships, surface management, authorized/pending withdrawals | quarter sections, quarter-quarter sections |
+| NV | government lots, quarter-quarter sections, quarter sections, sections, special surveys, survey points, townships, authorized/pending withdrawals | boundary, surface management, statewide claims, intersected surveys, second divisions |
+| OR | boundary, statewide claims, government lots, quarter-quarter sections, quarter sections, special surveys, authorized/pending withdrawals | surface management, townships, sections, survey points, intersected surveys, second divisions |
+| UT | boundary, statewide claims, quarter-quarter sections, quarter sections, sections, survey points, townships, surface management, authorized/pending withdrawals | government lots, special surveys, intersected surveys, second divisions |
+| WA | boundary, statewide claims, government lots, quarter-quarter sections, quarter sections, sections, special surveys, survey points, townships, surface management, authorized/pending withdrawals | intersected surveys, second divisions |
+| WY | boundary, intersected surveys, second divisions, special surveys, survey points, townships, surface management, authorized/pending withdrawals | statewide claims, sections, government lots, quarter sections, quarter-quarter sections |
+
+All registered entries have local source-layer/extent and representative tile-handler fixture tests. The prepared backend supports current and standardized archive paths without changing public routes; VM verification/deployment remains pending under the [VM handoff](vm-backend-handoff.md). Roads and historic mines use R2 for all 11 states; their production metadata and payloads are unverified here. Missing means not established by this MBTiles audit, not proof that no dataset exists elsewhere. Parcels remain last, on the VM. Montana uses the user-verified canonical filename; duplicate deletion still requires live hash/reference checks, as documented in the remediation report.

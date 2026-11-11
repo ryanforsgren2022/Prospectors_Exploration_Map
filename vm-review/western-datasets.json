@@ -1,0 +1,2601 @@
+{
+  "schemaVersion": 1,
+  "canonicalDataRoot": "/root/LIVE_SITE_CASHE/live-mvt/data",
+  "states": {
+    "az": {
+      "datasets": {
+        "claims": {
+          "path": "az/claims/az-claims-not-closed.mbtiles",
+          "sourceLayer": "claims_not_closed",
+          "minzoom": 6,
+          "maxzoom": 15,
+          "bounds": [
+            -114.627742,
+            31.333188,
+            -109.047525,
+            36.9973
+          ],
+          "auditFileIdentity": "64769:2885530",
+          "auditBytes": 110419968,
+          "sampleTile": [
+            6,
+            11,
+            39,
+            68352
+          ],
+          "semantics": "notClosed",
+          "classificationField": "CSE_DISP",
+          "canonicalPath": "az/claims/tiles/az-claims.mbtiles"
+        },
+        "plssGovernmentLots": {
+          "path": "az/plss/tiles/az-plss.mbtiles",
+          "sourceLayer": "plss_government_lots",
+          "minzoom": 11,
+          "maxzoom": 16,
+          "bounds": [
+            -114.816742,
+            31.332232,
+            -109.0448,
+            37.003786
+          ],
+          "auditFileIdentity": "64769:2885444",
+          "auditBytes": 894402560,
+          "sampleTile": [
+            6,
+            11,
+            37,
+            877
+          ],
+          "canonicalPath": "az/plss/tiles/az-plss.mbtiles"
+        },
+        "plssQuarterQuarterSections": {
+          "path": "az/plss/tiles/az-plss-quarter-quarter-sections.mbtiles",
+          "sourceLayer": "plss_quarter_quarter",
+          "minzoom": 12,
+          "maxzoom": 16,
+          "bounds": [
+            -114.81235,
+            31.332342,
+            -109.047525,
+            37.001454
+          ],
+          "auditFileIdentity": "64769:2886280",
+          "auditBytes": 1344331776,
+          "sampleTile": [
+            12,
+            767,
+            2431,
+            6361
+          ],
+          "canonicalPath": "az/plss/tiles/az-plss-quarter-quarter-sections.mbtiles"
+        },
+        "plssQuarterSections": {
+          "path": "az/plss/tiles/az-plss-quarter-sections.mbtiles",
+          "sourceLayer": "plss_quarter_sections",
+          "minzoom": 11,
+          "maxzoom": 16,
+          "bounds": [
+            -114.803801,
+            31.332832,
+            -109.047527,
+            37.001454
+          ],
+          "auditFileIdentity": "64769:2886271",
+          "auditBytes": 675225600,
+          "sampleTile": [
+            11,
+            399,
+            1243,
+            1990
+          ],
+          "canonicalPath": "az/plss/tiles/az-plss-quarter-sections.mbtiles"
+        },
+        "plssSections": {
+          "path": "az/plss/tiles/az-plss.mbtiles",
+          "sourceLayer": "plss_sections",
+          "minzoom": 9,
+          "maxzoom": 16,
+          "bounds": [
+            -114.816742,
+            31.332232,
+            -109.0448,
+            37.003786
+          ],
+          "auditFileIdentity": "64769:2885444",
+          "auditBytes": 894402560,
+          "sampleTile": [
+            6,
+            11,
+            37,
+            877
+          ],
+          "canonicalPath": "az/plss/tiles/az-plss.mbtiles"
+        },
+        "plssSpecialSurveys": {
+          "path": "az/plss/tiles/az-plss.mbtiles",
+          "sourceLayer": "plss_special_surveys",
+          "minzoom": 10,
+          "maxzoom": 16,
+          "bounds": [
+            -114.816742,
+            31.332232,
+            -109.0448,
+            37.003786
+          ],
+          "auditFileIdentity": "64769:2885444",
+          "auditBytes": 894402560,
+          "sampleTile": [
+            6,
+            11,
+            37,
+            877
+          ],
+          "canonicalPath": "az/plss/tiles/az-plss.mbtiles"
+        },
+        "plssSurveyPoints": {
+          "path": "az/plss/tiles/az-plss-survey-points.mbtiles",
+          "sourceLayer": "plss_survey_points",
+          "minzoom": 12,
+          "maxzoom": 16,
+          "bounds": [
+            -114.81633,
+            31.332342,
+            -109.045172,
+            37.003723
+          ],
+          "auditFileIdentity": "64769:2886293",
+          "auditBytes": 993103872,
+          "sampleTile": [
+            12,
+            767,
+            2431,
+            1016
+          ],
+          "canonicalPath": "az/plss/tiles/az-plss-survey-points.mbtiles"
+        },
+        "plssTownships": {
+          "path": "az/plss/tiles/az-plss-townships.mbtiles",
+          "sourceLayer": "plss_townships",
+          "minzoom": 6,
+          "maxzoom": 16,
+          "bounds": [
+            -114.81633,
+            31.332342,
+            -109.045172,
+            37.003723
+          ],
+          "auditFileIdentity": "64769:2885775",
+          "auditBytes": 305995776,
+          "sampleTile": [
+            6,
+            11,
+            39,
+            8305
+          ],
+          "canonicalPath": "az/plss/tiles/az-plss-townships.mbtiles"
+        },
+        "surfaceManagement": {
+          "path": "az/surface-management/az-surface-management.mbtiles",
+          "sourceLayer": "surface_management",
+          "minzoom": 0,
+          "maxzoom": 12,
+          "bounds": [
+            -114.816342,
+            31.332346,
+            -109.045183,
+            37.003729
+          ],
+          "auditFileIdentity": "64769:2885679",
+          "auditBytes": 26787840,
+          "sampleTile": [
+            0,
+            0,
+            0,
+            43201
+          ],
+          "canonicalPath": "az/surface-management/tiles/az-surface-management.mbtiles"
+        },
+        "withdrawalsAuthorized": {
+          "path": "az/withdrawals/tiles/az-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_authorized",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -114.81361,
+            31.333502,
+            -109.047028,
+            37.001384
+          ],
+          "auditFileIdentity": "64769:2885531",
+          "auditBytes": 375996416,
+          "sampleTile": [
+            4,
+            3,
+            9,
+            120387
+          ],
+          "canonicalPath": "az/withdrawals/tiles/az-withdrawals.mbtiles"
+        },
+        "withdrawalsPending": {
+          "path": "az/withdrawals/tiles/az-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_pending",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -114.81361,
+            31.333502,
+            -109.047028,
+            37.001384
+          ],
+          "auditFileIdentity": "64769:2885531",
+          "auditBytes": 375996416,
+          "sampleTile": [
+            4,
+            3,
+            9,
+            120387
+          ],
+          "canonicalPath": "az/withdrawals/tiles/az-withdrawals.mbtiles"
+        }
+      },
+      "name": "Arizona",
+      "bounds": [
+        -114.8128344705447,
+        31.332406253852533,
+        -109.04483902389023,
+        37.0039183311733
+      ]
+    },
+    "ca": {
+      "datasets": {
+        "boundary": {
+          "path": "ca/boundary/tiles/ca-boundary.mbtiles",
+          "sourceLayer": "state_boundary",
+          "minzoom": 4,
+          "maxzoom": 14,
+          "bounds": [
+            -124.409591,
+            32.534435,
+            -114.131211,
+            42.009485
+          ],
+          "auditFileIdentity": "64769:1311648",
+          "auditBytes": 10108928,
+          "sampleTile": [
+            4,
+            2,
+            10,
+            287
+          ],
+          "canonicalPath": "ca/boundary/tiles/ca-boundary.mbtiles"
+        },
+        "claims": {
+          "path": "ca/claims/ca-claims-not-closed.mbtiles",
+          "sourceLayer": "mining_claims",
+          "minzoom": 6,
+          "maxzoom": 16,
+          "bounds": [
+            -123.60693,
+            32.689918,
+            -114.370442,
+            42.002119
+          ],
+          "auditFileIdentity": "64769:1311671",
+          "auditBytes": 35143680,
+          "sampleTile": [
+            6,
+            11,
+            39,
+            4186
+          ],
+          "semantics": "notClosed",
+          "classificationField": "CSE_DISP",
+          "canonicalPath": "ca/claims/tiles/ca-claims.mbtiles"
+        },
+        "plssGovernmentLots": {
+          "path": "ca/plss/tiles/ca-plss-government-lots.mbtiles",
+          "sourceLayer": "plss_government_lots",
+          "minzoom": 6,
+          "maxzoom": 16,
+          "bounds": [
+            -124.408342,
+            32.534421,
+            -114.1315,
+            42.009503
+          ],
+          "auditFileIdentity": "64769:1049737",
+          "auditBytes": 836149248,
+          "sampleTile": [
+            6,
+            9,
+            39,
+            439303
+          ],
+          "canonicalPath": "ca/plss/tiles/ca-plss-government-lots.mbtiles"
+        },
+        "plssQuarterQuarterSections": {
+          "path": "ca/plss/tiles/ca-plss-quarter-quarter-sections.mbtiles",
+          "sourceLayer": "plss_quarter_quarter_sections",
+          "minzoom": 8,
+          "maxzoom": 16,
+          "bounds": [
+            -124.40683,
+            32.536403,
+            -114.136023,
+            42.006842
+          ],
+          "auditFileIdentity": "64769:1311676",
+          "auditBytes": 2840043520,
+          "sampleTile": [
+            8,
+            46,
+            155,
+            34040
+          ],
+          "canonicalPath": "ca/plss/tiles/ca-plss-quarter-quarter-sections.mbtiles"
+        },
+        "plssQuarterSections": {
+          "path": "ca/plss/tiles/ca-plss-quarter-sections.mbtiles",
+          "sourceLayer": "plss_quarter_sections",
+          "minzoom": 10,
+          "maxzoom": 16,
+          "bounds": [
+            -124.40683,
+            32.536403,
+            -114.136023,
+            42.006842
+          ],
+          "auditFileIdentity": "64769:1311692",
+          "auditBytes": 818081792,
+          "sampleTile": [
+            10,
+            168,
+            630,
+            29453
+          ],
+          "canonicalPath": "ca/plss/tiles/ca-plss-quarter-sections.mbtiles"
+        },
+        "plssSections": {
+          "path": "ca/plss/tiles/ca-plss-sections.mbtiles",
+          "sourceLayer": "plss_sections",
+          "minzoom": 6,
+          "maxzoom": 16,
+          "bounds": [
+            -124.408356,
+            32.534312,
+            -114.131139,
+            42.009509
+          ],
+          "auditFileIdentity": "64769:1049709",
+          "auditBytes": 1133031424,
+          "sampleTile": [
+            6,
+            9,
+            39,
+            144393
+          ],
+          "canonicalPath": "ca/plss/tiles/ca-plss-sections.mbtiles"
+        },
+        "plssSpecialSurveys": {
+          "path": "ca/plss/tiles/ca-plss-special-surveys.mbtiles",
+          "sourceLayer": "plss_special_surveys",
+          "minzoom": 6,
+          "maxzoom": 16,
+          "bounds": [
+            -124.353787,
+            32.575935,
+            -114.24215,
+            42.003832
+          ],
+          "auditFileIdentity": "64769:1049722",
+          "auditBytes": 96550912,
+          "sampleTile": [
+            6,
+            9,
+            39,
+            1138
+          ],
+          "canonicalPath": "ca/plss/tiles/ca-plss-special-surveys.mbtiles"
+        },
+        "plssSurveyPoints": {
+          "path": "ca/plss/tiles/ca-plss-survey-points.mbtiles",
+          "sourceLayer": "plss_survey_points",
+          "minzoom": 6,
+          "maxzoom": 16,
+          "bounds": [
+            -124.408342,
+            32.534307,
+            -114.131127,
+            42.009503
+          ],
+          "auditFileIdentity": "64769:1049732",
+          "auditBytes": 1131491328,
+          "sampleTile": [
+            6,
+            11,
+            39,
+            698
+          ],
+          "canonicalPath": "ca/plss/tiles/ca-plss-survey-points.mbtiles"
+        },
+        "plssTownships": {
+          "path": "ca/plss/tiles/ca-plss-townships.mbtiles",
+          "sourceLayer": "plss_townships",
+          "minzoom": 6,
+          "maxzoom": 16,
+          "bounds": [
+            -124.408356,
+            32.534312,
+            -114.131139,
+            42.009509
+          ],
+          "auditFileIdentity": "64769:1049706",
+          "auditBytes": 417304576,
+          "sampleTile": [
+            6,
+            9,
+            39,
+            8674
+          ],
+          "canonicalPath": "ca/plss/tiles/ca-plss-townships.mbtiles"
+        },
+        "surfaceManagement": {
+          "path": "ca/surface-management/tiles/ca-surface-management.mbtiles",
+          "sourceLayer": "surface_management",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -124.418111,
+            32.534323,
+            -114.131484,
+            42.009509
+          ],
+          "auditFileIdentity": "64769:1311651",
+          "auditBytes": 468922368,
+          "sampleTile": [
+            4,
+            2,
+            10,
+            139597
+          ],
+          "canonicalPath": "ca/surface-management/tiles/ca-surface-management.mbtiles"
+        },
+        "withdrawalsAuthorized": {
+          "path": "ca/withdrawals/tiles/ca-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_authorized",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -124.408356,
+            32.534312,
+            -114.131512,
+            42.009552
+          ],
+          "auditFileIdentity": "64769:2885558",
+          "auditBytes": 806453248,
+          "sampleTile": [
+            4,
+            2,
+            10,
+            39947
+          ],
+          "canonicalPath": "ca/withdrawals/tiles/ca-withdrawals.mbtiles"
+        },
+        "withdrawalsPending": {
+          "path": "ca/withdrawals/tiles/ca-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_pending",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -124.408356,
+            32.534312,
+            -114.131512,
+            42.009552
+          ],
+          "auditFileIdentity": "64769:2885558",
+          "auditBytes": 806453248,
+          "sampleTile": [
+            4,
+            2,
+            10,
+            39947
+          ],
+          "canonicalPath": "ca/withdrawals/tiles/ca-withdrawals.mbtiles"
+        }
+      },
+      "name": "California",
+      "bounds": [
+        -124.41060660766607,
+        32.5342307609976,
+        -114.13445790587905,
+        42.00965914828148
+      ]
+    },
+    "co": {
+      "datasets": {
+        "boundary": {
+          "path": "co/boundary/tiles/co-boundary.mbtiles",
+          "sourceLayer": "boundary",
+          "minzoom": 0,
+          "maxzoom": 16,
+          "bounds": [
+            -109.060204,
+            36.992449,
+            -102.041522,
+            41.003444
+          ],
+          "auditFileIdentity": "64769:2886546",
+          "auditBytes": 96059392,
+          "sampleTile": [
+            0,
+            0,
+            0,
+            329
+          ],
+          "canonicalPath": "co/boundary/tiles/co-boundary.mbtiles"
+        },
+        "parcels": {
+          "path": "co/parcels/tiles/co-parcels.mbtiles",
+          "sourceLayer": "parcels",
+          "minzoom": 12,
+          "maxzoom": 16,
+          "bounds": [
+            -109.06008,
+            36.992322,
+            -102.049953,
+            41.00329
+          ],
+          "auditFileIdentity": "64769:2889543",
+          "auditBytes": 1922949120,
+          "sampleTile": [
+            12,
+            807,
+            2504,
+            456
+          ],
+          "canonicalPath": "co/parcels/tiles/co-parcels.mbtiles"
+        },
+        "plssGovernmentLots": {
+          "path": "co/plss/tiles/co-plss.mbtiles",
+          "sourceLayer": "plss_government_lots",
+          "minzoom": 11,
+          "maxzoom": 16,
+          "bounds": [
+            -109.060249,
+            36.992407,
+            -102.041016,
+            41.003739
+          ],
+          "auditFileIdentity": "64769:2886696",
+          "auditBytes": 1429012480,
+          "sampleTile": [
+            6,
+            12,
+            39,
+            40868
+          ],
+          "canonicalPath": "co/plss/tiles/co-plss.mbtiles"
+        },
+        "plssQuarterQuarterSections": {
+          "path": "co/plss/tiles/co-plss-quarter-quarter-sections.mbtiles",
+          "sourceLayer": "plss_quarter_quarter",
+          "minzoom": 12,
+          "maxzoom": 16,
+          "bounds": [
+            -109.056693,
+            36.994162,
+            -102.044435,
+            41.002445
+          ],
+          "auditFileIdentity": "64769:2886710",
+          "auditBytes": 1373028352,
+          "sampleTile": [
+            12,
+            863,
+            2526,
+            15941
+          ],
+          "canonicalPath": "co/plss/tiles/co-plss-quarter-quarter-sections.mbtiles"
+        },
+        "plssQuarterSections": {
+          "path": "co/plss/tiles/co-plss-quarter-sections.mbtiles",
+          "sourceLayer": "plss_quarter_sections",
+          "minzoom": 11,
+          "maxzoom": 16,
+          "bounds": [
+            -109.056693,
+            36.994607,
+            -102.044435,
+            41.002445
+          ],
+          "auditFileIdentity": "64769:2886725",
+          "auditBytes": 911409152,
+          "sampleTile": [
+            11,
+            431,
+            1278,
+            20911
+          ],
+          "canonicalPath": "co/plss/tiles/co-plss-quarter-sections.mbtiles"
+        },
+        "plssSections": {
+          "path": "co/plss/tiles/co-plss.mbtiles",
+          "sourceLayer": "plss_sections",
+          "minzoom": 9,
+          "maxzoom": 16,
+          "bounds": [
+            -109.060249,
+            36.992407,
+            -102.041016,
+            41.003739
+          ],
+          "auditFileIdentity": "64769:2886696",
+          "auditBytes": 1429012480,
+          "sampleTile": [
+            6,
+            12,
+            39,
+            40868
+          ],
+          "canonicalPath": "co/plss/tiles/co-plss.mbtiles"
+        },
+        "plssSpecialSurveys": {
+          "path": "co/plss/tiles/co-plss.mbtiles",
+          "sourceLayer": "plss_special_surveys",
+          "minzoom": 10,
+          "maxzoom": 16,
+          "bounds": [
+            -109.060249,
+            36.992407,
+            -102.041016,
+            41.003739
+          ],
+          "auditFileIdentity": "64769:2886696",
+          "auditBytes": 1429012480,
+          "sampleTile": [
+            6,
+            12,
+            39,
+            40868
+          ],
+          "canonicalPath": "co/plss/tiles/co-plss.mbtiles"
+        },
+        "plssSurveyPoints": {
+          "path": "co/plss/tiles/co-plss-survey-points.mbtiles",
+          "sourceLayer": "plss_survey_points",
+          "minzoom": 12,
+          "maxzoom": 16,
+          "bounds": [
+            -109.060204,
+            36.992401,
+            -102.041762,
+            41.003453
+          ],
+          "auditFileIdentity": "64769:2886740",
+          "auditBytes": 1196453888,
+          "sampleTile": [
+            12,
+            831,
+            2542,
+            1238
+          ],
+          "canonicalPath": "co/plss/tiles/co-plss-survey-points.mbtiles"
+        },
+        "plssTownships": {
+          "path": "co/plss/tiles/co-plss.mbtiles",
+          "sourceLayer": "plss_townships",
+          "minzoom": 6,
+          "maxzoom": 16,
+          "bounds": [
+            -109.060249,
+            36.992407,
+            -102.041016,
+            41.003739
+          ],
+          "auditFileIdentity": "64769:2886696",
+          "auditBytes": 1429012480,
+          "sampleTile": [
+            6,
+            12,
+            39,
+            40868
+          ],
+          "canonicalPath": "co/plss/tiles/co-plss.mbtiles"
+        },
+        "surfaceManagement": {
+          "path": "co/surface-management/tiles/co-surface-management.mbtiles",
+          "sourceLayer": "surface_management",
+          "minzoom": 5,
+          "maxzoom": 16,
+          "bounds": [
+            -109.061279,
+            36.991585,
+            -102.041016,
+            41.004775
+          ],
+          "auditFileIdentity": "64769:2889562",
+          "auditBytes": 329920512,
+          "sampleTile": [
+            5,
+            6,
+            19,
+            1158442
+          ],
+          "canonicalPath": "co/surface-management/tiles/co-surface-management.mbtiles"
+        },
+        "withdrawalsAuthorized": {
+          "path": "co/withdrawals/tiles/co-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_authorized",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -109.059127,
+            36.993818,
+            -102.113767,
+            41.000024
+          ],
+          "auditFileIdentity": "64769:2885614",
+          "auditBytes": 245366784,
+          "sampleTile": [
+            4,
+            3,
+            10,
+            17040
+          ],
+          "canonicalPath": "co/withdrawals/tiles/co-withdrawals.mbtiles"
+        },
+        "withdrawalsPending": {
+          "path": "co/withdrawals/tiles/co-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_pending",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -109.059127,
+            36.993818,
+            -102.113767,
+            41.000024
+          ],
+          "auditFileIdentity": "64769:2885614",
+          "auditBytes": 245366784,
+          "sampleTile": [
+            4,
+            3,
+            10,
+            17040
+          ],
+          "canonicalPath": "co/withdrawals/tiles/co-withdrawals.mbtiles"
+        }
+      },
+      "name": "Colorado",
+      "bounds": [
+        -109.05919619986199,
+        36.99275055519555,
+        -102.04212644366443,
+        41.00198213121131
+      ]
+    },
+    "id": {
+      "datasets": {
+        "boundary": {
+          "path": "id/boundary/tiles/id-boundary.mbtiles",
+          "sourceLayer": "state_boundary",
+          "minzoom": 4,
+          "maxzoom": 15,
+          "bounds": [
+            -117.243027,
+            41.988182,
+            -111.043495,
+            49.000846
+          ],
+          "auditFileIdentity": "64769:1311482",
+          "auditBytes": 25079808,
+          "sampleTile": [
+            4,
+            3,
+            10,
+            466
+          ],
+          "canonicalPath": "id/boundary/tiles/id-boundary.mbtiles"
+        },
+        "claimsBlmLands": {
+          "path": "id/claims/id-claims-active-blm-lands.mbtiles",
+          "sourceLayer": "claims",
+          "minzoom": 8,
+          "maxzoom": 15,
+          "bounds": [
+            -117.220407,
+            41.988182,
+            -111.169759,
+            47.645076
+          ],
+          "auditFileIdentity": "64769:1311492",
+          "auditBytes": 23273472,
+          "sampleTile": [
+            8,
+            47,
+            162,
+            74777
+          ],
+          "semantics": "notClosed",
+          "classificationField": "CSE_DISP",
+          "coverage": "BLM lands only; not authoritative statewide coverage",
+          "canonicalPath": "id/claims-blm-lands/tiles/id-claims-blm-lands.mbtiles"
+        },
+        "plssGovernmentLots": {
+          "path": "id/plss/tiles/id-plss-government-lots.mbtiles",
+          "sourceLayer": "plss_government_lots",
+          "minzoom": 8,
+          "maxzoom": 16,
+          "bounds": [
+            -117.241736,
+            41.988654,
+            -111.043379,
+            49.000124
+          ],
+          "auditFileIdentity": "64769:1311446",
+          "auditBytes": 155021312,
+          "sampleTile": [
+            8,
+            49,
+            160,
+            768
+          ],
+          "canonicalPath": "id/plss/tiles/id-plss-government-lots.mbtiles"
+        },
+        "plssIntersected": {
+          "path": "id/plss/tiles/id-plss-intersected.mbtiles",
+          "sourceLayer": "plss_intersected",
+          "minzoom": 8,
+          "maxzoom": 16,
+          "bounds": [
+            -117.241736,
+            41.988189,
+            -111.043379,
+            49.000845
+          ],
+          "auditFileIdentity": "64769:1311439",
+          "auditBytes": 1953513472,
+          "sampleTile": [
+            8,
+            49,
+            160,
+            9395
+          ],
+          "canonicalPath": "id/plss/tiles/id-plss-intersected-surveys.mbtiles"
+        },
+        "plssQuarterQuarterSections": {
+          "path": "id/plss/tiles/id-plss-quarter-quarter-sections.mbtiles",
+          "sourceLayer": "plss_quarter_quarter_sections",
+          "minzoom": 8,
+          "maxzoom": 16,
+          "bounds": [
+            -117.230896,
+            41.988189,
+            -111.044697,
+            49.000186
+          ],
+          "auditFileIdentity": "64769:1311449",
+          "auditBytes": 730853376,
+          "sampleTile": [
+            8,
+            49,
+            160,
+            2493
+          ],
+          "canonicalPath": "id/plss/tiles/id-plss-quarter-quarter-sections.mbtiles"
+        },
+        "plssQuarterSections": {
+          "path": "id/plss/tiles/id-plss-quarter-sections.mbtiles",
+          "sourceLayer": "plss_quarter_sections",
+          "minzoom": 8,
+          "maxzoom": 16,
+          "bounds": [
+            -117.225821,
+            41.988189,
+            -111.044697,
+            49.000186
+          ],
+          "auditFileIdentity": "64769:1311455",
+          "auditBytes": 423059456,
+          "sampleTile": [
+            8,
+            49,
+            160,
+            554
+          ],
+          "canonicalPath": "id/plss/tiles/id-plss-quarter-sections.mbtiles"
+        },
+        "plssSections": {
+          "path": "id/plss/tiles/id-plss-sections.mbtiles",
+          "sourceLayer": "plss_sections",
+          "minzoom": 8,
+          "maxzoom": 16,
+          "bounds": [
+            -117.241736,
+            41.988189,
+            -111.043379,
+            49.000845
+          ],
+          "auditFileIdentity": "64769:1311437",
+          "auditBytes": 795475968,
+          "sampleTile": [
+            8,
+            47,
+            160,
+            22398
+          ],
+          "canonicalPath": "id/plss/tiles/id-plss-sections.mbtiles"
+        },
+        "plssTownships": {
+          "path": "id/plss/tiles/id-plss-townships.mbtiles",
+          "sourceLayer": "plss_townships",
+          "minzoom": 6,
+          "maxzoom": 16,
+          "bounds": [
+            -117.241736,
+            41.988189,
+            -111.043379,
+            49.000845
+          ],
+          "auditFileIdentity": "64769:1311496",
+          "auditBytes": 162086912,
+          "sampleTile": [
+            6,
+            11,
+            42,
+            430
+          ],
+          "canonicalPath": "id/plss/tiles/id-plss-townships.mbtiles"
+        },
+        "surfaceManagement": {
+          "path": "id/surface-management/tiles/id-surface-management.mbtiles",
+          "sourceLayer": "surface_management",
+          "minzoom": 5,
+          "maxzoom": 15,
+          "bounds": [
+            -117.241823,
+            41.988196,
+            -111.043346,
+            49.000852
+          ],
+          "auditFileIdentity": "64769:1311467",
+          "auditBytes": 128380928,
+          "sampleTile": [
+            5,
+            5,
+            21,
+            4792
+          ],
+          "canonicalPath": "id/surface-management/tiles/id-surface-management.mbtiles"
+        },
+        "withdrawalsAuthorized": {
+          "path": "id/withdrawals/tiles/id-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_authorized",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -117.235717,
+            41.996185,
+            -111.044004,
+            48.999772
+          ],
+          "auditFileIdentity": "64769:2885683",
+          "auditBytes": 530833408,
+          "sampleTile": [
+            4,
+            3,
+            10,
+            43040
+          ],
+          "canonicalPath": "id/withdrawals/tiles/id-withdrawals.mbtiles"
+        },
+        "withdrawalsPending": {
+          "path": "id/withdrawals/tiles/id-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_pending",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -117.235717,
+            41.996185,
+            -111.044004,
+            48.999772
+          ],
+          "auditFileIdentity": "64769:2885683",
+          "auditBytes": 530833408,
+          "sampleTile": [
+            4,
+            3,
+            10,
+            43040
+          ],
+          "canonicalPath": "id/withdrawals/tiles/id-withdrawals.mbtiles"
+        }
+      },
+      "name": "Idaho",
+      "bounds": [
+        -117.24278650376503,
+        41.988182656016555,
+        -111.04407577795777,
+        49.00068691035909
+      ]
+    },
+    "mt": {
+      "datasets": {
+        "boundary": {
+          "path": "mt/boundary/tiles/mt-boundary.mbtiles",
+          "sourceLayer": "state_boundary",
+          "minzoom": 0,
+          "maxzoom": 12,
+          "bounds": [
+            -116.049153,
+            44.357915,
+            -104.039694,
+            49.001109
+          ],
+          "auditFileIdentity": "64769:1311177",
+          "auditBytes": 1216512,
+          "sampleTile": [
+            0,
+            0,
+            0,
+            346
+          ],
+          "canonicalPath": "mt/boundary/tiles/mt-boundary.mbtiles"
+        },
+        "claims": {
+          "path": "mt/claims/mt-claims.mbtiles",
+          "sourceLayer": "claims",
+          "minzoom": 6,
+          "maxzoom": 16,
+          "bounds": [
+            -116.044392,
+            44.488228,
+            -104.344679,
+            48.789407
+          ],
+          "auditFileIdentity": "64769:1311266",
+          "auditBytes": 75747328,
+          "sampleTile": [
+            6,
+            13,
+            40,
+            20174
+          ],
+          "semantics": "notClosed",
+          "classificationField": "CSE_DISP",
+          "canonicalPath": "mt/claims/tiles/mt-claims.mbtiles"
+        },
+        "plssIntersected": {
+          "path": "mt/plss/tiles/mt-plss-intersected.mbtiles",
+          "sourceLayer": "plss_intersected",
+          "minzoom": 9,
+          "maxzoom": 16,
+          "bounds": [
+            -116.04918,
+            44.35837,
+            -104.039646,
+            49.001097
+          ],
+          "auditFileIdentity": "64769:1311306",
+          "auditBytes": 4467822592,
+          "sampleTile": [
+            9,
+            105,
+            335,
+            728340
+          ],
+          "canonicalPath": "mt/plss/tiles/mt-plss-intersected-surveys.mbtiles"
+        },
+        "plssSecondDivision": {
+          "path": "mt/plss/tiles/mt-plss-second-division.mbtiles",
+          "sourceLayer": "plss_second_division",
+          "minzoom": 11,
+          "maxzoom": 16,
+          "bounds": [
+            -116.04918,
+            44.37658,
+            -104.039646,
+            49.001097
+          ],
+          "auditFileIdentity": "64769:1311305",
+          "auditBytes": 3201519616,
+          "sampleTile": [
+            11,
+            417,
+            1311,
+            55036
+          ],
+          "canonicalPath": "mt/plss/tiles/mt-plss-second-divisions.mbtiles"
+        },
+        "plssSections": {
+          "path": "mt/plss/tiles/mt-plss-sections.mbtiles",
+          "sourceLayer": "plss_first_division",
+          "minzoom": 8,
+          "maxzoom": 15,
+          "bounds": [
+            -116.04918,
+            44.35837,
+            -104.039646,
+            49.001097
+          ],
+          "auditFileIdentity": "64769:1311304",
+          "auditBytes": 509579264,
+          "sampleTile": [
+            8,
+            53,
+            163,
+            29846
+          ],
+          "canonicalPath": "mt/plss/tiles/mt-plss-sections.mbtiles"
+        },
+        "plssSpecialSurveys": {
+          "path": "mt/plss/tiles/mt-plss-special-surveys.mbtiles",
+          "sourceLayer": "plss_special_surveys",
+          "minzoom": 9,
+          "maxzoom": 16,
+          "bounds": [
+            -116.049075,
+            44.471737,
+            -104.041987,
+            48.991143
+          ],
+          "auditFileIdentity": "64769:1311307",
+          "auditBytes": 44859392,
+          "sampleTile": [
+            9,
+            104,
+            327,
+            391
+          ],
+          "canonicalPath": "mt/plss/tiles/mt-plss-special-surveys.mbtiles"
+        },
+        "plssSurveyPoints": {
+          "path": "mt/plss/tiles/mt-plss-survey-points.mbtiles",
+          "sourceLayer": "plss_survey_points",
+          "minzoom": 11,
+          "maxzoom": 16,
+          "bounds": [
+            -116.04918,
+            44.35837,
+            -104.039646,
+            49.001097
+          ],
+          "auditFileIdentity": "64769:1311308",
+          "auditBytes": 1671569408,
+          "sampleTile": [
+            11,
+            401,
+            1326,
+            884
+          ],
+          "canonicalPath": "mt/plss/tiles/mt-plss-survey-points.mbtiles"
+        },
+        "plssTownships": {
+          "path": "mt/plss/tiles/mt-plss-townships.mbtiles",
+          "sourceLayer": "plss_townships",
+          "minzoom": 6,
+          "maxzoom": 14,
+          "bounds": [
+            -116.04918,
+            44.35837,
+            -104.039646,
+            49.001097
+          ],
+          "auditFileIdentity": "64769:1311182",
+          "auditBytes": 74182656,
+          "sampleTile": [
+            6,
+            11,
+            42,
+            2936
+          ],
+          "canonicalPath": "mt/plss/tiles/mt-plss-townships.mbtiles"
+        },
+        "surfaceManagement": {
+          "path": "mt/surface-management/mt-surface-management.mbtiles",
+          "sourceLayer": "surface_management",
+          "minzoom": 5,
+          "maxzoom": 14,
+          "bounds": [
+            -116.049131,
+            44.357916,
+            -104.039648,
+            49.001096
+          ],
+          "auditFileIdentity": "64769:2885706",
+          "auditBytes": 62337024,
+          "sampleTile": [
+            5,
+            5,
+            21,
+            5463
+          ],
+          "canonicalPath": "mt/surface-management/tiles/mt-surface-management.mbtiles"
+        },
+        "withdrawalsAuthorized": {
+          "path": "mt/withdrawals/tiles/mt-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_authorized",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -116.049095,
+            44.358376,
+            -104.041453,
+            49.00109
+          ],
+          "auditFileIdentity": "64769:2885714",
+          "auditBytes": 1183428608,
+          "sampleTile": [
+            4,
+            3,
+            10,
+            162403
+          ],
+          "canonicalPath": "mt/withdrawals/tiles/mt-withdrawals.mbtiles"
+        },
+        "withdrawalsPending": {
+          "path": "mt/withdrawals/tiles/mt-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_pending",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -116.049095,
+            44.358376,
+            -104.041453,
+            49.00109
+          ],
+          "auditFileIdentity": "64769:2885714",
+          "auditBytes": 1183428608,
+          "sampleTile": [
+            4,
+            3,
+            10,
+            162403
+          ],
+          "canonicalPath": "mt/withdrawals/tiles/mt-withdrawals.mbtiles"
+        }
+      },
+      "name": "Montana",
+      "bounds": [
+        -116.05114089810897,
+        44.35832834237342,
+        -104.04136319773197,
+        49.00154597004969
+      ]
+    },
+    "nm": {
+      "datasets": {
+        "boundary": {
+          "path": "nm/boundary/tiles/nm-boundary.mbtiles",
+          "sourceLayer": "boundary",
+          "minzoom": 0,
+          "maxzoom": 16,
+          "bounds": [
+            -109.050431,
+            31.33216,
+            -103.002043,
+            37.000233
+          ],
+          "auditFileIdentity": "64769:2889512",
+          "auditBytes": 98623488,
+          "sampleTile": [
+            0,
+            0,
+            0,
+            345
+          ],
+          "canonicalPath": "nm/boundary/tiles/nm-boundary.mbtiles"
+        },
+        "claims": {
+          "path": "nm/claims/nm-claims-not-closed.mbtiles",
+          "sourceLayer": "claims",
+          "minzoom": 9,
+          "maxzoom": 16,
+          "bounds": [
+            -109.048752,
+            31.639545,
+            -103.450317,
+            36.770549
+          ],
+          "auditFileIdentity": "64769:1311417",
+          "auditBytes": 27099136,
+          "sampleTile": [
+            9,
+            104,
+            311,
+            6391
+          ],
+          "semantics": "notClosed",
+          "classificationField": "CSE_DISP",
+          "canonicalPath": "nm/claims/tiles/nm-claims.mbtiles"
+        },
+        "plssGovernmentLots": {
+          "path": "nm/plss/tiles/nm-plss-government-lots.mbtiles",
+          "sourceLayer": "plss_government_lots",
+          "minzoom": 12,
+          "maxzoom": 16,
+          "bounds": [
+            -109.05008,
+            31.33216,
+            -103.002153,
+            37.000233
+          ],
+          "auditFileIdentity": "64769:1311017",
+          "auditBytes": 329166848,
+          "sampleTile": [
+            12,
+            865,
+            2462,
+            2971
+          ],
+          "canonicalPath": "nm/plss/tiles/nm-plss-government-lots.mbtiles"
+        },
+        "plssIntersected": {
+          "path": "nm/plss/tiles/intersected-surveys.mbtiles",
+          "sourceLayer": "nm_plss_intersected-surveys",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -109.050443,
+            31.33216,
+            -103.002153,
+            37.000233
+          ],
+          "auditFileIdentity": "64769:1311012",
+          "auditBytes": 2367410176,
+          "sampleTile": [
+            4,
+            3,
+            9,
+            446717
+          ],
+          "canonicalPath": "nm/plss/tiles/nm-plss-intersected-surveys.mbtiles"
+        },
+        "plssSecondDivision": {
+          "path": "nm/plss/tiles/second-divisions.mbtiles",
+          "sourceLayer": "nm_plss_second-divisions",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -109.05008,
+            31.33216,
+            -103.002153,
+            37.000233
+          ],
+          "auditFileIdentity": "64769:1310883",
+          "auditBytes": 1994809344,
+          "sampleTile": [
+            4,
+            3,
+            9,
+            456327
+          ],
+          "canonicalPath": "nm/plss/tiles/nm-plss-second-divisions.mbtiles"
+        },
+        "plssSections": {
+          "path": "nm/plss/tiles/sections.mbtiles",
+          "sourceLayer": "nm_plss_sections",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -109.050443,
+            31.33216,
+            -103.002153,
+            37.000233
+          ],
+          "auditFileIdentity": "64769:1310881",
+          "auditBytes": 743481344,
+          "sampleTile": [
+            4,
+            3,
+            9,
+            436880
+          ],
+          "canonicalPath": "nm/plss/tiles/nm-plss-sections.mbtiles"
+        },
+        "plssSpecialSurveys": {
+          "path": "nm/plss/tiles/special-surveys.mbtiles",
+          "sourceLayer": "nm_plss_special-surveys",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -109.046903,
+            31.597145,
+            -103.032888,
+            37.000112
+          ],
+          "auditFileIdentity": "64769:1311005",
+          "auditBytes": 71716864,
+          "sampleTile": [
+            4,
+            3,
+            9,
+            116915
+          ],
+          "canonicalPath": "nm/plss/tiles/nm-plss-special-surveys.mbtiles"
+        },
+        "plssSurveyPoints": {
+          "path": "nm/plss/tiles/survey-points.mbtiles",
+          "sourceLayer": "nm_plss_survey-points",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -109.050443,
+            31.33216,
+            -103.002153,
+            37.000233
+          ],
+          "auditFileIdentity": "64769:1311004",
+          "auditBytes": 874463232,
+          "sampleTile": [
+            4,
+            3,
+            9,
+            2454
+          ],
+          "canonicalPath": "nm/plss/tiles/nm-plss-survey-points.mbtiles"
+        },
+        "plssTownships": {
+          "path": "nm/plss/tiles/townships.mbtiles",
+          "sourceLayer": "nm_plss_townships",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -109.050443,
+            31.33216,
+            -103.002153,
+            37.000233
+          ],
+          "auditFileIdentity": "64769:1310879",
+          "auditBytes": 273068032,
+          "sampleTile": [
+            4,
+            3,
+            9,
+            131727
+          ],
+          "canonicalPath": "nm/plss/tiles/nm-plss-townships.mbtiles"
+        },
+        "surfaceManagement": {
+          "path": "nm/surface-management/nm-surface-management.mbtiles",
+          "sourceLayer": "surface_management",
+          "minzoom": 6,
+          "maxzoom": 16,
+          "bounds": [
+            -109.050453,
+            31.332165,
+            -103.002163,
+            37.000239
+          ],
+          "auditFileIdentity": "64769:1311407",
+          "auditBytes": 468152320,
+          "sampleTile": [
+            6,
+            13,
+            37,
+            19606
+          ],
+          "canonicalPath": "nm/surface-management/tiles/nm-surface-management.mbtiles"
+        },
+        "withdrawalsAuthorized": {
+          "path": "nm/withdrawals/tiles/nm-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_authorized",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -109.050091,
+            31.332165,
+            -103.042711,
+            37.000239
+          ],
+          "auditFileIdentity": "64769:2885748",
+          "auditBytes": 668057600,
+          "sampleTile": [
+            4,
+            3,
+            9,
+            176517
+          ],
+          "canonicalPath": "nm/withdrawals/tiles/nm-withdrawals.mbtiles"
+        },
+        "withdrawalsPending": {
+          "path": "nm/withdrawals/tiles/nm-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_pending",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -109.050091,
+            31.332165,
+            -103.042711,
+            37.000239
+          ],
+          "auditFileIdentity": "64769:2885748",
+          "auditBytes": 668057600,
+          "sampleTile": [
+            4,
+            3,
+            9,
+            176517
+          ],
+          "canonicalPath": "nm/withdrawals/tiles/nm-withdrawals.mbtiles"
+        }
+      },
+      "name": "New Mexico",
+      "bounds": [
+        -109.04842831788318,
+        31.332406253852533,
+        -103.0004679397794,
+        37.00048209241092
+      ]
+    },
+    "nv": {
+      "datasets": {
+        "plssGovernmentLots": {
+          "path": "nv/plss/tiles/nv-plss.mbtiles",
+          "sourceLayer": "plss_government_lots",
+          "minzoom": 11,
+          "maxzoom": 16,
+          "bounds": [
+            -120.005722,
+            35.001878,
+            -114.039459,
+            42.002366
+          ],
+          "auditFileIdentity": "64769:1049666",
+          "auditBytes": 1488248832,
+          "sampleTile": [
+            6,
+            10,
+            39,
+            18326
+          ],
+          "canonicalPath": "nv/plss/tiles/nv-plss.mbtiles"
+        },
+        "plssQuarterQuarterSections": {
+          "path": "nv/plss/tiles/nv-plss-quarter-quarter-sections.mbtiles",
+          "sourceLayer": "plss_quarter_quarter",
+          "minzoom": 12,
+          "maxzoom": 16,
+          "bounds": [
+            -120.003851,
+            35.043465,
+            -114.041938,
+            41.996843
+          ],
+          "auditFileIdentity": "64769:3407881",
+          "auditBytes": 1802518528,
+          "sampleTile": [
+            12,
+            735,
+            2558,
+            30802
+          ],
+          "canonicalPath": "nv/plss/tiles/nv-plss-quarter-quarter-sections.mbtiles"
+        },
+        "plssQuarterSections": {
+          "path": "nv/plss/tiles/nv-plss-quarter-sections.mbtiles",
+          "sourceLayer": "plss_quarter_sections",
+          "minzoom": 11,
+          "maxzoom": 16,
+          "bounds": [
+            -120.003838,
+            35.050669,
+            -114.045188,
+            41.996675
+          ],
+          "auditFileIdentity": "64769:2886316",
+          "auditBytes": 740225024,
+          "sampleTile": [
+            11,
+            367,
+            1276,
+            8427
+          ],
+          "canonicalPath": "nv/plss/tiles/nv-plss-quarter-sections.mbtiles"
+        },
+        "plssSections": {
+          "path": "nv/plss/tiles/nv-plss.mbtiles",
+          "sourceLayer": "plss_sections",
+          "minzoom": 9,
+          "maxzoom": 16,
+          "bounds": [
+            -120.005722,
+            35.001878,
+            -114.039459,
+            42.002366
+          ],
+          "auditFileIdentity": "64769:1049666",
+          "auditBytes": 1488248832,
+          "sampleTile": [
+            6,
+            10,
+            39,
+            18326
+          ],
+          "canonicalPath": "nv/plss/tiles/nv-plss.mbtiles"
+        },
+        "plssSpecialSurveys": {
+          "path": "nv/plss/tiles/nv-plss.mbtiles",
+          "sourceLayer": "plss_special_surveys",
+          "minzoom": 10,
+          "maxzoom": 16,
+          "bounds": [
+            -120.005722,
+            35.001878,
+            -114.039459,
+            42.002366
+          ],
+          "auditFileIdentity": "64769:1049666",
+          "auditBytes": 1488248832,
+          "sampleTile": [
+            6,
+            10,
+            39,
+            18326
+          ],
+          "canonicalPath": "nv/plss/tiles/nv-plss.mbtiles"
+        },
+        "plssSurveyPoints": {
+          "path": "nv/plss/tiles/nv-plss-survey-points.mbtiles",
+          "sourceLayer": "plss_survey_points",
+          "minzoom": 12,
+          "maxzoom": 16,
+          "bounds": [
+            -120.00572,
+            35.002344,
+            -114.03946,
+            42.001911
+          ],
+          "auditFileIdentity": "64769:2886164",
+          "auditBytes": 925052928,
+          "sampleTile": [
+            12,
+            735,
+            2569,
+            1215
+          ],
+          "canonicalPath": "nv/plss/tiles/nv-plss-survey-points.mbtiles"
+        },
+        "plssTownships": {
+          "path": "nv/plss/tiles/nv-plss.mbtiles",
+          "sourceLayer": "plss_townships",
+          "minzoom": 6,
+          "maxzoom": 16,
+          "bounds": [
+            -120.005722,
+            35.001878,
+            -114.039459,
+            42.002366
+          ],
+          "auditFileIdentity": "64769:1049666",
+          "auditBytes": 1488248832,
+          "sampleTile": [
+            6,
+            10,
+            39,
+            18326
+          ],
+          "canonicalPath": "nv/plss/tiles/nv-plss.mbtiles"
+        },
+        "withdrawalsAuthorized": {
+          "path": "nv/withdrawals/tiles/nv-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_authorized",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -120.005696,
+            35.065312,
+            -114.039472,
+            42.001917
+          ],
+          "auditFileIdentity": "64769:2885869",
+          "auditBytes": 1121202176,
+          "sampleTile": [
+            4,
+            2,
+            10,
+            55865
+          ],
+          "canonicalPath": "nv/withdrawals/tiles/nv-withdrawals.mbtiles"
+        },
+        "withdrawalsPending": {
+          "path": "nv/withdrawals/tiles/nv-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_pending",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -120.005696,
+            35.065312,
+            -114.039472,
+            42.001917
+          ],
+          "auditFileIdentity": "64769:2885869",
+          "auditBytes": 1121202176,
+          "sampleTile": [
+            4,
+            2,
+            10,
+            55865
+          ],
+          "canonicalPath": "nv/withdrawals/tiles/nv-withdrawals.mbtiles"
+        }
+      },
+      "name": "Nevada",
+      "bounds": [
+        -120.00654287832877,
+        35.00145019239192,
+        -114.04113626206261,
+        42.0019276110661
+      ]
+    },
+    "or": {
+      "datasets": {
+        "boundary": {
+          "path": "or/boundary/tiles/or-boundary.mbtiles",
+          "sourceLayer": "boundary",
+          "minzoom": 4,
+          "maxzoom": 12,
+          "bounds": [
+            -124.703541,
+            41.992082,
+            -116.463262,
+            46.299099
+          ],
+          "auditFileIdentity": "64769:2885756",
+          "auditBytes": 786432,
+          "sampleTile": [
+            4,
+            2,
+            10,
+            797
+          ],
+          "canonicalPath": "or/boundary/tiles/or-boundary.mbtiles"
+        },
+        "claims": {
+          "path": "or/claims/or-claims-not-closed.mbtiles",
+          "sourceLayer": "claims_not_closed",
+          "minzoom": 6,
+          "maxzoom": 15,
+          "bounds": [
+            -124.320558,
+            41.995947,
+            -117.026644,
+            45.731825
+          ],
+          "auditFileIdentity": "64769:2885758",
+          "auditBytes": 30404608,
+          "sampleTile": [
+            6,
+            11,
+            41,
+            12476
+          ],
+          "semantics": "notClosed",
+          "classificationField": "CSE_DISP",
+          "canonicalPath": "or/claims/tiles/or-claims.mbtiles"
+        },
+        "plssGovernmentLots": {
+          "path": "or/plss/tiles/or-plss-government-lots-blm-authoritative.mbtiles",
+          "sourceLayer": "plss_government_lots",
+          "minzoom": 9,
+          "maxzoom": 16,
+          "bounds": [
+            -124.566257,
+            41.992087,
+            -116.464065,
+            46.258367
+          ],
+          "auditFileIdentity": "64769:2885761",
+          "auditBytes": 593711104,
+          "sampleTile": [
+            9,
+            87,
+            326,
+            124995
+          ],
+          "canonicalPath": "or/plss/tiles/or-plss-government-lots.mbtiles"
+        },
+        "plssQuarterQuarterSections": {
+          "path": "or/plss/tiles/or-plss-quarter-quarter-sections-blm-authoritative.mbtiles",
+          "sourceLayer": "plss_quarter_quarter_sections",
+          "minzoom": 9,
+          "maxzoom": 16,
+          "bounds": [
+            -124.566257,
+            41.992997,
+            -116.467196,
+            46.258367
+          ],
+          "auditFileIdentity": "64769:2885764",
+          "auditBytes": 2660323328,
+          "sampleTile": [
+            9,
+            79,
+            322,
+            673338
+          ],
+          "canonicalPath": "or/plss/tiles/or-plss-quarter-quarter-sections.mbtiles"
+        },
+        "plssQuarterSections": {
+          "path": "or/plss/tiles/or-plss-quarter-sections.mbtiles",
+          "sourceLayer": "plss_quarter_sections",
+          "minzoom": 8,
+          "maxzoom": 16,
+          "bounds": [
+            -124.566257,
+            41.992997,
+            -116.467196,
+            46.258367
+          ],
+          "auditFileIdentity": "64769:2885766",
+          "auditBytes": 1921867776,
+          "sampleTile": [
+            8,
+            39,
+            160,
+            22214
+          ],
+          "canonicalPath": "or/plss/tiles/or-plss-quarter-sections.mbtiles"
+        },
+        "plssSpecialSurveys": {
+          "path": "or/plss/tiles/or-plss-special-surveys.mbtiles",
+          "sourceLayer": "plss_special_surveys",
+          "minzoom": 9,
+          "maxzoom": 16,
+          "bounds": [
+            -124.525381,
+            41.992589,
+            -116.482982,
+            46.257685
+          ],
+          "auditFileIdentity": "64769:2885763",
+          "auditBytes": 85647360,
+          "sampleTile": [
+            9,
+            87,
+            326,
+            6263
+          ],
+          "canonicalPath": "or/plss/tiles/or-plss-special-surveys.mbtiles"
+        },
+        "withdrawalsAuthorized": {
+          "path": "or/withdrawals/tiles/or-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_authorized",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -124.513448,
+            41.992863,
+            -116.463726,
+            46.258367
+          ],
+          "auditFileIdentity": "64769:2885880",
+          "auditBytes": 791588864,
+          "sampleTile": [
+            4,
+            2,
+            10,
+            233891
+          ],
+          "canonicalPath": "or/withdrawals/tiles/or-withdrawals.mbtiles"
+        },
+        "withdrawalsPending": {
+          "path": "or/withdrawals/tiles/or-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_pending",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -124.513448,
+            41.992863,
+            -116.463726,
+            46.258367
+          ],
+          "auditFileIdentity": "64769:2885880",
+          "auditBytes": 791588864,
+          "sampleTile": [
+            4,
+            2,
+            10,
+            233891
+          ],
+          "canonicalPath": "or/withdrawals/tiles/or-withdrawals.mbtiles"
+        }
+      },
+      "name": "Oregon",
+      "bounds": [
+        -124.55417836738366,
+        41.99161889477894,
+        -116.46390970729706,
+        46.26801803457034
+      ]
+    },
+    "ut": {
+      "datasets": {
+        "boundary": {
+          "path": "ut/boundary/utah-state-boundary.mbtiles",
+          "sourceLayer": "state_boundary",
+          "minzoom": 0,
+          "maxzoom": 14,
+          "bounds": [
+            -114.052962,
+            36.997968,
+            -109.041058,
+            42.001702
+          ],
+          "auditFileIdentity": "64769:1051811",
+          "auditBytes": 5373952,
+          "sampleTile": [
+            0,
+            0,
+            0,
+            206
+          ],
+          "canonicalPath": "ut/boundary/tiles/ut-boundary.mbtiles"
+        },
+        "claims": {
+          "path": "ut/claims/utah-claims-active.mbtiles",
+          "sourceLayer": "claims",
+          "minzoom": 8,
+          "maxzoom": 14,
+          "bounds": [
+            -114.052306,
+            37.023061,
+            -109.042159,
+            41.98902
+          ],
+          "auditFileIdentity": "64769:1051783",
+          "auditBytes": 14245888,
+          "sampleTile": [
+            8,
+            46,
+            158,
+            2939
+          ],
+          "semantics": "notClosed",
+          "classificationField": "CSE_DISP",
+          "canonicalPath": "ut/claims/tiles/ut-claims.mbtiles"
+        },
+        "plssQuarterQuarterSections": {
+          "path": "ut/plss/tiles/ut-plss-quarter-quarter-sections.mbtiles",
+          "sourceLayer": "plss_quarter_quarter",
+          "minzoom": 12,
+          "maxzoom": 16,
+          "bounds": [
+            -114.050446,
+            36.999153,
+            -109.044514,
+            42.000917
+          ],
+          "auditFileIdentity": "64769:3408928",
+          "auditBytes": 854761472,
+          "sampleTile": [
+            12,
+            767,
+            2559,
+            529
+          ],
+          "canonicalPath": "ut/plss/tiles/ut-plss-quarter-quarter-sections.mbtiles"
+        },
+        "plssQuarterSections": {
+          "path": "ut/plss/tiles/ut-plss-quarter-sections.mbtiles",
+          "sourceLayer": "plss_quarter_sections",
+          "minzoom": 11,
+          "maxzoom": 16,
+          "bounds": [
+            -114.052897,
+            36.997663,
+            -109.04161,
+            42.001713
+          ],
+          "auditFileIdentity": "64769:3409405",
+          "auditBytes": 648691712,
+          "sampleTile": [
+            11,
+            383,
+            1279,
+            3483
+          ],
+          "canonicalPath": "ut/plss/tiles/ut-plss-quarter-sections.mbtiles"
+        },
+        "plssSections": {
+          "path": "ut/plss/tiles/utah-plss-sections.mbtiles",
+          "sourceLayer": "plss_sections",
+          "minzoom": 5,
+          "maxzoom": 14,
+          "bounds": [
+            -114.052897,
+            36.997663,
+            -109.04161,
+            42.001518
+          ],
+          "auditFileIdentity": "64769:1051137",
+          "auditBytes": 105185280,
+          "sampleTile": [
+            5,
+            5,
+            20,
+            260451
+          ],
+          "canonicalPath": "ut/plss/tiles/ut-plss-sections.mbtiles"
+        },
+        "plssSurveyPoints": {
+          "path": "ut/plss/tiles/ut-plss-survey-points.mbtiles",
+          "sourceLayer": "plss_survey_points",
+          "minzoom": 12,
+          "maxzoom": 16,
+          "bounds": [
+            -114.052897,
+            36.997663,
+            -109.04161,
+            42.001713
+          ],
+          "auditFileIdentity": "64769:3410597",
+          "auditBytes": 676962304,
+          "sampleTile": [
+            12,
+            767,
+            2559,
+            424
+          ],
+          "canonicalPath": "ut/plss/tiles/ut-plss-survey-points.mbtiles"
+        },
+        "plssTownships": {
+          "path": "ut/plss/tiles/utah-plss-townships.mbtiles",
+          "sourceLayer": "plss_townships",
+          "minzoom": 5,
+          "maxzoom": 14,
+          "bounds": [
+            -114.052897,
+            36.997663,
+            -109.04161,
+            42.001713
+          ],
+          "auditFileIdentity": "64769:1051135",
+          "auditBytes": 43081728,
+          "sampleTile": [
+            5,
+            5,
+            20,
+            13245
+          ],
+          "canonicalPath": "ut/plss/tiles/ut-plss-townships.mbtiles"
+        },
+        "surfaceManagement": {
+          "path": "ut/surface-management/utah-surface-management.mbtiles",
+          "sourceLayer": "surface_management",
+          "minzoom": 5,
+          "maxzoom": 14,
+          "bounds": [
+            -114.052885,
+            36.997657,
+            -109.041606,
+            42.001707
+          ],
+          "auditFileIdentity": "64769:1051297",
+          "auditBytes": 65642496,
+          "sampleTile": [
+            5,
+            6,
+            20,
+            57128
+          ],
+          "canonicalPath": "ut/surface-management/tiles/ut-surface-management.mbtiles"
+        },
+        "withdrawalsAuthorized": {
+          "path": "ut/withdrawals/tiles/ut-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_authorized",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -114.052897,
+            36.997663,
+            -109.045013,
+            42.001518
+          ],
+          "auditFileIdentity": "64769:2885884",
+          "auditBytes": 1157165056,
+          "sampleTile": [
+            4,
+            3,
+            10,
+            49825
+          ],
+          "canonicalPath": "ut/withdrawals/tiles/ut-withdrawals.mbtiles"
+        },
+        "withdrawalsPending": {
+          "path": "ut/withdrawals/tiles/ut-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_pending",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -114.052897,
+            36.997663,
+            -109.045013,
+            42.001518
+          ],
+          "auditFileIdentity": "64769:2885884",
+          "auditBytes": 1157165056,
+          "sampleTile": [
+            4,
+            3,
+            10,
+            49825
+          ],
+          "canonicalPath": "ut/withdrawals/tiles/ut-withdrawals.mbtiles"
+        }
+      },
+      "name": "Utah",
+      "bounds": [
+        -114.05190414404143,
+        36.99790491333913,
+        -109.04124972989729,
+        42.0019276110661
+      ]
+    },
+    "wa": {
+      "datasets": {
+        "boundary": {
+          "path": "wa/boundary/tiles/wa-boundary.mbtiles",
+          "sourceLayer": "state_boundary",
+          "minzoom": 4,
+          "maxzoom": 15,
+          "bounds": [
+            -124.848974,
+            45.543541,
+            -116.916071,
+            49.002439
+          ],
+          "auditFileIdentity": "64769:1311503",
+          "auditBytes": 22581248,
+          "sampleTile": [
+            4,
+            2,
+            10,
+            617
+          ],
+          "canonicalPath": "wa/boundary/tiles/wa-boundary.mbtiles"
+        },
+        "claims": {
+          "path": "wa/claims/wa-claims-not-closed.mbtiles",
+          "sourceLayer": "claims_not_closed",
+          "minzoom": 6,
+          "maxzoom": 15,
+          "bounds": [
+            -123.56994,
+            45.721685,
+            -117.04274,
+            49.000108
+          ],
+          "auditFileIdentity": "64769:2885751",
+          "auditBytes": 8290304,
+          "sampleTile": [
+            6,
+            11,
+            42,
+            33644
+          ],
+          "semantics": "notClosed",
+          "classificationField": "CSE_DISP",
+          "canonicalPath": "wa/claims/tiles/wa-claims.mbtiles"
+        },
+        "plssGovernmentLots": {
+          "path": "wa/plss/tiles/wa-plss-government-lots-blm-authoritative.mbtiles",
+          "sourceLayer": "plss_government_lots",
+          "minzoom": 9,
+          "maxzoom": 16,
+          "bounds": [
+            -124.731915,
+            45.550432,
+            -116.917674,
+            49.002436
+          ],
+          "auditFileIdentity": "64769:2885741",
+          "auditBytes": 274751488,
+          "sampleTile": [
+            9,
+            79,
+            332,
+            92587
+          ],
+          "canonicalPathBlocked": "wa/plss/tiles/wa-plss-government-lots.mbtiles"
+        },
+        "plssQuarterQuarterSections": {
+          "path": "wa/plss/tiles/wa-plss-quarter-quarter-sections-blm-authoritative.mbtiles",
+          "sourceLayer": "plss_quarter_quarter_sections",
+          "minzoom": 9,
+          "maxzoom": 16,
+          "bounds": [
+            -124.725057,
+            45.550432,
+            -116.922994,
+            49.002436
+          ],
+          "auditFileIdentity": "64769:2885747",
+          "auditBytes": 1176539136,
+          "sampleTile": [
+            9,
+            79,
+            334,
+            149946
+          ],
+          "canonicalPathBlocked": "wa/plss/tiles/wa-plss-quarter-quarter-sections.mbtiles"
+        },
+        "plssQuarterSections": {
+          "path": "wa/plss/tiles/wa-plss-quarter-sections.mbtiles",
+          "sourceLayer": "plss_quarter_sections",
+          "minzoom": 8,
+          "maxzoom": 16,
+          "bounds": [
+            -124.725057,
+            45.550432,
+            -116.922994,
+            49.002436
+          ],
+          "auditFileIdentity": "64769:2885749",
+          "auditBytes": 840200192,
+          "sampleTile": [
+            8,
+            39,
+            167,
+            70193
+          ],
+          "canonicalPath": "wa/plss/tiles/wa-plss-quarter-sections.mbtiles"
+        },
+        "plssSections": {
+          "path": "wa/plss/tiles/wa-plss-sections.mbtiles",
+          "sourceLayer": "plss_sections",
+          "minzoom": 6,
+          "maxzoom": 16,
+          "bounds": [
+            -124.76414,
+            45.555135,
+            -116.917713,
+            49.002432
+          ],
+          "auditFileIdentity": "64769:1311526",
+          "auditBytes": 1020682240,
+          "sampleTile": [
+            6,
+            11,
+            42,
+            49958
+          ],
+          "canonicalPath": "wa/plss/tiles/wa-plss-sections.mbtiles"
+        },
+        "plssSpecialSurveys": {
+          "path": "wa/plss/tiles/wa-plss-special-surveys.mbtiles",
+          "sourceLayer": "plss_special_surveys",
+          "minzoom": 9,
+          "maxzoom": 16,
+          "bounds": [
+            -124.690003,
+            45.558434,
+            -116.93858,
+            49.002428
+          ],
+          "auditFileIdentity": "64769:2885742",
+          "auditBytes": 60018688,
+          "sampleTile": [
+            9,
+            79,
+            334,
+            5700
+          ],
+          "canonicalPath": "wa/plss/tiles/wa-plss-special-surveys.mbtiles"
+        },
+        "plssSurveyPoints": {
+          "path": "wa/plss/tiles/wa-plss-survey-points.mbtiles",
+          "sourceLayer": "plss_survey_points",
+          "minzoom": 8,
+          "maxzoom": 16,
+          "bounds": [
+            -124.832105,
+            45.543727,
+            -116.917493,
+            49.002432
+          ],
+          "auditFileIdentity": "64769:1311530",
+          "auditBytes": 253562880,
+          "sampleTile": [
+            8,
+            39,
+            167,
+            831
+          ],
+          "canonicalPath": "wa/plss/tiles/wa-plss-survey-points.mbtiles"
+        },
+        "plssTownships": {
+          "path": "wa/plss/tiles/wa-plss-townships.mbtiles",
+          "sourceLayer": "plss_townships",
+          "minzoom": 6,
+          "maxzoom": 16,
+          "bounds": [
+            -124.76414,
+            45.555135,
+            -116.917713,
+            49.002432
+          ],
+          "auditFileIdentity": "64769:1311522",
+          "auditBytes": 292937728,
+          "sampleTile": [
+            6,
+            11,
+            42,
+            2792
+          ],
+          "canonicalPath": "wa/plss/tiles/wa-plss-townships.mbtiles"
+        },
+        "surfaceManagement": {
+          "path": "wa/surface-management/tiles/wa-surface-management.mbtiles",
+          "sourceLayer": "surface_management",
+          "minzoom": 5,
+          "maxzoom": 15,
+          "bounds": [
+            -124.785543,
+            45.558335,
+            -116.916071,
+            49.002264
+          ],
+          "auditFileIdentity": "64769:1311518",
+          "auditBytes": 21483520,
+          "sampleTile": [
+            5,
+            5,
+            21,
+            2023
+          ],
+          "canonicalPath": "wa/surface-management/tiles/wa-surface-management.mbtiles"
+        },
+        "withdrawalsAuthorized": {
+          "path": "wa/withdrawals/tiles/wa-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_authorized",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -124.736213,
+            45.548391,
+            -116.922284,
+            49.002344
+          ],
+          "auditFileIdentity": "64769:2885889",
+          "auditBytes": 566263808,
+          "sampleTile": [
+            4,
+            2,
+            10,
+            154093
+          ],
+          "canonicalPath": "wa/withdrawals/tiles/wa-withdrawals.mbtiles"
+        },
+        "withdrawalsPending": {
+          "path": "wa/withdrawals/tiles/wa-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_pending",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -124.736213,
+            45.548391,
+            -116.922284,
+            49.002344
+          ],
+          "auditFileIdentity": "64769:2885889",
+          "auditBytes": 566263808,
+          "sampleTile": [
+            4,
+            2,
+            10,
+            154093
+          ],
+          "canonicalPath": "wa/withdrawals/tiles/wa-withdrawals.mbtiles"
+        }
+      },
+      "name": "Washington",
+      "bounds": [
+        -124.73364306703067,
+        45.54383071539715,
+        -116.9161607504075,
+        49.00240502974029
+      ]
+    },
+    "wy": {
+      "datasets": {
+        "boundary": {
+          "path": "wy/boundary/wy-boundary.mbtiles",
+          "sourceLayer": "state_boundary",
+          "minzoom": 0,
+          "maxzoom": 12,
+          "bounds": [
+            -111.054558,
+            40.994772,
+            -104.052245,
+            45.005815
+          ],
+          "auditFileIdentity": "64769:1311922",
+          "auditBytes": 675840,
+          "sampleTile": [
+            0,
+            0,
+            0,
+            311
+          ],
+          "canonicalPath": "wy/boundary/tiles/wy-boundary.mbtiles"
+        },
+        "plssIntersected": {
+          "path": "wy/plss/tiles/wy-plss-intersected.mbtiles",
+          "sourceLayer": "plss_intersected",
+          "minzoom": 10,
+          "maxzoom": 16,
+          "bounds": [
+            -111.054571,
+            40.994651,
+            -104.052387,
+            45.005795
+          ],
+          "auditFileIdentity": "64769:1311048",
+          "auditBytes": 2884833280,
+          "sampleTile": [
+            10,
+            216,
+            647,
+            21106
+          ],
+          "canonicalPath": "wy/plss/tiles/wy-plss-intersected-surveys.mbtiles"
+        },
+        "plssSecondDivision": {
+          "path": "wy/plss/tiles/wy-plss-second-division.mbtiles",
+          "sourceLayer": "plss_second_division",
+          "minzoom": 12,
+          "maxzoom": 16,
+          "bounds": [
+            -111.048543,
+            40.994651,
+            -104.052387,
+            45.005795
+          ],
+          "auditFileIdentity": "64769:1310961",
+          "auditBytes": 2196353024,
+          "sampleTile": [
+            12,
+            817,
+            2575,
+            29160
+          ],
+          "canonicalPath": "wy/plss/tiles/wy-plss-second-divisions.mbtiles"
+        },
+        "plssSpecialSurveys": {
+          "path": "wy/plss/tiles/wy-plss-special-surveys.mbtiles",
+          "sourceLayer": "plss_special_surveys",
+          "minzoom": 10,
+          "maxzoom": 16,
+          "bounds": [
+            -111.047222,
+            40.997269,
+            -104.054895,
+            45.000139
+          ],
+          "auditFileIdentity": "64769:1311114",
+          "auditBytes": 82120704,
+          "sampleTile": [
+            10,
+            208,
+            647,
+            442
+          ],
+          "canonicalPath": "wy/plss/tiles/wy-plss-special-surveys.mbtiles"
+        },
+        "plssSurveyPoints": {
+          "path": "wy/plss/tiles/wy-plss-survey-points.mbtiles",
+          "sourceLayer": "plss_survey_points",
+          "minzoom": 11,
+          "maxzoom": 16,
+          "bounds": [
+            -111.048543,
+            40.994651,
+            -104.052387,
+            45.005795
+          ],
+          "auditFileIdentity": "64769:1311180",
+          "auditBytes": 926048256,
+          "sampleTile": [
+            11,
+            432,
+            1295,
+            452
+          ],
+          "canonicalPath": "wy/plss/tiles/wy-plss-survey-points.mbtiles"
+        },
+        "plssTownships": {
+          "path": "wy/plss/tiles/wy-plss-townships.mbtiles",
+          "sourceLayer": "plss_townships",
+          "minzoom": 8,
+          "maxzoom": 16,
+          "bounds": [
+            -111.054583,
+            40.994657,
+            -104.052397,
+            45.005802
+          ],
+          "auditFileIdentity": "64769:1310970",
+          "auditBytes": 277180416,
+          "sampleTile": [
+            8,
+            54,
+            160,
+            954
+          ],
+          "canonicalPath": "wy/plss/tiles/wy-plss-townships.mbtiles"
+        },
+        "surfaceManagement": {
+          "path": "wy/surface-management/wy-surface-management.mbtiles",
+          "sourceLayer": "surface_management",
+          "minzoom": 6,
+          "maxzoom": 16,
+          "bounds": [
+            -111.054583,
+            40.994657,
+            -104.052397,
+            45.005802
+          ],
+          "auditFileIdentity": "64769:1311907",
+          "auditBytes": 579502080,
+          "sampleTile": [
+            6,
+            13,
+            39,
+            11105
+          ],
+          "canonicalPath": "wy/surface-management/tiles/wy-surface-management.mbtiles"
+        },
+        "withdrawalsAuthorized": {
+          "path": "wy/withdrawals/tiles/wy-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_authorized",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -111.048555,
+            40.996266,
+            -104.052722,
+            45.005802
+          ],
+          "auditFileIdentity": "64769:2885894",
+          "auditBytes": 491544576,
+          "sampleTile": [
+            4,
+            3,
+            10,
+            180759
+          ],
+          "canonicalPath": "wy/withdrawals/tiles/wy-withdrawals.mbtiles"
+        },
+        "withdrawalsPending": {
+          "path": "wy/withdrawals/tiles/wy-withdrawals.mbtiles",
+          "sourceLayer": "withdrawals_pending",
+          "minzoom": 4,
+          "maxzoom": 16,
+          "bounds": [
+            -111.048555,
+            40.996266,
+            -104.052722,
+            45.005802
+          ],
+          "auditFileIdentity": "64769:2885894",
+          "auditBytes": 491544576,
+          "sampleTile": [
+            4,
+            3,
+            10,
+            180759
+          ],
+          "canonicalPath": "wy/withdrawals/tiles/wy-withdrawals.mbtiles"
+        }
+      },
+      "name": "Wyoming",
+      "bounds": [
+        -111.05843295392954,
+        40.995109653686534,
+        -104.05213107971079,
+        45.006059349083486
+      ]
+    }
+  }
+}

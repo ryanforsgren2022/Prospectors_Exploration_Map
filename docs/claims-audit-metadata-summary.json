@@ -1,0 +1,154 @@
+[
+  {
+    "state": "az",
+    "archive": "az/claims/az-claims-not-closed.mbtiles",
+    "metadataReportedFeatureCount": 65674,
+    "classificationsObserved": [
+      "Active",
+      "Filed",
+      "On Appeal",
+      "Under Review"
+    ],
+    "actualCountsByClassification": null,
+    "actualBefore": null,
+    "actualAfter": null,
+    "actualUnknown": null,
+    "actualClosed": null,
+    "status": "BLOCKED: source MBTiles not accessible"
+  },
+  {
+    "state": "ca",
+    "archive": "ca/claims/ca-claims-not-closed.mbtiles",
+    "metadataReportedFeatureCount": 9049,
+    "classificationsObserved": [
+      "Active",
+      "Filed",
+      "Submitted",
+      "Under Review"
+    ],
+    "actualCountsByClassification": null,
+    "actualBefore": null,
+    "actualAfter": null,
+    "actualUnknown": null,
+    "actualClosed": null,
+    "status": "BLOCKED: source MBTiles not accessible"
+  },
+  {
+    "state": "id",
+    "archive": "id/claims/id-claims-active-blm-lands.mbtiles",
+    "metadataReportedFeatureCount": 11005,
+    "classificationsObserved": [
+      "Active",
+      "Appeal - Stay Granted",
+      "Filed",
+      "Submitted",
+      "Under Review"
+    ],
+    "actualCountsByClassification": null,
+    "actualBefore": null,
+    "actualAfter": null,
+    "actualUnknown": null,
+    "actualClosed": null,
+    "status": "BLOCKED: source MBTiles not accessible"
+  },
+  {
+    "state": "mt",
+    "archive": "mt/claims/montana-claims-active.mbtiles",
+    "metadataReportedFeatureCount": 18636,
+    "classificationsObserved": [
+      "Active",
+      "Filed",
+      "Under Review"
+    ],
+    "actualCountsByClassification": null,
+    "actualBefore": null,
+    "actualAfter": null,
+    "actualUnknown": null,
+    "actualClosed": null,
+    "status": "BLOCKED: source MBTiles not accessible"
+  },
+  {
+    "state": "mt",
+    "archive": "mt/claims/mt-claims.mbtiles",
+    "metadataReportedFeatureCount": 18636,
+    "classificationsObserved": [
+      "Active",
+      "Filed",
+      "Under Review"
+    ],
+    "actualCountsByClassification": null,
+    "actualBefore": null,
+    "actualAfter": null,
+    "actualUnknown": null,
+    "actualClosed": null,
+    "status": "BLOCKED: source MBTiles not accessible"
+  },
+  {
+    "state": "nm",
+    "archive": "nm/claims/nm-claims-not-closed.mbtiles",
+    "metadataReportedFeatureCount": 14470,
+    "classificationsObserved": [
+      "Active",
+      "Filed",
+      "Under Review"
+    ],
+    "actualCountsByClassification": null,
+    "actualBefore": null,
+    "actualAfter": null,
+    "actualUnknown": null,
+    "actualClosed": null,
+    "status": "BLOCKED: source MBTiles not accessible"
+  },
+  {
+    "state": "or",
+    "archive": "or/claims/or-claims-not-closed.mbtiles",
+    "metadataReportedFeatureCount": 11502,
+    "classificationsObserved": [
+      "Active",
+      "Filed",
+      "Interim",
+      "On Appeal",
+      "Under Review"
+    ],
+    "actualCountsByClassification": null,
+    "actualBefore": null,
+    "actualAfter": null,
+    "actualUnknown": null,
+    "actualClosed": null,
+    "status": "BLOCKED: source MBTiles not accessible"
+  },
+  {
+    "state": "ut",
+    "archive": "ut/claims/utah-claims-active.mbtiles",
+    "metadataReportedFeatureCount": 44122,
+    "classificationsObserved": [
+      "Active",
+      "Draft",
+      "Filed",
+      "On Appeal",
+      "Under Review"
+    ],
+    "actualCountsByClassification": null,
+    "actualBefore": null,
+    "actualAfter": null,
+    "actualUnknown": null,
+    "actualClosed": null,
+    "status": "BLOCKED: source MBTiles not accessible"
+  },
+  {
+    "state": "wa",
+    "archive": "wa/claims/wa-claims-not-closed.mbtiles",
+    "metadataReportedFeatureCount": 2596,
+    "classificationsObserved": [
+      "Active",
+      "Filed",
+      "Under Review"
+    ],
+    "actualCountsByClassification": null,
+    "actualBefore": null,
+    "actualAfter": null,
+    "actualUnknown": null,
+    "actualClosed": null,
+    "status": "BLOCKED: source MBTiles not accessible"
+  }
+]

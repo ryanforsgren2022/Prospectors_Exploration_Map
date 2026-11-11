@@ -1,0 +1,131 @@
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+
+import {
+  database,
+  SESSION_COOKIE,
+  readCookie,
+  hashToken,
+  jsonResponse
+} from '../../lib/auth.js';
+
+const FILES = Object.freeze({
+  authorized: 'withdrawals-authorized.geojson',
+  pending: 'withdrawals-pending.geojson'
+});
+
+export default async function handler(req, res) {
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET');
+
+    return jsonResponse(res, 405, {
+      ok: false,
+      error: 'Method not allowed'
+    });
+  }
+
+  const type = String(req.query?.type || '');
+
+  if (!Object.hasOwn(FILES, type)) {
+    return jsonResponse(res, 400, {
+      ok: false,
+      error: 'Invalid withdrawal type'
+    });
+  }
+
+  try {
+    const sessionToken = readCookie(
+      req.headers.cookie || '',
+      SESSION_COOKIE
+    );
+
+    if (!sessionToken) {
+      return jsonResponse(res, 401, {
+        ok: false,
+        authenticated: false
+      });
+    }
+
+    const sql = database();
+    const tokenHash = hashToken(sessionToken);
+
+    const rows = await sql`
+      SELECT
+        s.user_id,
+        s.expires_at,
+        s.revoked_at,
+        u.status AS user_status,
+        e.status AS entitlement_status,
+        e.starts_at,
+        e.expires_at AS entitlement_expires_at
+      FROM sessions s
+      JOIN users u
+        ON u.id = s.user_id
+      LEFT JOIN map_entitlements e
+        ON e.user_id = s.user_id
+       AND e.map_slug = 'prospectors'
+      WHERE s.token_hash = ${tokenHash}
+      LIMIT 1
+    `;
+
+    const row = rows[0];
+    const now = new Date();
+
+    const validSession =
+      row &&
+      row.user_status === 'active' &&
+      row.revoked_at === null &&
+      new Date(row.expires_at) > now;
+
+    const validEntitlement =
+      validSession &&
+      row.entitlement_status === 'active' &&
+      new Date(row.starts_at) <= now &&
+      (
+        !row.entitlement_expires_at ||
+        new Date(row.entitlement_expires_at) > now
+      );
+
+    if (!validSession) {
+      return jsonResponse(res, 401, {
+      ok: false,
+      authenticated: false
+    });
+    }
+
+    if (!validEntitlement) {
+      return jsonResponse(res, 403, {
+      ok: false,
+      error: 'Prospectors access is not active'
+    });
+    }
+
+    const filePath = join(
+      process.cwd(),
+      'source-dist',
+      'data',
+      FILES[type]
+    );
+
+    const data = await readFile(filePath, 'utf8');
+
+    res.statusCode = 200;
+    res.setHeader(
+      'Content-Type',
+      'application/geo+json; charset=utf-8'
+    );
+    res.setHeader(
+      'Cache-Control',
+      'private, no-store'
+    );
+    res.end(data);
+
+  } catch (error) {
+    console.error('Withdrawal data error:', error);
+
+    return jsonResponse(res, 500, {
+      ok: false,
+      error: 'Unable to load withdrawal data'
+    });
+  }
+}

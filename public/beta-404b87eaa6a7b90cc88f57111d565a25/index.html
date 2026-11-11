@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=yes">
+  <meta name="theme-color" content="#111814">
+  <title>Prospectors Exploration Map (BETA)</title>
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+  <meta name="description" content="Arizona prospecting map with roads, geology, historic mines, land status, and saved research locations.">
+  <link rel="stylesheet" href="./vendor/maplibre-gl.css">
+  <link rel="stylesheet" href="./map.67553f8e28a2.css">
+  <!-- AEM_EARLY_DEFERRED_SCRIPTS_V1 -->
+  <script defer src="./vendor/maplibre-gl.js"></script>
+  <script defer src="./vendor/pmtiles.js"></script>
+  <script defer src="./map.0aad26c00c41.js"></script>
+</head>
+<body>
+  <main id="map" aria-label="Interactive Arizona prospecting exploration map"></main>
+  <h1 class="sr-only">Prospectors Exploration Map</h1>
+
+
+
+  <!-- AEM_EDGE_LAYOUT_V1 -->
+  <div class="aem-edge-ui">
+    <div class="aem-brand">© American Exploration Maps</div>
+    <div class="aem-citations">    <details class="toolbar-menu">
+      <summary>Citations</summary>
+      <div class="toolbar-menu__content site-information">
+        <h2>Prospectors Exploration Map <span>(BETA)</span></h2>
+        <p>An exploration and land-research map across 11 western states, combining mining claims, historic mines, PLSS surveys, public-land information, roads, geology, and geographic reference data.</p>
+        <h3>Data Sources &amp; Attribution</h3><p>Source attribution varies by dataset and state. Consult original publisher records before relying on data.</p><p><a href="https://mlrs.blm.gov/s/" target="_blank" rel="noopener noreferrer">BLM MLRS</a> · <a href="https://ngmdb.usgs.gov/nationalgeology/" target="_blank" rel="noopener noreferrer">USGS Geologic Maps</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap attribution</a></p><h3>Beta testing</h3>
+        <p>This map is still being tested. Layers can be incomplete, delayed, or unavailable. Use it to screen and plan research—not as a legal determination of land status, ownership, claim validity, or access.</p>
+        <h3>Your research</h3>
+        <p>Saved locations and notes stay in this browser on this device. Clearing website data can remove them.</p>
+        <p class="site-information__links"><a href="https://mlrs.blm.gov/s/" target="_blank" rel="noopener noreferrer">BLM MLRS</a><a href="https://ngmdb.usgs.gov/nationalgeology/" target="_blank" rel="noopener noreferrer">USGS National Geologic Map</a></p>
+      </div>
+    </details>
+</div>
+
+    <div class="aem-layers">
+      <details id="aemLayersPanel" class="toolbar-menu">
+        <summary>Layers</summary>
+        <div class="aem-layers-body">
+    <details class="toolbar-menu">
+      <summary>Mining History</summary>
+      <div class="toolbar-menu__content">
+        <div class="switch-row">
+          <label for="geologyLayer">Geology</label>
+          <div class="geology-controls">
+            <button id="geologyKeyButton" class="geology-key-button" type="button" aria-label="Open geology color key" aria-haspopup="dialog" aria-controls="geologyKey"><span class="geology-key-button__icon" aria-hidden="true">?</span></button>
+            <input id="geologyLayer" type="checkbox" aria-label="Show geology layer">
+          </div>
+        </div>
+        <label class="switch-row"><span>Historic Mines &amp; Occurrences</span><input id="historicMines" type="checkbox"></label>
+        <p class="hint">Historic mine and occurrence records load for states in view. Tap a pin for source details.</p>
+      </div>
+    </details>
+    <details class="toolbar-menu">
+      <summary>Explore</summary>
+      <div class="toolbar-menu__content">
+        <label class="switch-row"><span>Surface Management</span><input id="surfaceManagement" type="checkbox"></label>
+        <label class="switch-row"><span>Private property parcels</span><input id="propertyParcels" type="checkbox"></label>
+        <label class="switch-row"><span>Mining withdrawals</span><input id="miningWithdrawals" type="checkbox"></label>
+        <label class="switch-row"><span>Mining claims — all non-closed statuses</span><input id="notClosedClaims" type="checkbox"></label>
+        <div id="surfaceLegend" class="surface-legend" hidden>
+          <span><i class="blm"></i>BLM</span><span><i class="usfs"></i>USFS</span>
+          <span><i class="state"></i>State</span><span><i class="private"></i>Private</span>
+        </div>
+      </div>
+    </details>
+    <details class="toolbar-menu">
+      <summary>Reference</summary>
+      <div class="toolbar-menu__content">
+        <label class="switch-row"><span>PLSS townships</span><input id="plssTownships" type="checkbox"></label>
+        <label class="switch-row"><span>PLSS sections &amp; survey details</span><input id="plssSections" type="checkbox"></label>
+      </div>
+    </details>
+
+          <details class="toolbar-menu">
+            <summary>Roads</summary>
+            <div class="toolbar-menu__content">
+              <label for="aemRoadDensity">Road Density:
+                <output id="aemRoadDensityValue">50%</output>
+              </label>
+              <input id="aemRoadDensity" type="range"
+                min="0" max="100" value="50" step="5">
+              <p class="hint">Interstates are always retained.</p>
+            </div>
+          </details>
+          <div id="aemDynamicLayers"></div>
+    <details id="accountGroup" class="toolbar-menu">
+      <summary>Account</summary>
+      <div class="toolbar-menu__content account-panel">
+        <span class="account-panel__label">Signed in as</span>
+        <strong id="accountEmail" class="account-panel__email">Loading account…</strong>
+        <button id="signOutButton" class="account-panel__sign-out" type="button" disabled>Sign out</button>
+        <p id="accountStatus" class="account-panel__status" role="status" hidden></p>
+      </div>
+    </details>
+
+        </div>
+      </details>
+    </div>
+
+    <div class="aem-search">
+      <details class="aem-edge-panel">
+        <summary>Search &amp; Routing</summary>
+        <div class="aem-edge-panel-body">
+        <form id="mapSearchForm" class="map-search" role="search">
+          <label for="mapSearch">Find a location</label>
+          <div class="map-search__row">
+            <input id="mapSearch" type="search" autocomplete="off" placeholder="Address, coordinates, PLSS, APN, or claim">
+            <button type="submit">Find</button>
+          </div>
+          <p id="mapSearchStatus" class="map-search__status">Examples: 33.0650, -110.8139 · T1S R14E S6 · AMC 123456</p>
+        </form>
+
+          <p class="hint">Routing: coming later.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="aem-saved">
+      <details class="aem-edge-panel">
+        <summary>Track &amp; Save</summary>
+        <div class="aem-edge-panel-body">
+        <div class="gps-tool" aria-live="polite">
+          <button id="gpsTrackingButton" type="button" aria-pressed="false">Start GPS tracking</button>
+          <span id="gpsTrackingStatus">GPS off</span>
+        </div>
+        <div class="pin-tool" aria-live="polite">
+          <button id="dropPinButton" type="button" aria-pressed="false">Drop &amp; save pin</button>
+          <span id="dropPinStatus">Tap this, then tap the map</span>
+        </div>
+
+
+        </div>
+      </details>
+      <details class="aem-edge-panel">
+        <summary>Saved Pins / Visited Mines</summary>
+        <div class="aem-edge-panel-body">
+        <details id="savedLocationsGroup" class="saved-locations-dock">
+          <summary>Saved locations</summary>
+          <div class="saved-locations-dock__content">
+            <p id="savedLocationsEmpty" class="hint">Save a pinned location to keep your own research notes here.</p>
+            <div id="savedLocationsList" class="saved-locations"></div>
+            <p id="savedLocationsStatus" class="saved-locations__status" role="status" hidden></p>
+          </div>
+        </details>
+
+        </div>
+      </details>
+    </div>
+
+    <span id="zoomReadout" class="zoom-readout"
+      aria-live="polite">Z 8.5</span>
+<div class="aem-preserved" hidden>    <details class="toolbar-menu">
+      <summary>Roads</summary>
+      <div class="toolbar-menu__content">
+        <label class="switch-row"><span>Road lines</span><input id="roadRendering" type="checkbox" checked></label>
+        <div class="road-subclass" hidden>
+          <label class="switch-row"><span>Off-road trails only</span><input id="offRoadTrailsOnly" type="checkbox"></label>
+        </div>
+      </div>
+    </details>
+    <details class="toolbar-menu">
+      <summary>Appearance</summary>
+      <div class="toolbar-menu__content">
+        <div class="segmented" role="group" aria-label="Map appearance">
+          <button id="satelliteButton" class="active" type="button">Satellite</button>
+          <button id="terrainButton" class="active" type="button">3D terrain</button>
+          <button id="twoDButton" type="button">2D route view</button>
+        </div>
+        <label id="twoDHillshadeOption" class="switch-row two-d-option" hidden>
+          <span>2D hillshade</span>
+          <input id="twoDHillshade" type="checkbox">
+        </label>
+        <p id="twoDHillshadeHint" class="hint two-d-option" hidden>Optional terrain relief for flat map reading.</p>
+      </div>
+    </details>
+</div>
+  </div>
+  <dialog id="geologyKey" class="geology-key" aria-labelledby="geologyKeyTitle">
+    <div class="geology-key__heading">
+      <h2 id="geologyKeyTitle">Geologic age guide</h2>
+      <button id="geologyKeyClose" class="geology-key__close" type="button" aria-label="Close geology color key">×</button>
+    </div>
+    <p>These colors commonly represent the age of mapped rock or sediment.</p>
+    <dl class="geology-key__swatches" aria-label="Examples from the geologic time color palette">
+      <div><dt><i style="--unit-color:#fefd21" aria-hidden="true"></i>Quaternary</dt><dd>Young surface sediment and deposits</dd></div>
+      <div><dt><i style="--unit-color:#ffb563" aria-hidden="true"></i>Cenozoic</dt><dd>Neogene and Paleogene rock units</dd></div>
+      <div><dt><i style="--unit-color:#9fd353" aria-hidden="true"></i>Cretaceous</dt><dd>Younger Mesozoic rock units</dd></div>
+      <div><dt><i style="--unit-color:#258bac" aria-hidden="true"></i>Jurassic</dt><dd>Middle Mesozoic rock units</dd></div>
+      <div><dt><i style="--unit-color:#8426a0" aria-hidden="true"></i>Triassic</dt><dd>Older Mesozoic rock units</dd></div>
+      <div><dt><i style="--unit-color:#fa443a" aria-hidden="true"></i>Permian</dt><dd>Late Paleozoic rock units</dd></div>
+      <div><dt><i style="--unit-color:#ed4fbb" aria-hidden="true"></i>Precambrian</dt><dd>Ancient rock units</dd></div>
+    </dl>
+    <h3>Common minerals by material</h3>
+    <dl class="geology-key__materials" aria-label="Examples of minerals commonly found in sediment and sedimentary rock">
+      <div><dt>Stream sand and gravel</dt><dd>Quartz, feldspar, mica</dd></div>
+      <div><dt>Fine silt and mud</dt><dd>Clay minerals, quartz, mica</dd></div>
+      <div><dt>Carbonate rock</dt><dd>Calcite; dolomite in dolostone</dd></div>
+      <div><dt>Salt or gypsum deposits</dt><dd>Halite or gypsum, depending on the deposit</dd></div>
+    </dl>
+    <p class="geology-key__note">Approximate age guide, not an exact key for every source map. Color alone cannot identify minerals at a location.</p>
+    <a href="https://timescalefoundation.org/charts/rgb.html" target="_blank" rel="noopener noreferrer">Geologic time color chart</a><br>
+    <a href="https://tiles.macrostrat.org/" target="_blank" rel="noopener noreferrer">About this geology map</a><br>
+    <a href="https://ngmdb.usgs.gov/nationalgeology/" target="_blank" rel="noopener noreferrer">USGS map: look up local rock units</a><br>
+    <a href="https://pubs.usgs.gov/sir/2013/5242/" target="_blank" rel="noopener noreferrer">USGS sediment mineral examples</a>
+  </dialog>
+  <aside id="researchLocation" class="research-location" aria-live="polite" hidden>
+    <button id="researchLocationClose" class="research-location__close" type="button" aria-label="Close location research">×</button>
+    <strong>Location research</strong>
+    <p id="researchCoordinates" class="research-location__coordinates"></p>
+
+    <div class="research-location__page-shell">
+      <div id="researchPageTitle" class="research-location__page-title"></div>
+      <div id="researchResults" class="research-location__results"></div>
+
+      <div class="research-location__pager">
+        <button id="researchPrevPage" type="button">← Previous</button>
+        <span id="researchPageIndicator">1 / 4</span>
+        <button id="researchNextPage" type="button">Next →</button>
+      </div>
+    </div>
+
+    <button id="researchSaveLocation" class="research-location__save" type="button">Save this location</button>
+
+
+    <p class="research-location__note">Screening only—confirm land status, claims, withdrawals, and legal access before acting.</p>
+  </aside>
+  <aside id="saveLocation" class="save-location" aria-label="Save location" hidden>
+    <button id="saveLocationClose" class="save-location__close" type="button" aria-label="Close save location">×</button>
+    <strong>Save location</strong>
+    <p id="saveLocationCoordinates" class="save-location__coordinates"></p>
+    <form id="saveLocationForm" class="save-location__form">
+      <label for="saveLocationName">Name</label>
+      <input id="saveLocationName" maxlength="80" required placeholder="Example: Wash access point">
+      <label for="saveLocationDescription">Description</label>
+      <textarea id="saveLocationDescription" maxlength="1000" rows="3" placeholder="What you found, access notes, or what to check next"></textarea>
+      <button type="submit">Save location</button>
+    </form>
+  </aside>
+  
+  
+  
+
+<script>
+// AEM_CITATIONS_ICON_ONLY_V1
+document.addEventListener('DOMContentLoaded', () => {
+  const summary = [...document.querySelectorAll('summary')]
+    .find(el => {
+      const label = el.textContent.trim().toLowerCase();
+      return label === 'citations' ||
+             label === 'about & data' ||
+             label === 'about &amp; data';
+    });
+
+  if (!summary) {
+    console.error('STOP AND REPORT: Citations control not found.');
+    return;
+  }
+
+  summary.replaceChildren();
+
+  const icon = document.createElement('span');
+  icon.className = 'aem-citations-icon-only';
+  icon.setAttribute('aria-hidden', 'true');
+
+  icon.innerHTML = `
+    <svg viewBox="0 0 48 48" fill="none"
+         stroke="currentColor" stroke-width="2.8"
+         stroke-linecap="round" stroke-linejoin="round">
+      <path d="M24 10 C17 5 10 6 5 8 V36
+               C12 34 18 34 24 39 Z"/>
+      <path d="M24 10 C31 5 38 6 43 8 V36
+               C36 34 30 34 24 39 Z"/>
+      <path d="M10 15 H19 M10 21 H19 M10 27 H19"/>
+      <circle cx="34" cy="17" r="2"/>
+      <path d="M34 23 V32"/>
+    </svg>`;
+
+  summary.appendChild(icon);
+  summary.setAttribute('aria-label', 'Citations');
+  summary.setAttribute('title', 'Citations');
+  summary.classList.add('aem-citations-icon-button');
+});
+</script>
+
+</body>
+</html>

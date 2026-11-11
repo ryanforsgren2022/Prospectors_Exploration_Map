@@ -1,0 +1,196 @@
+{
+  "countUnit": "tile-feature occurrences across stored tiles and zooms; not distinct legal claims",
+  "classificationField": "CSE_DISP",
+  "normalization": "Unicode whitespace collapse + casefold",
+  "rule": "all named classifications except Closed",
+  "unknownPolicy": "count separately; omit from the classified non-closed layer",
+  "states": {
+    "az": {
+      "status": "BLOCKED",
+      "archives": [
+        {
+          "path": "/root/LIVE_SITE_CASHE/live-mvt/data/az/claims/az-claims-not-closed.mbtiles",
+          "status": "BLOCKED",
+          "sourceLayers": [
+            "claims_not_closed"
+          ],
+          "before": null,
+          "after": null,
+          "closed": null,
+          "unknown": null,
+          "byClassification": null,
+          "afterByClassification": null,
+          "unknownReasons": null,
+          "blocker": "[Errno 13] Permission denied: '/root/LIVE_SITE_CASHE'",
+          "coverage": "State archive; completeness requires source reconciliation"
+        }
+      ]
+    },
+    "ca": {
+      "status": "BLOCKED",
+      "archives": [
+        {
+          "path": "/root/LIVE_SITE_CASHE/live-mvt/data/ca/claims/ca-claims-not-closed.mbtiles",
+          "status": "BLOCKED",
+          "sourceLayers": [
+            "mining_claims"
+          ],
+          "before": null,
+          "after": null,
+          "closed": null,
+          "unknown": null,
+          "byClassification": null,
+          "afterByClassification": null,
+          "unknownReasons": null,
+          "blocker": "[Errno 13] Permission denied: '/root/LIVE_SITE_CASHE'",
+          "coverage": "State archive; completeness requires source reconciliation"
+        }
+      ]
+    },
+    "co": {
+      "status": "BLOCKED",
+      "archives": [],
+      "blocker": "No source claims MBTiles identified for this state in the supplied audit"
+    },
+    "id": {
+      "status": "BLOCKED",
+      "archives": [
+        {
+          "path": "/root/LIVE_SITE_CASHE/live-mvt/data/id/claims/id-claims-active-blm-lands.mbtiles",
+          "status": "BLOCKED",
+          "sourceLayers": [
+            "claims"
+          ],
+          "before": null,
+          "after": null,
+          "closed": null,
+          "unknown": null,
+          "byClassification": null,
+          "afterByClassification": null,
+          "unknownReasons": null,
+          "blocker": "[Errno 13] Permission denied: '/root/LIVE_SITE_CASHE'",
+          "coverage": "BLM lands only"
+        }
+      ]
+    },
+    "mt": {
+      "status": "BLOCKED",
+      "archives": [
+        {
+          "path": "/root/LIVE_SITE_CASHE/live-mvt/data/mt/claims/mt-claims.mbtiles",
+          "status": "BLOCKED",
+          "sourceLayers": [
+            "claims"
+          ],
+          "before": null,
+          "after": null,
+          "closed": null,
+          "unknown": null,
+          "byClassification": null,
+          "afterByClassification": null,
+          "unknownReasons": null,
+          "blocker": "[Errno 13] Permission denied: '/root/LIVE_SITE_CASHE'",
+          "coverage": "State archive; completeness requires source reconciliation"
+        }
+      ]
+    },
+    "nm": {
+      "status": "BLOCKED",
+      "archives": [
+        {
+          "path": "/root/LIVE_SITE_CASHE/live-mvt/data/nm/claims/nm-claims-not-closed.mbtiles",
+          "status": "BLOCKED",
+          "sourceLayers": [
+            "claims"
+          ],
+          "before": null,
+          "after": null,
+          "closed": null,
+          "unknown": null,
+          "byClassification": null,
+          "afterByClassification": null,
+          "unknownReasons": null,
+          "blocker": "[Errno 13] Permission denied: '/root/LIVE_SITE_CASHE'",
+          "coverage": "State archive; completeness requires source reconciliation"
+        }
+      ]
+    },
+    "nv": {
+      "status": "BLOCKED",
+      "archives": [],
+      "blocker": "No source claims MBTiles identified for this state in the supplied audit"
+    },
+    "or": {
+      "status": "BLOCKED",
+      "archives": [
+        {
+          "path": "/root/LIVE_SITE_CASHE/live-mvt/data/or/claims/or-claims-not-closed.mbtiles",
+          "status": "BLOCKED",
+          "sourceLayers": [
+            "claims_not_closed"
+          ],
+          "before": null,
+          "after": null,
+          "closed": null,
+          "unknown": null,
+          "byClassification": null,
+          "afterByClassification": null,
+          "unknownReasons": null,
+          "blocker": "[Errno 13] Permission denied: '/root/LIVE_SITE_CASHE'",
+          "coverage": "State archive; completeness requires source reconciliation"
+        }
+      ]
+    },
+    "ut": {
+      "status": "BLOCKED",
+      "archives": [
+        {
+          "path": "/root/LIVE_SITE_CASHE/live-mvt/data/ut/claims/utah-claims-active.mbtiles",
+          "status": "BLOCKED",
+          "sourceLayers": [
+            "claims"
+          ],
+          "before": null,
+          "after": null,
+          "closed": null,
+          "unknown": null,
+          "byClassification": null,
+          "afterByClassification": null,
+          "unknownReasons": null,
+          "blocker": "[Errno 13] Permission denied: '/root/LIVE_SITE_CASHE'",
+          "coverage": "State archive; completeness requires source reconciliation"
+        }
+      ]
+    },
+    "wa": {
+      "status": "BLOCKED",
+      "archives": [
+        {
+          "path": "/root/LIVE_SITE_CASHE/live-mvt/data/wa/claims/wa-claims-not-closed.mbtiles",
+          "status": "BLOCKED",
+          "sourceLayers": [
+            "claims_not_closed"
+          ],
+          "before": null,
+          "after": null,
+          "closed": null,
+          "unknown": null,
+          "byClassification": null,
+          "afterByClassification": null,
+          "unknownReasons": null,
+          "blocker": "[Errno 13] Permission denied: '/root/LIVE_SITE_CASHE'",
+          "coverage": "State archive; completeness requires source reconciliation"
+        }
+      ]
+    },
+    "wy": {
+      "status": "BLOCKED",
+      "archives": [],
+      "blocker": "No source claims MBTiles identified for this state in the supplied audit"
+    }
+  },
+  "excludedHistoricalDuplicates": [
+    "/root/LIVE_SITE_CASHE/live-mvt/data/mt/claims/montana-claims-active.mbtiles"
+  ],
+  "sourceDataModified": false
+}

@@ -1,0 +1,2039 @@
+{
+  "archiveCount": 168,
+  "outsideCount": 34,
+  "conflictEvidence": [
+    {
+      "state": "mt",
+      "group": "claims",
+      "selectedPath": "mt/claims/mt-claims.mbtiles",
+      "reason": "User confirmed identical SHA-256 and passing SQLite integrity for both archives; explicitly retain mt/claims/mt-claims.mbtiles. Exact digest not provided locally; duplicate removal remains conditional on live reference and hash checks.",
+      "evidence": [
+        {
+          "path": "mt/claims/montana-claims-active.mbtiles",
+          "bounds": "-116.044392,44.488228,-104.344679,48.789407",
+          "sourceBuild": "tippecanoe -o /root/arizona-naip-build/prospectors-west/claims-state-full-v1/mt/build-20261022-hub/claims-v2.mbtiles -l claims -Z6 -z16 --drop-densest-as-needed --extend-zooms-if-still-dropping /root/arizona-naip-build/prospectors-west/claims-state-full-v1/mt/build-20261022-hub/claims-all-fields.geojsonl",
+          "errors": [],
+          "sampleTile": [
+            6,
+            13,
+            40,
+            20174
+          ],
+          "layerMetadata": [
+            {
+              "id": "claims",
+              "description": "",
+              "minzoom": 6,
+              "maxzoom": 16,
+              "fields": {
+                "BLM_PROD": "String",
+                "CSE_DISP": "String",
+                "CSE_META": "String",
+                "CSE_NAME": "String",
+                "CSE_NR": "String",
+                "CSE_TYPE_NR": "String",
+                "Created": "String",
+                "ID": "String",
+                "LEG_CSE_NR": "String",
+                "Modified": "String",
+                "QLTY": "String",
+                "RCRD_ACRS": "Number",
+                "SF_ID": "String",
+                "SRC": "String",
+                "STAGE_ID": "String",
+                "Shape_Area": "Number",
+                "Shape_Length": "Number"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "claims",
+              "count": 18636,
+              "geometry": "Polygon",
+              "provenance": []
+            }
+          ]
+        },
+        {
+          "path": "mt/claims/mt-claims.mbtiles",
+          "bounds": "-116.044392,44.488228,-104.344679,48.789407",
+          "sourceBuild": "tippecanoe -o /root/arizona-naip-build/prospectors-west/claims-state-full-v1/mt/build-20261022-hub/claims-v2.mbtiles -l claims -Z6 -z16 --drop-densest-as-needed --extend-zooms-if-still-dropping /root/arizona-naip-build/prospectors-west/claims-state-full-v1/mt/build-20261022-hub/claims-all-fields.geojsonl",
+          "errors": [],
+          "sampleTile": [
+            6,
+            13,
+            40,
+            20174
+          ],
+          "layerMetadata": [
+            {
+              "id": "claims",
+              "description": "",
+              "minzoom": 6,
+              "maxzoom": 16,
+              "fields": {
+                "BLM_PROD": "String",
+                "CSE_DISP": "String",
+                "CSE_META": "String",
+                "CSE_NAME": "String",
+                "CSE_NR": "String",
+                "CSE_TYPE_NR": "String",
+                "Created": "String",
+                "ID": "String",
+                "LEG_CSE_NR": "String",
+                "Modified": "String",
+                "QLTY": "String",
+                "RCRD_ACRS": "Number",
+                "SF_ID": "String",
+                "SRC": "String",
+                "STAGE_ID": "String",
+                "Shape_Area": "Number",
+                "Shape_Length": "Number"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "claims",
+              "count": 18636,
+              "geometry": "Polygon",
+              "provenance": []
+            }
+          ]
+        }
+      ],
+      "verificationLimit": "Audit metadata and sample only; live payload/hash verification pending"
+    },
+    {
+      "state": "az",
+      "group": "plssTownships",
+      "selectedPath": "az/plss/tiles/az-plss-townships.mbtiles",
+      "reason": "Dedicated township source retains GlobalID, STATEABBR and PRINMER, with Arizona-wide coverage and a nonempty audit tile. Combined converted/tile-joined archive loses those fields; retain it for its other sublayers. This is a source/schema choice, not a date, file size or zoom ranking. Full feature-level coverage cannot be proven by this audit.",
+      "evidence": [
+        {
+          "path": "az/plss/tiles/az-plss-townships.mbtiles",
+          "bounds": "-114.816330,31.332342,-109.045172,37.003723",
+          "sourceBuild": "tippecanoe -o /root/arizona-naip-build/live-mvt/data/az/plss/tiles/az-plss-townships.mbtiles -l plss_townships -Z6 -z16 -pf -pk /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/townships-20261024/townships.geojsonl",
+          "errors": [],
+          "sampleTile": [
+            6,
+            11,
+            39,
+            8305
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_townships",
+              "description": "",
+              "minzoom": 6,
+              "maxzoom": 16,
+              "fields": {
+                "GlobalID": "String",
+                "PLSSID": "String",
+                "PRINMER": "String",
+                "PRINMERCD": "String",
+                "RANGEDIR": "String",
+                "RANGEFRAC": "String",
+                "RANGENO": "String",
+                "SHAPE_Area": "Number",
+                "SHAPE_Length": "Number",
+                "STATEABBR": "String",
+                "TWNSHPDIR": "String",
+                "TWNSHPDPCD": "String",
+                "TWNSHPFRAC": "String",
+                "TWNSHPLAB": "String",
+                "TWNSHPNO": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_townships",
+              "count": 3413,
+              "geometry": "Polygon",
+              "provenance": [
+                {
+                  "attribute": "STATEABBR",
+                  "count": 1,
+                  "type": "string",
+                  "values": [
+                    "AZ"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "path": "az/plss/tiles/az-plss.mbtiles",
+          "bounds": "-114.816742,31.332232,-109.044800,37.003786",
+          "sourceBuild": "tippecanoe -P -Z 6 -z 14 -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/converted-staging-v1/tmp -l plss_townships -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/converted-staging-v1/plss_townships.mbtiles.building /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/converted-staging-v1/plss_townships.geojsonl; tippecanoe -P -Z 10 -z 16 -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/converted-staging-v1/tmp -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/converted-staging-v1/plss_special_surveys.mbtiles.building /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/converted-staging-v1/plss_special_surveys.geojsonl; tippecanoe -P -Z11 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/second-divisions-v2/tmp -l plss_government_lots -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/converted-staging-v1/plss_government_lots.mbtiles.building /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/second-divisions-v2/plss_government_lots.geojsonl; tippecanoe -P -Z 9 -z 16 -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/converted-staging-v1/tmp -l plss_sections -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/converted-staging-v1/plss_sections.mbtiles.building /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/converted-staging-v1/plss_sections.geojsonl; tile-join -pk -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/output/az-plss.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/converted-staging-v1/plss_townships.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/converted-staging-v1/plss_sections.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/converted-staging-v1/plss_special_surveys.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/converted-staging-v1/plss_government_lots.mbtiles; tippecanoe -Z15 -z16 -l plss_townships -pk -pf -P -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/output/az-townships-z15-16.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/converted-staging-v1/plss_townships.geojsonl; tile-join -pk -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/output/az-plss-z16.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/output/az-plss.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/az/output/az-townships-z15-16.mbtiles",
+          "errors": [],
+          "sampleTile": [
+            6,
+            11,
+            37,
+            877
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_townships",
+              "description": "",
+              "minzoom": 6,
+              "maxzoom": 16,
+              "fields": {
+                "PLSSID": "String",
+                "PRINMERCD": "String",
+                "RANGEDIR": "String",
+                "RANGEFRAC": "String",
+                "RANGENO": "String",
+                "TWNSHPDIR": "String",
+                "TWNSHPDPCD": "String",
+                "TWNSHPFRAC": "String",
+                "TWNSHPLAB": "String",
+                "TWNSHPNO": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_townships",
+              "count": 1847431,
+              "geometry": "Polygon",
+              "provenance": []
+            }
+          ]
+        }
+      ],
+      "verificationLimit": "Audit metadata and sample only; live payload/hash verification pending"
+    },
+    {
+      "state": "wa",
+      "group": "plssGovernmentLots",
+      "selectedPath": "wa/plss/tiles/wa-plss-government-lots-blm-authoritative.mbtiles",
+      "reason": "BLM source input and cadastral schema span the state; competing clipped alternate-source schema covers only a small northwest subset. Bounds, schema, source build, nonempty sample and audit errors are recorded below. Statistics alone do not establish completeness.",
+      "evidence": [
+        {
+          "path": "wa/plss/tiles/wa-plss-government-lots-blm-authoritative.mbtiles",
+          "bounds": "-124.731915,45.550432,-116.917674,49.002436",
+          "sourceBuild": "tippecanoe -o /root/arizona-naip-build/live-mvt/data/wa/plss/tiles/wa-plss-government-lots-blm-authoritative.mbtiles -l plss_government_lots -Z 9 -z 16 -P --no-feature-limit --no-tile-size-limit -t /root/arizona-naip-build/prospectors-west/washington-build-20261022 /root/arizona-naip-build/prospectors-west/washington-build-20261022/blm-government-lots.geojsonl",
+          "errors": [],
+          "sampleTile": [
+            9,
+            79,
+            332,
+            92587
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_government_lots",
+              "description": "",
+              "minzoom": 9,
+              "maxzoom": 16,
+              "fields": {
+                "FRSTDIVDUP": "String",
+                "FRSTDIVID": "String",
+                "FRSTDIVLAB": "String",
+                "FRSTDIVNO": "String",
+                "FRSTDIVTXT": "String",
+                "FRSTDIVTYP": "String",
+                "GISACRE": "Number",
+                "GOVLOT": "String",
+                "OBJECTID": "Number",
+                "PLSSID": "String",
+                "PRINMER": "String",
+                "PRINMERCD": "String",
+                "QQSEC": "String",
+                "QSEC": "String",
+                "RANGEDIR": "String",
+                "RANGEFRAC": "String",
+                "RANGENO": "String",
+                "RECRDAREANO": "Number",
+                "RECRDAREATX": "String",
+                "REVISEDDATE": "Number",
+                "SECDIVID": "String",
+                "SECDIVLAB": "String",
+                "SECDIVNO": "String",
+                "SECDIVNOTE": "String",
+                "SECDIVSUF": "String",
+                "SECDIVTXT": "String",
+                "SECDIVTYP": "String",
+                "SHAPE.STArea()": "Number",
+                "SHAPE.STLength()": "Number",
+                "SOURCEDATE": "Number",
+                "SOURCEREF": "String",
+                "STATEABBR": "String",
+                "STEWARD": "String",
+                "SURVID": "String",
+                "SURVLAB": "String",
+                "SURVNO": "String",
+                "SURVNOTE": "String",
+                "SURVSUF": "String",
+                "SURVTYP": "String",
+                "SURVTYPTXT": "String",
+                "TWNSHPDIR": "String",
+                "TWNSHPDPCD": "String",
+                "TWNSHPFRAC": "String",
+                "TWNSHPLAB": "String",
+                "TWNSHPNO": "String",
+                "aem_source": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_government_lots",
+              "count": 81151,
+              "geometry": "Polygon",
+              "provenance": [
+                {
+                  "attribute": "STATEABBR",
+                  "count": 1,
+                  "type": "string",
+                  "values": [
+                    "WA"
+                  ]
+                },
+                {
+                  "attribute": "STEWARD",
+                  "count": 1,
+                  "type": "string",
+                  "values": [
+                    "BLM Cadastral - OR"
+                  ]
+                },
+                {
+                  "attribute": "aem_source",
+                  "count": 1,
+                  "type": "string",
+                  "values": [
+                    "BLM_Natl_PLSS_CadNSDI_MapServer_3"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "path": "wa/plss/tiles/wa-plss-government-lots.mbtiles",
+          "bounds": "-122.827343,47.737524,-122.681704,48.557894",
+          "sourceBuild": "tippecanoe -o /root/arizona-naip-build/prospectors-west/washington-build-20261022/wa-plss-government-lots.building.mbtiles -l plss_government_lots -Z9 -z16 --no-feature-limit --no-tile-size-limit -t /root/arizona-naip-build/prospectors-west/washington-build-20261022 /root/arizona-naip-build/prospectors-west/washington-build-20261022/plss-government-lots.clipped.geojsonl",
+          "errors": [],
+          "sampleTile": [
+            9,
+            81,
+            333,
+            1874
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_government_lots",
+              "description": "",
+              "minzoom": 9,
+              "maxzoom": 16,
+              "fields": {
+                "AQUATIC_LAND_FLG": "String",
+                "EDIT_DATE": "Number",
+                "EDIT_STATUS": "Number",
+                "EDIT_WHO": "String",
+                "GLOBALID": "String",
+                "LEGAL_DESC_DUP_STATUS_FLG": "String",
+                "LEGAL_DESC_LABEL_NM": "String",
+                "LEGAL_DESC_NM": "String",
+                "LEGAL_DESC_SYST_ID": "Number",
+                "LEGAL_DESC_TYPE_CD": "Number",
+                "OBJECTID": "Number",
+                "PLS_MERIDIAN_CD": "Number",
+                "PLS_RNG_DIR_CD": "String",
+                "PLS_RNG_FRACT_CD": "Number",
+                "PLS_RNG_NO": "Number",
+                "PLS_SECT_SUBDIV_TYPE_CD": "Number",
+                "PLS_TWP_DIR_CD": "String",
+                "PLS_TWP_FRACT_CD": "Number",
+                "PLS_TWP_NO": "Number",
+                "SHAPE.AREA": "Number",
+                "SHAPE.LEN": "Number",
+                "aem_source_layer": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_government_lots",
+              "count": 26,
+              "geometry": "Polygon",
+              "provenance": [
+                {
+                  "attribute": "aem_source_layer",
+                  "count": 1,
+                  "type": "string",
+                  "values": [
+                    "2"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "verificationLimit": "Audit metadata and sample only; live payload/hash verification pending"
+    },
+    {
+      "state": "wa",
+      "group": "plssQuarterQuarterSections",
+      "selectedPath": "wa/plss/tiles/wa-plss-quarter-quarter-sections-blm-authoritative.mbtiles",
+      "reason": "BLM source input and cadastral schema span the state; competing clipped alternate-source schema covers only a small northwest subset. Bounds, schema, source build, nonempty sample and audit errors are recorded below. Statistics alone do not establish completeness.",
+      "evidence": [
+        {
+          "path": "wa/plss/tiles/wa-plss-quarter-quarter-sections-blm-authoritative.mbtiles",
+          "bounds": "-124.725057,45.550432,-116.922994,49.002436",
+          "sourceBuild": "tippecanoe -o /root/arizona-naip-build/live-mvt/data/wa/plss/tiles/wa-plss-quarter-quarter-sections-blm-authoritative.mbtiles -l plss_quarter_quarter_sections -Z 9 -z 16 -P --no-feature-limit --no-tile-size-limit -t /root/arizona-naip-build/prospectors-west/washington-build-20261022 /root/arizona-naip-build/prospectors-west/washington-build-20261022/blm-quarter-quarter-sections.geojsonl",
+          "errors": [],
+          "sampleTile": [
+            9,
+            79,
+            334,
+            149946
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_quarter_quarter_sections",
+              "description": "",
+              "minzoom": 9,
+              "maxzoom": 16,
+              "fields": {
+                "FRSTDIVDUP": "String",
+                "FRSTDIVID": "String",
+                "FRSTDIVLAB": "String",
+                "FRSTDIVNO": "String",
+                "FRSTDIVTXT": "String",
+                "FRSTDIVTYP": "String",
+                "GISACRE": "Number",
+                "GOVLOT": "String",
+                "OBJECTID": "Number",
+                "PLSSID": "String",
+                "PRINMER": "String",
+                "PRINMERCD": "String",
+                "QQSEC": "String",
+                "QSEC": "String",
+                "RANGEDIR": "String",
+                "RANGEFRAC": "String",
+                "RANGENO": "String",
+                "RECRDAREANO": "Number",
+                "RECRDAREATX": "String",
+                "REVISEDDATE": "Number",
+                "SECDIVID": "String",
+                "SECDIVLAB": "String",
+                "SECDIVNO": "String",
+                "SECDIVNOTE": "String",
+                "SECDIVSUF": "String",
+                "SECDIVTXT": "String",
+                "SECDIVTYP": "String",
+                "SHAPE.STArea()": "Number",
+                "SHAPE.STLength()": "Number",
+                "SOURCEDATE": "Number",
+                "SOURCEREF": "String",
+                "SRVNAME": "String",
+                "STATEABBR": "String",
+                "STEWARD": "String",
+                "SURVDIV": "String",
+                "SURVID": "String",
+                "SURVLAB": "String",
+                "SURVNO": "String",
+                "SURVNOTE": "String",
+                "SURVSUF": "String",
+                "SURVTYP": "String",
+                "SURVTYPTXT": "String",
+                "TWNSHPDIR": "String",
+                "TWNSHPDPCD": "String",
+                "TWNSHPFRAC": "String",
+                "TWNSHPLAB": "String",
+                "TWNSHPNO": "String",
+                "aem_source": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_quarter_quarter_sections",
+              "count": 505410,
+              "geometry": "Polygon",
+              "provenance": [
+                {
+                  "attribute": "STATEABBR",
+                  "count": 1,
+                  "type": "string",
+                  "values": [
+                    "WA"
+                  ]
+                },
+                {
+                  "attribute": "STEWARD",
+                  "count": 1,
+                  "type": "string",
+                  "values": [
+                    "BLM Cadastral - OR"
+                  ]
+                },
+                {
+                  "attribute": "aem_source",
+                  "count": 1,
+                  "type": "string",
+                  "values": [
+                    "BLM_Natl_PLSS_CadNSDI_MapServer_3"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "path": "wa/plss/tiles/wa-plss-quarter-quarter-sections.mbtiles",
+          "bounds": "-122.843462,47.737525,-122.799206,47.838807",
+          "sourceBuild": "tippecanoe -o /root/arizona-naip-build/prospectors-west/washington-build-20261022/wa-plss-quarter-quarter-sections.building.mbtiles -l plss_quarter_quarter_sections -Z9 -z16 --no-feature-limit --no-tile-size-limit -t /root/arizona-naip-build/prospectors-west/washington-build-20261022 /root/arizona-naip-build/prospectors-west/washington-build-20261022/plss-quarter-quarter-sections.clipped.geojsonl",
+          "errors": [],
+          "sampleTile": [
+            9,
+            81,
+            333,
+            1786
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_quarter_quarter_sections",
+              "description": "",
+              "minzoom": 9,
+              "maxzoom": 16,
+              "fields": {
+                "AQUATIC_LAND_FLG": "String",
+                "EDIT_DATE": "Number",
+                "EDIT_STATUS": "Number",
+                "EDIT_WHO": "String",
+                "GLOBALID": "String",
+                "LEGAL_DESC_DUP_STATUS_FLG": "String",
+                "LEGAL_DESC_LABEL_NM": "String",
+                "LEGAL_DESC_NM": "String",
+                "LEGAL_DESC_SYST_ID": "Number",
+                "LEGAL_DESC_TYPE_CD": "Number",
+                "OBJECTID": "Number",
+                "PLS_ALIQUOT_SUBDIV_LEVEL1_CD": "String",
+                "PLS_ALIQUOT_SUBDIV_LEVEL2_CD": "String",
+                "PLS_MERIDIAN_CD": "Number",
+                "PLS_RNG_DIR_CD": "String",
+                "PLS_RNG_FRACT_CD": "Number",
+                "PLS_RNG_NO": "Number",
+                "PLS_SECT_SUBDIV_TYPE_CD": "Number",
+                "PLS_TWP_DIR_CD": "String",
+                "PLS_TWP_FRACT_CD": "Number",
+                "PLS_TWP_NO": "Number",
+                "SHAPE.AREA": "Number",
+                "SHAPE.LEN": "Number",
+                "aem_source_layer": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_quarter_quarter_sections",
+              "count": 16,
+              "geometry": "Polygon",
+              "provenance": [
+                {
+                  "attribute": "aem_source_layer",
+                  "count": 1,
+                  "type": "string",
+                  "values": [
+                    "2"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "verificationLimit": "Audit metadata and sample only; live payload/hash verification pending"
+    },
+    {
+      "state": "nv",
+      "group": "plssTownships",
+      "selectedPath": "nv/plss/tiles/nv-plss.mbtiles",
+      "reason": "Preserve archive explicitly used by copied production reader; no newest/largest ranking.",
+      "evidence": [
+        {
+          "path": "nv/plss/tiles/nevada-plss-townships.mbtiles",
+          "bounds": "-120.005716,35.002494,-114.039472,42.001842",
+          "sourceBuild": "tippecanoe -Z5 -z14 -l plss_townships -o data/nv/plss/tiles/nevada-plss-townships.mbtiles.building -P",
+          "errors": [],
+          "sampleTile": [
+            5,
+            5,
+            20,
+            58264
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_townships",
+              "description": "",
+              "minzoom": 5,
+              "maxzoom": 14,
+              "fields": {
+                "GlobalID": "String",
+                "OBJECTID": "Number",
+                "PLSSID": "String",
+                "PRINMER": "String",
+                "PRINMERCD": "String",
+                "RANGEDIR": "String",
+                "RANGEFRAC": "String",
+                "RANGENO": "String",
+                "SOURCEDATE": "Number",
+                "STATEABBR": "String",
+                "SURVTYPTXT": "String",
+                "Shape__Area": "Number",
+                "Shape__Length": "Number",
+                "TWNSHPDIR": "String",
+                "TWNSHPDPCD": "String",
+                "TWNSHPFRAC": "String",
+                "TWNSHPLAB": "String",
+                "TWNSHPNO": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_townships",
+              "count": 3379,
+              "geometry": "Polygon",
+              "provenance": [
+                {
+                  "attribute": "STATEABBR",
+                  "count": 1,
+                  "type": "string",
+                  "values": [
+                    "NV"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "path": "nv/plss/tiles/nv-plss.mbtiles",
+          "bounds": "-120.005722,35.001878,-114.039459,42.002366",
+          "sourceBuild": "tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_E -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_E/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/E.geojsonl; tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_T -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_T/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/T.geojsonl; tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_N -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_N/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/N.geojsonl; tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_K -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_K/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/K.geojsonl; tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_M -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_M/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/M.geojsonl; tippecanoe -P -Z6 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/serial-pipeline-20261017T005154Z/parts/first-division__PLSSFirstDivision -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/serial-pipeline-20261017T005154Z/parts/first-division__PLSSFirstDivision/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/serial-pipeline-20261017T005154Z/parts/first-division__PLSSFirstDivision/source.geojsonl; tile-join '--layer=plss_sections' -pk -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/sections/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/serial-pipeline-20261017T005154Z/parts/first-division__PLSSFirstDivision/part.mbtiles; tippecanoe -P -Z11 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/government_lots -l plss_government_lots -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/government_lots/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/second-division/government_lots.geojsonl; tippecanoe -P -Z6 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/townships -l plss_townships -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/townships/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/township/townships.geojsonl; tile-join -pk -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/nv-plss.building.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_townships.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_sections.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_m.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_k.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_t.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_e.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_n.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_government_lots.mbtiles",
+          "errors": [],
+          "sampleTile": [
+            6,
+            10,
+            39,
+            18326
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_townships",
+              "description": "",
+              "minzoom": 6,
+              "maxzoom": 16,
+              "fields": {
+                "PLSSID": "String",
+                "PRINMERCD": "String",
+                "RANGEDIR": "String",
+                "RANGEFRAC": "String",
+                "RANGENO": "String",
+                "TWNSHPDIR": "String",
+                "TWNSHPDPCD": "String",
+                "TWNSHPFRAC": "String",
+                "TWNSHPLAB": "String",
+                "TWNSHPNO": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_townships",
+              "count": 2020357,
+              "geometry": "Polygon",
+              "provenance": []
+            }
+          ]
+        }
+      ],
+      "verificationLimit": "Audit metadata and sample only; live payload/hash verification pending"
+    },
+    {
+      "state": "nv",
+      "group": "plssSections",
+      "selectedPath": "nv/plss/tiles/nv-plss.mbtiles",
+      "reason": "Preserve archive explicitly used by copied production reader; no newest/largest ranking.",
+      "evidence": [
+        {
+          "path": "nv/plss/tiles/nevada-plss-sections.mbtiles",
+          "bounds": "-120.005716,35.010798,-114.039472,42.001842",
+          "sourceBuild": "tippecanoe -Z5 -z14 -l plss_sections -o data/nv/plss/tiles/nevada-plss-sections.mbtiles.building -P",
+          "errors": [],
+          "sampleTile": [
+            5,
+            5,
+            20,
+            403758
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_sections",
+              "description": "",
+              "minzoom": 5,
+              "maxzoom": 14,
+              "fields": {
+                "FRSTDIVDUP": "String",
+                "FRSTDIVID": "String",
+                "FRSTDIVLAB": "String",
+                "FRSTDIVNO": "String",
+                "FRSTDIVTXT": "String",
+                "FRSTDIVTYP": "String",
+                "GISACRE": "Number",
+                "GlobalID": "String",
+                "OBJECTID": "Number",
+                "PLSSID": "String",
+                "RECRDAREANO": "Number",
+                "RECRDAREATX": "String",
+                "SOURCEDATE": "String",
+                "SURVTYP": "String",
+                "SURVTYPTXT": "String",
+                "Shape__Area": "Number",
+                "Shape__Length": "Number"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_sections",
+              "count": 112123,
+              "geometry": "Polygon",
+              "provenance": []
+            }
+          ]
+        },
+        {
+          "path": "nv/plss/tiles/nv-plss.mbtiles",
+          "bounds": "-120.005722,35.001878,-114.039459,42.002366",
+          "sourceBuild": "tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_E -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_E/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/E.geojsonl; tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_T -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_T/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/T.geojsonl; tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_N -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_N/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/N.geojsonl; tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_K -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_K/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/K.geojsonl; tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_M -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_M/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/M.geojsonl; tippecanoe -P -Z6 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/serial-pipeline-20261017T005154Z/parts/first-division__PLSSFirstDivision -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/serial-pipeline-20261017T005154Z/parts/first-division__PLSSFirstDivision/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/serial-pipeline-20261017T005154Z/parts/first-division__PLSSFirstDivision/source.geojsonl; tile-join '--layer=plss_sections' -pk -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/sections/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/serial-pipeline-20261017T005154Z/parts/first-division__PLSSFirstDivision/part.mbtiles; tippecanoe -P -Z11 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/government_lots -l plss_government_lots -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/government_lots/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/second-division/government_lots.geojsonl; tippecanoe -P -Z6 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/townships -l plss_townships -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/townships/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/township/townships.geojsonl; tile-join -pk -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/nv-plss.building.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_townships.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_sections.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_m.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_k.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_t.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_e.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_n.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_government_lots.mbtiles",
+          "errors": [],
+          "sampleTile": [
+            6,
+            10,
+            39,
+            18326
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_sections",
+              "description": "",
+              "minzoom": 9,
+              "maxzoom": 16,
+              "fields": {
+                "FRSTDIVDUP": "String",
+                "FRSTDIVID": "String",
+                "FRSTDIVLAB": "String",
+                "FRSTDIVNO": "String",
+                "FRSTDIVTXT": "String",
+                "FRSTDIVTYP": "String",
+                "GISACRE": "Number",
+                "GlobalID": "String",
+                "PLSSID": "String",
+                "RECRDAREANO": "Number",
+                "RECRDAREATX": "String",
+                "SHAPE_Area": "Number",
+                "SHAPE_Length": "Number",
+                "SOURCEDATE": "String",
+                "SURVTYP": "String",
+                "SURVTYPTXT": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_sections",
+              "count": 4240110,
+              "geometry": "Polygon",
+              "provenance": []
+            }
+          ]
+        }
+      ],
+      "verificationLimit": "Audit metadata and sample only; live payload/hash verification pending"
+    },
+    {
+      "state": "nv",
+      "group": "plssGovernmentLots",
+      "selectedPath": "nv/plss/tiles/nv-plss.mbtiles",
+      "reason": "Preserve archive explicitly used by copied production reader; no newest/largest ranking.",
+      "evidence": [
+        {
+          "path": "nv/plss/tiles/nv-plss.mbtiles",
+          "bounds": "-120.005722,35.001878,-114.039459,42.002366",
+          "sourceBuild": "tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_E -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_E/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/E.geojsonl; tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_T -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_T/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/T.geojsonl; tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_N -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_N/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/N.geojsonl; tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_K -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_K/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/K.geojsonl; tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_M -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_M/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/M.geojsonl; tippecanoe -P -Z6 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/serial-pipeline-20261017T005154Z/parts/first-division__PLSSFirstDivision -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/serial-pipeline-20261017T005154Z/parts/first-division__PLSSFirstDivision/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/serial-pipeline-20261017T005154Z/parts/first-division__PLSSFirstDivision/source.geojsonl; tile-join '--layer=plss_sections' -pk -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/sections/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/serial-pipeline-20261017T005154Z/parts/first-division__PLSSFirstDivision/part.mbtiles; tippecanoe -P -Z11 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/government_lots -l plss_government_lots -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/government_lots/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/second-division/government_lots.geojsonl; tippecanoe -P -Z6 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/townships -l plss_townships -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/townships/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/township/townships.geojsonl; tile-join -pk -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/nv-plss.building.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_townships.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_sections.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_m.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_k.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_t.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_e.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_n.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_government_lots.mbtiles",
+          "errors": [],
+          "sampleTile": [
+            6,
+            10,
+            39,
+            18326
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_government_lots",
+              "description": "",
+              "minzoom": 11,
+              "maxzoom": 16,
+              "fields": {
+                "FRSTDIVID": "String",
+                "GISACRE": "Number",
+                "PLSSID": "String",
+                "SECDIVID": "String",
+                "SECDIVLAB": "String",
+                "SECDIVNO": "String",
+                "SECDIVSUF": "String",
+                "SECDIVTXT": "String",
+                "SECDIVTYP": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_government_lots",
+              "count": 1833909,
+              "geometry": "Polygon",
+              "provenance": []
+            }
+          ]
+        },
+        {
+          "path": "nv/plss/tiles/plss_government_lots.mbtiles",
+          "bounds": "-120.005710,35.010793,-114.039460,42.001911",
+          "sourceBuild": "tippecanoe -P -Z11 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/government_lots -l plss_government_lots -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/government_lots/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/second-division/government_lots.geojsonl",
+          "errors": [],
+          "sampleTile": [
+            11,
+            351,
+            1278,
+            11290
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_government_lots",
+              "description": "",
+              "minzoom": 11,
+              "maxzoom": 16,
+              "fields": {
+                "FRSTDIVID": "String",
+                "GISACRE": "Number",
+                "PLSSID": "String",
+                "SECDIVID": "String",
+                "SECDIVLAB": "String",
+                "SECDIVNO": "String",
+                "SECDIVSUF": "String",
+                "SECDIVTXT": "String",
+                "SECDIVTYP": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_government_lots",
+              "count": 171496,
+              "geometry": "Polygon",
+              "provenance": []
+            }
+          ]
+        }
+      ],
+      "verificationLimit": "Audit metadata and sample only; live payload/hash verification pending"
+    },
+    {
+      "state": "nv",
+      "group": "plssSpecialSurveys",
+      "selectedPath": "nv/plss/tiles/nv-plss.mbtiles",
+      "reason": "Preserve archive explicitly used by copied production reader; no newest/largest ranking.",
+      "evidence": [
+        {
+          "path": "nv/plss/tiles/nv-plss.mbtiles",
+          "bounds": "-120.005722,35.001878,-114.039459,42.002366",
+          "sourceBuild": "tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_E -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_E/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/E.geojsonl; tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_T -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_T/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/T.geojsonl; tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_N -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_N/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/N.geojsonl; tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_K -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_K/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/K.geojsonl; tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_M -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_M/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/M.geojsonl; tippecanoe -P -Z6 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/serial-pipeline-20261017T005154Z/parts/first-division__PLSSFirstDivision -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/serial-pipeline-20261017T005154Z/parts/first-division__PLSSFirstDivision/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/serial-pipeline-20261017T005154Z/parts/first-division__PLSSFirstDivision/source.geojsonl; tile-join '--layer=plss_sections' -pk -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/sections/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/serial-pipeline-20261017T005154Z/parts/first-division__PLSSFirstDivision/part.mbtiles; tippecanoe -P -Z11 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/government_lots -l plss_government_lots -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/government_lots/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/second-division/government_lots.geojsonl; tippecanoe -P -Z6 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/townships -l plss_townships -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/townships/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/township/townships.geojsonl; tile-join -pk -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/nv-plss.building.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_townships.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_sections.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_m.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_k.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_t.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_e.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_n.mbtiles /root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_government_lots.mbtiles",
+          "errors": [],
+          "sampleTile": [
+            6,
+            10,
+            39,
+            18326
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_special_surveys",
+              "description": "",
+              "minzoom": 10,
+              "maxzoom": 16,
+              "fields": {
+                "GISACRE": "Number",
+                "RECRDAREANO": "Number",
+                "RECRDAREATX": "String",
+                "SOURCEREF": "String",
+                "SURVDIV": "String",
+                "SURVID": "String",
+                "SURVLAB": "String",
+                "SURVNO": "String",
+                "SURVNOTE": "String",
+                "SURVSUF": "String",
+                "SURVTYP": "String",
+                "SURVTYPTXT": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_special_surveys",
+              "count": 90659,
+              "geometry": "Polygon",
+              "provenance": []
+            }
+          ]
+        },
+        {
+          "path": "nv/plss/tiles/special-surveys/plss_special_surveys_e.mbtiles",
+          "bounds": "-119.998064,35.676991,-114.212060,41.761461",
+          "sourceBuild": "tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_E -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_E/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/E.geojsonl",
+          "errors": [],
+          "sampleTile": [
+            10,
+            171,
+            635,
+            637
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_special_surveys",
+              "description": "",
+              "minzoom": 10,
+              "maxzoom": 16,
+              "fields": {
+                "GISACRE": "Number",
+                "RECRDAREANO": "Number",
+                "RECRDAREATX": "String",
+                "SOURCEREF": "String",
+                "SURVDIV": "String",
+                "SURVID": "String",
+                "SURVLAB": "String",
+                "SURVNO": "String",
+                "SURVNOTE": "String",
+                "SURVSUF": "String",
+                "SURVTYP": "String",
+                "SURVTYPTXT": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_special_surveys",
+              "count": 195,
+              "geometry": "Polygon",
+              "provenance": []
+            }
+          ]
+        },
+        {
+          "path": "nv/plss/tiles/special-surveys/plss_special_surveys_k.mbtiles",
+          "bounds": "-119.644761,36.903949,-114.043684,41.841357",
+          "sourceBuild": "tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_K -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_K/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/K.geojsonl",
+          "errors": [],
+          "sampleTile": [
+            10,
+            178,
+            628,
+            1074
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_special_surveys",
+              "description": "",
+              "minzoom": 10,
+              "maxzoom": 16,
+              "fields": {
+                "GISACRE": "Number",
+                "RECRDAREANO": "Number",
+                "RECRDAREATX": "String",
+                "SURVDIV": "String",
+                "SURVLAB": "String",
+                "SURVNO": "String",
+                "SURVNOTE": "String",
+                "SURVSUF": "String",
+                "SURVTYP": "String",
+                "SURVTYPTXT": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_special_surveys",
+              "count": 2264,
+              "geometry": "Polygon",
+              "provenance": []
+            }
+          ]
+        },
+        {
+          "path": "nv/plss/tiles/special-surveys/plss_special_surveys_m.mbtiles",
+          "bounds": "-120.001107,35.201048,-114.041185,41.959244",
+          "sourceBuild": "tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_M -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_M/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/M.geojsonl",
+          "errors": [],
+          "sampleTile": [
+            10,
+            183,
+            638,
+            242
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_special_surveys",
+              "description": "",
+              "minzoom": 10,
+              "maxzoom": 16,
+              "fields": {
+                "GISACRE": "Number",
+                "RECRDAREANO": "Number",
+                "RECRDAREATX": "String",
+                "SOURCEREF": "String",
+                "SURVDIV": "String",
+                "SURVID": "String",
+                "SURVLAB": "String",
+                "SURVNO": "String",
+                "SURVNOTE": "String",
+                "SURVSUF": "String",
+                "SURVTYP": "String",
+                "SURVTYPTXT": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_special_surveys",
+              "count": 4516,
+              "geometry": "Polygon",
+              "provenance": []
+            }
+          ]
+        },
+        {
+          "path": "nv/plss/tiles/special-surveys/plss_special_surveys_n.mbtiles",
+          "bounds": "-119.644799,37.454360,-114.043683,41.882134",
+          "sourceBuild": "tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_N -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_N/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/N.geojsonl",
+          "errors": [],
+          "sampleTile": [
+            10,
+            179,
+            640,
+            212
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_special_surveys",
+              "description": "",
+              "minzoom": 10,
+              "maxzoom": 16,
+              "fields": {
+                "GISACRE": "Number",
+                "RECRDAREANO": "Number",
+                "RECRDAREATX": "String",
+                "SURVDIV": "String",
+                "SURVLAB": "String",
+                "SURVNO": "String",
+                "SURVNOTE": "String",
+                "SURVTYP": "String",
+                "SURVTYPTXT": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_special_surveys",
+              "count": 13,
+              "geometry": "Polygon",
+              "provenance": []
+            }
+          ]
+        },
+        {
+          "path": "nv/plss/tiles/special-surveys/plss_special_surveys_t.mbtiles",
+          "bounds": "-119.999497,35.605127,-114.050092,41.996274",
+          "sourceBuild": "tippecanoe -P -Z10 -z16 -pf -pk -t /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_T -l plss_special_surveys -o /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/parts/special_T/part.building.mbtiles /root/arizona-naip-build/prospectors-west/plss-state-full-v1/nv/selected-plss-20261017T025638Z/extracted/special-survey/T.geojsonl",
+          "errors": [],
+          "sampleTile": [
+            10,
+            175,
+            638,
+            557
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_special_surveys",
+              "description": "",
+              "minzoom": 10,
+              "maxzoom": 16,
+              "fields": {
+                "GISACRE": "Number",
+                "RECRDAREANO": "Number",
+                "RECRDAREATX": "String",
+                "SURVDIV": "String",
+                "SURVLAB": "String",
+                "SURVNO": "String",
+                "SURVNOTE": "String",
+                "SURVSUF": "String",
+                "SURVTYP": "String",
+                "SURVTYPTXT": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_special_surveys",
+              "count": 383,
+              "geometry": "Polygon",
+              "provenance": []
+            }
+          ]
+        }
+      ],
+      "verificationLimit": "Audit metadata and sample only; live payload/hash verification pending"
+    },
+    {
+      "state": "ut",
+      "group": "plssTownships",
+      "selectedPath": "ut/plss/tiles/utah-plss-townships.mbtiles",
+      "reason": "Preserve archive explicitly used by copied production reader; no newest/largest ranking.",
+      "evidence": [
+        {
+          "path": "ut/plss/tiles/utah-plss-townships.mbtiles",
+          "bounds": "-114.052897,36.997663,-109.041610,42.001713",
+          "sourceBuild": "tippecanoe -Z5 -z14 -l plss_townships -o /root/arizona-naip-build/live-mvt/data/ut/plss/tiles/utah-plss-townships.building.mbtiles -P",
+          "errors": [],
+          "sampleTile": [
+            5,
+            5,
+            20,
+            13245
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_townships",
+              "description": "",
+              "minzoom": 5,
+              "maxzoom": 14,
+              "fields": {
+                "BASEMERIDIAN": "String",
+                "LABEL": "String",
+                "OBJECTID": "Number",
+                "PLSSID": "String",
+                "PRINMER": "String",
+                "PRINMERCD": "String",
+                "QNUM": "Number",
+                "RANGE": "String",
+                "RANGEDIR": "String",
+                "RANGEFRAC": "String",
+                "RANGENO": "String",
+                "RNUM": "Number",
+                "STATEABBR": "String",
+                "Shape__Area": "Number",
+                "Shape__Length": "Number",
+                "TNUM": "Number",
+                "TOWNSHIP": "String",
+                "TWNSHPDIR": "String",
+                "TWNSHPDPCD": "String",
+                "TWNSHPFRAC": "String",
+                "TWNSHPLAB": "String",
+                "TWNSHPNO": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_townships",
+              "count": 2566,
+              "geometry": "Polygon",
+              "provenance": [
+                {
+                  "attribute": "STATEABBR",
+                  "count": 1,
+                  "type": "string",
+                  "values": [
+                    "UT"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "path": "ut/plss/townships.mbtiles",
+          "bounds": "-114.052897,36.997663,-109.041610,42.001713",
+          "sourceBuild": "tippecanoe -Z5 -z14 -l plss_townships -o /root/arizona-naip-build/live-mvt/data/ut/plss/tiles/utah-plss-townships.building.mbtiles -P",
+          "errors": [],
+          "sampleTile": [
+            5,
+            5,
+            20,
+            13245
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_townships",
+              "description": "",
+              "minzoom": 5,
+              "maxzoom": 14,
+              "fields": {
+                "BASEMERIDIAN": "String",
+                "LABEL": "String",
+                "OBJECTID": "Number",
+                "PLSSID": "String",
+                "PRINMER": "String",
+                "PRINMERCD": "String",
+                "QNUM": "Number",
+                "RANGE": "String",
+                "RANGEDIR": "String",
+                "RANGEFRAC": "String",
+                "RANGENO": "String",
+                "RNUM": "Number",
+                "STATEABBR": "String",
+                "Shape__Area": "Number",
+                "Shape__Length": "Number",
+                "TNUM": "Number",
+                "TOWNSHIP": "String",
+                "TWNSHPDIR": "String",
+                "TWNSHPDPCD": "String",
+                "TWNSHPFRAC": "String",
+                "TWNSHPLAB": "String",
+                "TWNSHPNO": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_townships",
+              "count": 2566,
+              "geometry": "Polygon",
+              "provenance": [
+                {
+                  "attribute": "STATEABBR",
+                  "count": 1,
+                  "type": "string",
+                  "values": [
+                    "UT"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "verificationLimit": "Audit metadata and sample only; live payload/hash verification pending"
+    },
+    {
+      "state": "ut",
+      "group": "plssSections",
+      "selectedPath": "ut/plss/tiles/utah-plss-sections.mbtiles",
+      "reason": "Preserve archive explicitly used by copied production reader; no newest/largest ranking.",
+      "evidence": [
+        {
+          "path": "ut/plss/sections.mbtiles",
+          "bounds": "-114.052897,36.997663,-109.041610,42.001518",
+          "sourceBuild": "tippecanoe -Z5 -z14 -l plss_sections -o /root/arizona-naip-build/live-mvt/data/ut/plss/tiles/utah-plss-sections.building.mbtiles -P",
+          "errors": [],
+          "sampleTile": [
+            5,
+            5,
+            20,
+            260451
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_sections",
+              "description": "",
+              "minzoom": 5,
+              "maxzoom": 14,
+              "fields": {
+                "BASEMERIDIAN": "String",
+                "FRSTDIVDUP": "String",
+                "FRSTDIVID": "String",
+                "FRSTDIVLAB": "String",
+                "FRSTDIVNO": "String",
+                "FRSTDIVTXT": "String",
+                "FRSTDIVTYP": "String",
+                "LABEL": "String",
+                "OBJECTID": "Number",
+                "PLSSID": "String",
+                "QNUM": "Number",
+                "RANGE": "String",
+                "RNUM": "Number",
+                "SECTION": "String",
+                "SNUM": "Number",
+                "SURVTYPTXT": "String",
+                "Shape__Area": "Number",
+                "Shape__Length": "Number",
+                "TNUM": "Number",
+                "TOWNSHIP": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_sections",
+              "count": 78352,
+              "geometry": "Polygon",
+              "provenance": []
+            }
+          ]
+        },
+        {
+          "path": "ut/plss/tiles/utah-plss-sections.mbtiles",
+          "bounds": "-114.052897,36.997663,-109.041610,42.001518",
+          "sourceBuild": "tippecanoe -Z5 -z14 -l plss_sections -o /root/arizona-naip-build/live-mvt/data/ut/plss/tiles/utah-plss-sections.building.mbtiles -P",
+          "errors": [],
+          "sampleTile": [
+            5,
+            5,
+            20,
+            260451
+          ],
+          "layerMetadata": [
+            {
+              "id": "plss_sections",
+              "description": "",
+              "minzoom": 5,
+              "maxzoom": 14,
+              "fields": {
+                "BASEMERIDIAN": "String",
+                "FRSTDIVDUP": "String",
+                "FRSTDIVID": "String",
+                "FRSTDIVLAB": "String",
+                "FRSTDIVNO": "String",
+                "FRSTDIVTXT": "String",
+                "FRSTDIVTYP": "String",
+                "LABEL": "String",
+                "OBJECTID": "Number",
+                "PLSSID": "String",
+                "QNUM": "Number",
+                "RANGE": "String",
+                "RNUM": "Number",
+                "SECTION": "String",
+                "SNUM": "Number",
+                "SURVTYPTXT": "String",
+                "Shape__Area": "Number",
+                "Shape__Length": "Number",
+                "TNUM": "Number",
+                "TOWNSHIP": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "plss_sections",
+              "count": 78352,
+              "geometry": "Polygon",
+              "provenance": []
+            }
+          ]
+        }
+      ],
+      "verificationLimit": "Audit metadata and sample only; live payload/hash verification pending"
+    },
+    {
+      "state": "ut",
+      "group": "withdrawalsAuthorized",
+      "selectedPath": "ut/withdrawals/tiles/ut-withdrawals.mbtiles",
+      "reason": "Preserve archive explicitly used by copied production reader; no newest/largest ranking.",
+      "evidence": [
+        {
+          "path": "ut/withdrawals/tiles/ut-withdrawals.mbtiles",
+          "bounds": "-114.052897,36.997663,-109.045013,42.001518",
+          "sourceBuild": "tippecanoe -P -Z4 -z16 --no-feature-limit --no-tile-size-limit --simplify-only-low-zooms -o /root/arizona-naip-build/prospectors-west/withdrawals-state-full-v1/ut/withdrawals-full-v1.mbtiles -n 'AEM UT Mining Withdrawals' -L '{\"layer\": \"withdrawals_authorized\", \"file\": \"/root/arizona-naip-build/prospectors-west/withdrawals-state-full-v1/ut/authorized.geojsonl\"}' -L '{\"layer\": \"withdrawals_pending\", \"file\": \"/root/arizona-naip-build/prospectors-west/withdrawals-state-full-v1/ut/pending.geojsonl\"}'",
+          "errors": [],
+          "sampleTile": [
+            4,
+            3,
+            10,
+            49825
+          ],
+          "layerMetadata": [
+            {
+              "id": "withdrawals_authorized",
+              "description": "",
+              "minzoom": 4,
+              "maxzoom": 16,
+              "fields": {
+                "ADMIN_STATE": "String",
+                "BLM_PROD": "String",
+                "CMMDTY": "String",
+                "CSE_DISP": "String",
+                "CSE_DISP_DT": "Number",
+                "CSE_META": "String",
+                "CSE_NAME": "String",
+                "CSE_NR": "String",
+                "CSE_TYPE_NR": "String",
+                "GEO_STATE": "String",
+                "LEG_CSE_NR": "String",
+                "OBJECTID": "Number",
+                "QLTY": "String",
+                "RCRD_ACRS": "Number",
+                "REC_TYPE_CSE_GRP": "String",
+                "SEG_MIN": "String",
+                "SEG_SUR": "String",
+                "SF_ID": "String",
+                "source_oid": "Number",
+                "state_code": "String",
+                "withdrawal_status": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "withdrawals_authorized",
+              "count": 555,
+              "geometry": "Polygon",
+              "provenance": []
+            }
+          ]
+        },
+        {
+          "path": "ut/withdrawals/utah-withdrawals-authorized.mbtiles",
+          "bounds": "-114.052909,36.997997,-109.041806,42.001515",
+          "sourceBuild": "tippecanoe -o /root/utah-build/output/withdrawals/utah-withdrawals-authorized.building.mbtiles -l withdrawals_authorized -Z 7 -z 14 --no-feature-limit --no-tile-size-limit /root/utah-build/source/withdrawals/authorized/utah-clipped.geojsonl",
+          "errors": [],
+          "sampleTile": [
+            7,
+            25,
+            80,
+            9088
+          ],
+          "layerMetadata": [
+            {
+              "id": "withdrawals_authorized",
+              "description": "",
+              "minzoom": 7,
+              "maxzoom": 14,
+              "fields": {
+                "ADMIN_STATE": "String",
+                "BLM_PROD": "String",
+                "CMMDTY": "String",
+                "CSE_DISP": "String",
+                "CSE_DISP_DT": "Number",
+                "CSE_META": "String",
+                "CSE_NAME": "String",
+                "CSE_NR": "String",
+                "CSE_TYPE_NR": "String",
+                "GEO_STATE": "String",
+                "LEG_CSE_NR": "String",
+                "OBJECTID": "Number",
+                "QLTY": "String",
+                "RCRD_ACRS": "Number",
+                "REC_TYPE_CSE_GRP": "String",
+                "SEG_MIN": "String",
+                "SEG_SUR": "String",
+                "SF_ID": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "withdrawals_authorized",
+              "count": 572,
+              "geometry": "Polygon",
+              "provenance": []
+            }
+          ]
+        }
+      ],
+      "verificationLimit": "Audit metadata and sample only; live payload/hash verification pending"
+    },
+    {
+      "state": "ut",
+      "group": "withdrawalsPending",
+      "selectedPath": "ut/withdrawals/tiles/ut-withdrawals.mbtiles",
+      "reason": "Preserve archive explicitly used by copied production reader; no newest/largest ranking.",
+      "evidence": [
+        {
+          "path": "ut/withdrawals/tiles/ut-withdrawals.mbtiles",
+          "bounds": "-114.052897,36.997663,-109.045013,42.001518",
+          "sourceBuild": "tippecanoe -P -Z4 -z16 --no-feature-limit --no-tile-size-limit --simplify-only-low-zooms -o /root/arizona-naip-build/prospectors-west/withdrawals-state-full-v1/ut/withdrawals-full-v1.mbtiles -n 'AEM UT Mining Withdrawals' -L '{\"layer\": \"withdrawals_authorized\", \"file\": \"/root/arizona-naip-build/prospectors-west/withdrawals-state-full-v1/ut/authorized.geojsonl\"}' -L '{\"layer\": \"withdrawals_pending\", \"file\": \"/root/arizona-naip-build/prospectors-west/withdrawals-state-full-v1/ut/pending.geojsonl\"}'",
+          "errors": [],
+          "sampleTile": [
+            4,
+            3,
+            10,
+            49825
+          ],
+          "layerMetadata": [
+            {
+              "id": "withdrawals_pending",
+              "description": "",
+              "minzoom": 4,
+              "maxzoom": 16,
+              "fields": {
+                "ADMIN_STATE": "String",
+                "BLM_PROD": "String",
+                "CMMDTY": "String",
+                "CSE_DISP": "String",
+                "CSE_DISP_DT": "Number",
+                "CSE_META": "String",
+                "CSE_NAME": "String",
+                "CSE_NR": "String",
+                "CSE_TYPE_NR": "String",
+                "GEO_STATE": "String",
+                "LEG_CSE_NR": "String",
+                "OBJECTID": "Number",
+                "QLTY": "String",
+                "RCRD_ACRS": "Number",
+                "REC_TYPE_CSE_GRP": "String",
+                "SEG_MIN": "String",
+                "SEG_SUR": "String",
+                "SF_ID": "String",
+                "source_oid": "Number",
+                "state_code": "String",
+                "withdrawal_status": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "withdrawals_pending",
+              "count": 18,
+              "geometry": "Polygon",
+              "provenance": []
+            }
+          ]
+        },
+        {
+          "path": "ut/withdrawals/utah-withdrawals-pending.mbtiles",
+          "bounds": "-114.050819,37.000394,-109.073575,41.748893",
+          "sourceBuild": "tippecanoe -o /root/utah-build/output/withdrawals/utah-withdrawals-pending.building.mbtiles -l withdrawals_pending -Z 7 -z 14 --no-feature-limit --no-tile-size-limit /root/utah-build/source/withdrawals/pending/utah-clipped.geojsonl",
+          "errors": [],
+          "sampleTile": [
+            7,
+            25,
+            80,
+            720
+          ],
+          "layerMetadata": [
+            {
+              "id": "withdrawals_pending",
+              "description": "",
+              "minzoom": 7,
+              "maxzoom": 14,
+              "fields": {
+                "ADMIN_STATE": "String",
+                "BLM_PROD": "String",
+                "CMMDTY": "String",
+                "CSE_DISP": "String",
+                "CSE_DISP_DT": "Number",
+                "CSE_META": "String",
+                "CSE_NAME": "String",
+                "CSE_NR": "String",
+                "CSE_TYPE_NR": "String",
+                "GEO_STATE": "String",
+                "LEG_CSE_NR": "String",
+                "OBJECTID": "Number",
+                "QLTY": "String",
+                "RCRD_ACRS": "Number",
+                "REC_TYPE_CSE_GRP": "String",
+                "SEG_MIN": "String",
+                "SEG_SUR": "String",
+                "SF_ID": "String"
+              }
+            }
+          ],
+          "statistics": [
+            {
+              "layer": "withdrawals_pending",
+              "count": 20,
+              "geometry": "Polygon",
+              "provenance": []
+            }
+          ]
+        }
+      ],
+      "verificationLimit": "Audit metadata and sample only; live payload/hash verification pending"
+    }
+  ],
+  "auditErrorCount": 6,
+  "aliases": [
+    [
+      "/root/LIVE_SITE_CASHE/live-mvt/data/ca/boundary/tiles/ca-boundary.mbtiles",
+      "/root/arizona-naip-build/prospectors-west/california-boundary-build/ca-boundary.mbtiles"
+    ],
+    [
+      "/root/LIVE_SITE_CASHE/live-mvt/data/ca/claims/ca-claims-not-closed.mbtiles",
+      "/root/arizona-naip-build/prospectors-west/claims-state-full-v1/ca/esrijson-repair-v3/ca-claims-not-closed-recovered.mbtiles"
+    ],
+    [
+      "/root/LIVE_SITE_CASHE/live-mvt/data/ca/plss/tiles/ca-plss-quarter-quarter-sections.mbtiles",
+      "/root/arizona-naip-build/prospectors-west/plss-state-full-v1/ca/quarter-quarter/ca-plss-quarter-quarter-fast.mbtiles"
+    ],
+    [
+      "/root/LIVE_SITE_CASHE/live-mvt/data/ca/plss/tiles/ca-plss-sections.mbtiles",
+      "/root/arizona-naip-build/prospectors-west/plss-state-full-v1/ca/ca-plss-sections.mbtiles"
+    ],
+    [
+      "/root/LIVE_SITE_CASHE/live-mvt/data/ca/plss/tiles/ca-plss-townships.mbtiles",
+      "/root/arizona-naip-build/prospectors-west/plss-state-full-v1/ca/ca-plss-townships.mbtiles"
+    ],
+    [
+      "/root/LIVE_SITE_CASHE/live-mvt/data/ca/surface-management/tiles/ca-surface-management.mbtiles",
+      "/root/arizona-naip-build/prospectors-west/surface-management-state-full-v1/ca/ca-surface-management.mbtiles"
+    ],
+    [
+      "/root/LIVE_SITE_CASHE/live-mvt/data/nm/plss/tiles/nm-plss-sections.invalid-20261021T203051881017Z.mbtiles",
+      "/root/arizona-naip-build/prospectors-west/plss-state-full-v1/nm/build-20261021/nm-plss-sections-20261021-083203.mbtiles"
+    ],
+    [
+      "/root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_government_lots.mbtiles",
+      "/root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/tiles/plss_government_lots.mbtiles"
+    ],
+    [
+      "/root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_e.mbtiles",
+      "/root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/tiles/special-surveys/plss_special_surveys_e.mbtiles"
+    ],
+    [
+      "/root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_k.mbtiles",
+      "/root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/tiles/special-surveys/plss_special_surveys_k.mbtiles"
+    ],
+    [
+      "/root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_m.mbtiles",
+      "/root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/tiles/special-surveys/plss_special_surveys_m.mbtiles"
+    ],
+    [
+      "/root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_n.mbtiles",
+      "/root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/tiles/special-surveys/plss_special_surveys_n.mbtiles"
+    ],
+    [
+      "/root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/staging/selected-plss-20261017T025638Z/parts/plss_special_surveys_t.mbtiles",
+      "/root/LIVE_SITE_CASHE/live-mvt/data/nv/plss/tiles/special-surveys/plss_special_surveys_t.mbtiles"
+    ]
+  ],
+  "invalidOrUnverifiedMetadata": [
+    {
+      "path": "/root/LIVE_SITE_CASHE/live-mvt/data/az/boundary/az-boundary.mbtiles",
+      "errors": [
+        "Missing vector metadata/bounds"
+      ]
+    },
+    {
+      "path": "/root/LIVE_SITE_CASHE/live-mvt/data/nm/plss/tiles/nm-plss-sections.invalid-20261021T203051881017Z.mbtiles",
+      "errors": [
+        "No nonempty tile found"
+      ]
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/plss-state-full-v1/ca/ca-plss-special-surveys.tmp.mbtiles",
+      "errors": [
+        "No nonempty tile found"
+      ]
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/plss-state-full-v1/id/build-20261022/id-plss-quarter-quarter-sections.building.mbtiles",
+      "errors": [
+        "No nonempty tile found"
+      ]
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/plss-state-full-v1/id/build-20261022/id-plss-quarter-sections.derived.building.mbtiles",
+      "errors": [
+        "No nonempty tile found"
+      ]
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/plss-state-full-v1/id/build-20261022/id-plss-townships.building.mbtiles",
+      "errors": [
+        "Missing vector metadata/bounds"
+      ]
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/plss-state-full-v1/nm/build-20261021/nm-plss-sections-20261021-083203.mbtiles",
+      "errors": [
+        "No nonempty tile found"
+      ]
+    },
+    {
+      "path": "/root/colorado-build/run-20261018T170204Z/jobs/parcels-precision-recovery/patch.mbtiles",
+      "errors": [
+        "No nonempty tile found"
+      ]
+    }
+  ],
+  "unresolvedCompetitors": [],
+  "explicitPreferences": [
+    {
+      "state": "mt",
+      "group": "claims",
+      "path": "mt/claims/mt-claims.mbtiles"
+    },
+    {
+      "state": "az",
+      "group": "plssTownships",
+      "path": "az/plss/tiles/az-plss-townships.mbtiles"
+    },
+    {
+      "state": "wa",
+      "group": "plssGovernmentLots",
+      "path": "wa/plss/tiles/wa-plss-government-lots-blm-authoritative.mbtiles"
+    },
+    {
+      "state": "wa",
+      "group": "plssQuarterQuarterSections",
+      "path": "wa/plss/tiles/wa-plss-quarter-quarter-sections-blm-authoritative.mbtiles"
+    },
+    {
+      "state": "nv",
+      "group": "plssTownships",
+      "path": "nv/plss/tiles/nv-plss.mbtiles"
+    },
+    {
+      "state": "nv",
+      "group": "plssSections",
+      "path": "nv/plss/tiles/nv-plss.mbtiles"
+    },
+    {
+      "state": "nv",
+      "group": "plssGovernmentLots",
+      "path": "nv/plss/tiles/nv-plss.mbtiles"
+    },
+    {
+      "state": "nv",
+      "group": "plssSpecialSurveys",
+      "path": "nv/plss/tiles/nv-plss.mbtiles"
+    },
+    {
+      "state": "ut",
+      "group": "plssTownships",
+      "path": "ut/plss/tiles/utah-plss-townships.mbtiles"
+    },
+    {
+      "state": "ut",
+      "group": "plssSections",
+      "path": "ut/plss/tiles/utah-plss-sections.mbtiles"
+    },
+    {
+      "state": "ut",
+      "group": "withdrawalsAuthorized",
+      "path": "ut/withdrawals/tiles/ut-withdrawals.mbtiles"
+    },
+    {
+      "state": "ut",
+      "group": "withdrawalsPending",
+      "path": "ut/withdrawals/tiles/ut-withdrawals.mbtiles"
+    }
+  ],
+  "claimsScopeReview": [],
+  "outside": [
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/california-boundary-build/ca-boundary.mbtiles",
+      "layers": [
+        "state_boundary"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": true,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/claims-state-full-v1/ca/esrijson-repair-v3/ca-claims-not-closed-recovered.mbtiles",
+      "layers": [
+        "mining_claims"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": true,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/claims-state-full-v1/ca/esrijson-repair-v3/ca-claims-not-closed.mbtiles",
+      "layers": [
+        "mining_claims"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/historic-mines-state-full-v1/ca/cgs-20261023/historic-mines.mbtiles",
+      "layers": [
+        "historic_mines_points"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/historic-mines-state-full-v1/or/dogami-milo4-20261023/historic-mines.mbtiles",
+      "layers": [
+        "historic_mines_points"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/historic-mines-state-full-v1/wa/wgs-complete-20261023/historic-mines.mbtiles",
+      "layers": [
+        "historic_mines_points"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/plss-state-full-v1/ca/ca-plss-sections.mbtiles",
+      "layers": [
+        "plss_sections"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": true,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/plss-state-full-v1/ca/ca-plss-special-surveys.tmp.mbtiles",
+      "layers": [],
+      "errors": [
+        "No nonempty tile found"
+      ],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/plss-state-full-v1/ca/ca-plss-townships.mbtiles",
+      "layers": [
+        "plss_townships"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": true,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/plss-state-full-v1/ca/quarter-quarter/ca-plss-quarter-quarter-fast.mbtiles",
+      "layers": [
+        "plss_quarter_quarter_sections"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": true,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/plss-state-full-v1/ca/quarter-sections/ca-plss-quarter-sections-derived.mbtiles",
+      "layers": [
+        "plss_quarter_sections"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/plss-state-full-v1/ca/quarter-sections/rejected/ca-plss-quarter-sections-dropped-20261024-0141.mbtiles",
+      "layers": [
+        "plss_quarter_sections"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/plss-state-full-v1/id/build-20261022/id-plss-quarter-quarter-sections.building.mbtiles",
+      "layers": [],
+      "errors": [
+        "No nonempty tile found"
+      ],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/plss-state-full-v1/id/build-20261022/id-plss-quarter-sections.derived.building.mbtiles",
+      "layers": [],
+      "errors": [
+        "No nonempty tile found"
+      ],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/plss-state-full-v1/id/build-20261022/id-plss-townships.building.mbtiles",
+      "layers": [],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/plss-state-full-v1/nm/build-20261021/nm-plss-sections-20261021-083203.mbtiles",
+      "layers": [],
+      "errors": [
+        "No nonempty tile found"
+      ],
+      "alreadyRepresentedByIdentity": true,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/surface-management-state-full-v1/ca/ca-surface-management.mbtiles",
+      "layers": [
+        "surface_management"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": true,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/arizona-naip-build/prospectors-west/withdrawals-west-v1/output/western-withdrawals-v3.mbtiles",
+      "layers": [
+        "withdrawals_authorized",
+        "withdrawals_pending"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/colorado-build/run-20261018T170204Z/jobs/parcels-precision-recovery/patch-retry.mbtiles",
+      "layers": [
+        "parcels"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/colorado-build/run-20261018T170204Z/jobs/parcels-precision-recovery/patch.mbtiles",
+      "layers": [],
+      "errors": [
+        "No nonempty tile found"
+      ],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/colorado-build/run-20261018T170204Z/jobs/parcels-recovery/converted.mbtiles",
+      "layers": [
+        "parcels"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/colorado-build/run-20261018T170204Z/jobs/parcels/converted.mbtiles",
+      "layers": [
+        "parcels"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/colorado-build/run-20261018T170204Z/jobs/surface-management-precision-recovery/patch.mbtiles",
+      "layers": [
+        "surface_management"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/colorado-build/run-20261018T170204Z/jobs/surface-management/converted.mbtiles",
+      "layers": [
+        "surface_management"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/mines-vm-release-20261018/az/az-historic-mines.mbtiles",
+      "layers": [
+        "historic_mines"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/mines-vm-release-20261018/nv/nv-historic-mines.mbtiles",
+      "layers": [
+        "historic_mines"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/mines-vm-release-20261018/ut/ut-historic-mines.mbtiles",
+      "layers": [
+        "historic_mines"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/nevada-build/output/nevada-historic-mines-z4-8.mbtiles",
+      "layers": [
+        "historic_mines"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/utah-build/output/utah-historic-mines.mbtiles",
+      "layers": [
+        "historic_mines"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/utah-build/output/withdrawals/utah-withdrawals-authorized.mbtiles",
+      "layers": [
+        "withdrawals_authorized"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/utah-build/output/withdrawals/utah-withdrawals-pending.mbtiles",
+      "layers": [
+        "withdrawals_pending"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/utah-build/z16-data-build-20261017T205649Z/jobs/boundary/added-zooms.mbtiles",
+      "layers": [
+        "state_boundary"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/utah-build/z16-data-build-20261017T205649Z/jobs/claims/added-zooms.mbtiles",
+      "layers": [
+        "claims"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    },
+    {
+      "path": "/root/utah-build/z16-data-build-20261017T205649Z/jobs/surface-management/added-zooms.mbtiles",
+      "layers": [
+        "surface_management"
+      ],
+      "errors": [],
+      "alreadyRepresentedByIdentity": false,
+      "needsVerificationBeforeConsolidation": true
+    }
+  ]
+}

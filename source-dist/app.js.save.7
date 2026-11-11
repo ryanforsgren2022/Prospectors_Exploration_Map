@@ -1,0 +1,4049 @@
+/* SMALL_BLACK_ROADS_Z10_V2 */
+/* Arizona prospecting map: consolidated production map configuration. */
+const BUILD_VERSION = '2.0.0';
+const routeNumber = [
+  'case',
+  ['in', ['to-string', ['get', 'ref']], ['literal', ['101', '202', '303']]],
+  ['concat', 'Loop ', ['to-string', ['get', 'ref']]],
+  ['==', ['get', 'network'], 'us-interstate'],
+  ['concat', 'I-', ['to-string', ['get', 'ref']]],
+  ['==', ['get', 'network'], 'us-highway'],
+  ['concat', 'US ', ['to-string', ['get', 'ref']]],
+  ['==', ['get', 'network'], 'us-state'],
+  ['concat', 'AZ ', ['to-string', ['get', 'ref']]],
+  ['to-string', ['get', 'ref']]
+];
+
+const routeLabel = [
+  'case',
+  ['has', 'ref'], routeNumber,
+  ['coalesce', ['get', 'name_en'], ['get', 'name'], 'Road']
+];
+
+const forestRoadRef = ['to-string', ['get', 'ref']];
+const forestRoadLabel = [
+  'case',
+  ['any',
+    ['==', ['slice', ['upcase', forestRoadRef], 0, 2], 'FR'],
+    ['==', ['slice', ['upcase', forestRoadRef], 0, 2], 'FS']
+  ],
+  forestRoadRef,
+  ['concat', 'FR ', forestRoadRef]
+];
+
+// Keep managed access roads visually continuous when their underlying OSM
+// classification changes between track, service, minor, or another class.
+const managedAccessName = ['downcase', ['coalesce', ['get', 'name_en'], ['get', 'name'], '']];
+const managedAccessRef = ['downcase', ['to-string', ['get', 'ref']]];
+const managedAccessFilter = ['any',
+  ['==', ['slice', managedAccessName, 0, 4], 'blm '],
+  ['==', ['slice', managedAccessName, 0, 9], 'blm road '],
+  ['==', ['slice', managedAccessName, 0, 12], 'forest road '],
+  ['==', ['slice', managedAccessName, 0, 15], 'forest service '],
+  ['==', ['slice', managedAccessName, 0, 26], 'bureau of land management '],
+  ['==', ['slice', managedAccessRef, 0, 3], 'blm'],
+  ['==', ['slice', managedAccessRef, 0, 2], 'fs'],
+  ['==', ['slice', managedAccessRef, 0, 2], 'fr']
+];
+
+// AEM_UNIFIED_WESTERN_ROADS_V1: single PMTiles source across 11 contiguous states.
+const WESTERN_ROAD_PRIMARY = ['primary-road-casing', 'primary-roads', 'state-road-casing', 'state-roads', 'secondary-road-casing', 'secondary-roads', 'local-road-casing', 'local-roads', 'primary-route-labels', 'state-route-labels', 'other-numbered-route-labels', 'primary-road-name-labels', 'arterial-road-name-labels', 'main-street-labels', 'local-labels'];
+const WESTERN_ROAD_ACCESS = ['access-roads-casing', 'access-roads', 'managed-road-casing', 'managed-roads', 'forest-road-labels', 'managed-road-name-labels', 'access-labels'];
+const WESTERN_ROAD_TRAILS = ['western-trails', 'western-trail-labels'];
+const WESTERN_ROAD_IDS = [...WESTERN_ROAD_PRIMARY, ...WESTERN_ROAD_ACCESS, ...WESTERN_ROAD_TRAILS];
+const WESTERN_ROAD_GROUPS = Object.freeze({
+  major: ['motorway', 'motorway_link', 'trunk', 'trunk_link'],
+  state: ['primary', 'primary_link', 'secondary', 'secondary_link'],
+  secondary: ['tertiary', 'tertiary_link', 'unclassified'],
+  local: ['residential', 'living_street', 'road', 'service'],
+  access: ['track'],
+  managed: ['__aem_managed_access__'],
+  trail: ['path', 'footway', 'cycleway', 'bridleway', 'pedestrian', 'steps']
+});
+// AEM_AZ_ROAD_PARITY_V5: Arizona access/path and zoom parity on unified OSM roads.
+// AEM_WESTERN_STYLE_V3: presentation only; the unified PMTiles data is unchanged.
+// All widths below are pixels interpolated by map zoom. Tune here, not per state.
+// AEM_ROAD_OPACITY_HIDE_DEVBOX_V4
+function westernRoadStyles() {
+  const groups = WESTERN_ROAD_GROUPS;
+  const hide = { visibility: 'none', 'line-cap': 'round', 'line-join': 'round' };
+  // AEM_ROAD_CLASS_FINAL_V1
+  // Designated FR/FS/BLM roads retain priority regardless of highway subclass.
+  const lower = (key) =>
+    ['downcase', ['to-string', ['coalesce', ['get', key], '']]];
+  const starts = (value, prefix) =>
+    ['==', ['slice', value, 0, prefix.length], prefix];
+
+  const ref = lower('ref');
+  const name = lower('name');
+
+  const managed = ['all',
+    ['!', ['match', ['get', 'highway'],
+      ['path', 'footway', 'cycleway', 'bridleway', 'pedestrian', 'steps'],
+      true, false]],
+    ['any',
+      starts(ref, 'fr'),
+      starts(ref, 'fs'),
+      starts(ref, 'blm'),
+      starts(ref, 'nfsr'),
+      starts(name, 'forest road '),
+      starts(name, 'forest service '),
+      starts(name, 'national forest development road'),
+      starts(name, 'blm '),
+      starts(name, 'bureau of land management ')
+    ]
+  ];
+
+  const minorService = ['all',
+    ['==', ['get', 'highway'], 'service'],
+    ['any',
+      ['match', ['get', 'service'],
+        ['driveway', 'parking_aisle'], true, false],
+      ['match', ['get', 'subclass'],
+        ['driveway', 'parking_aisle'], true, false]
+    ]
+  ];
+
+  const matches = (highways) => {
+    if (highways === groups.managed) return managed;
+    const raw = ['match', ['get', 'highway'], highways, true, false];
+    if (highways === groups.access)
+      return ['all', raw, ['!', managed]];
+    if (highways === groups.local || highways === groups.secondary)
+      return ['all', raw, ['!', managed], ['!', minorService]];
+    return raw;
+  };
+  const hasText = (key) => ['all', ['has', key], ['!=', ['get', key], '']];
+  const noRef = ['!', hasText('ref')];
+  // Evaluate the same two-level offset in the style, without resetting filters on zoom.
+  const roadVisibleAtZoom = ['<=', ['to-number', ['get', 'tippecanoe:minimumzoom'], 0], ['+', ['floor', ['zoom']], 2]];
+
+  const line = (id, highways, minzoom, color, stops, extras = {}) => ({
+    id, type: 'line', source: 'roads', 'source-layer': 'roads', minzoom,
+    filter: ['all', matches(highways), roadVisibleAtZoom], layout: { ...hide },
+    paint: {
+      'line-color': color,
+      'line-width': ['interpolate', ['linear'], ['zoom'], ...stops],
+      ...extras,
+      'line-opacity': 1
+    }
+  });
+
+  // Route refs take priority over road names. Do not show both on the same road.
+  // The converter stores missing refs/names as empty strings, not nulls.
+  const refText = ['get', 'ref'];
+  const nameText = ['get', 'name'];
+  const label = (id, highways, minzoom, text, eligible, priority, size, bold = false) => ({
+    id, type: 'symbol', source: 'roads', 'source-layer': 'roads', minzoom,
+    filter: ['all', matches(highways), eligible, roadVisibleAtZoom],
+    layout: {
+      visibility: 'none',
+      'symbol-placement': 'line',
+      'symbol-sort-key': priority,
+      'text-field': text,
+      'text-font': [bold ? 'Noto Sans Bold' : 'Noto Sans Regular'],
+      'text-size': size,
+      'symbol-spacing': priority < 4 ? 460 : 550,
+      'text-max-angle': 40,
+      'text-padding': 10,
+      'text-keep-upright': true,
+      'text-optional': true,
+      'text-allow-overlap': false,
+      'text-ignore-placement': false
+    },
+    paint: {
+      'text-color': '#f9f9f9',
+      'text-halo-color': '#101010',
+      'text-halo-width': bold ? 1.7 : 1.4
+    }
+  });
+
+  // Layer order matters: paths/access underneath major routes so white
+  // highways remain continuous where roads intersect.
+  const haloLayers = [
+    line('western-trails', groups.trail, 8.5, '#101010',
+      [10.5, 0.8, 14, 1.15, 18, 1.8], { 'line-dasharray': [2, 2] }),
+
+    // Reveal road classes progressively as the map zooms in.
+    line('access-roads-casing', groups.access, 8.5, '#d3d3d3',
+      [9, 1.05, 12, 1.5, 14, 1.82, 18, 2.65], { 'line-opacity': 0.77 }),
+    line('access-roads', groups.access, 8.5, '#050505',
+      [9, 0.72, 12, 1.10, 14, 1.45, 18, 2.2]),
+
+    line('local-road-casing', groups.local, 10.5, '#d5d5d5',
+      [10, 0.98, 14, 1.55, 18, 2.45], { 'line-opacity': 0.75 }),
+    line('local-roads', groups.local, 10.5, '#080808',
+      [10, 0.57, 14, 1.08, 18, 1.9]),
+
+    line('secondary-road-casing', groups.secondary, 7, '#e7e7e7',
+      [9, 1.22, 14, 2.0, 18, 2.95], { 'line-opacity': 0.82 }),
+    line('secondary-roads', groups.secondary, 7, '#030303',
+      [9, 0.75, 14, 1.47, 18, 2.35]),
+
+    // Managed roads remain black across OSM highway subclasses.
+    line('managed-road-casing', groups.managed, 7, '#f2f4f3',
+      [9, 1.7, 12, 2.2, 14, 2.8, 18, 3.5]),
+    line('managed-roads', groups.managed, 7, '#050505',
+      [9, 1.0, 12, 1.5, 14, 2.1, 18, 2.7]),
+
+    // Major numbered roads remain white and draw on top of minor roads.
+    line('state-road-casing', groups.state, 6.1, '#070707',
+      [8.1, 1.5, 12, 2.5, 18, 3.5]),
+    line('state-roads', groups.state, 6.1, '#ffffff',
+      [8.1, 0.88, 12, 1.7, 18, 2.6]),
+    line('primary-road-casing', groups.major, 2, '#050505',
+      [4, 1.7, 12, 3.15, 18, 4.5]),
+    line('primary-roads', groups.major, 2, '#ffffff',
+      [4, 1.08, 12, 2.2, 18, 3.35]),
+
+    // Numeric/ref labels take priority; don't also draw the street name.
+    label('primary-route-labels', groups.major, 2, refText, hasText('ref'), 1, 13, true),
+    label('state-route-labels', groups.state, 6.1, refText, hasText('ref'), 2, 12.5, true),
+    label('other-numbered-route-labels', groups.secondary, 6.1, refText, hasText('ref'), 3, 11.5, true),
+    label('forest-road-labels', groups.managed, 7, refText, hasText('ref'), 4, 11, true),
+
+    label('primary-road-name-labels', groups.major, 10, nameText,
+      ['all', noRef, hasText('name')], 5, 12),
+    label('arterial-road-name-labels', groups.state, 9.5, nameText,
+      ['all', noRef, hasText('name')], 6, 11.5),
+    label('main-street-labels', groups.secondary, 10, nameText,
+      ['all', noRef, hasText('name')], 7, 11),
+    label('local-labels', groups.local, 11.5, nameText,
+      ['all', noRef, hasText('name')], 8, 10.5),
+    label('managed-road-name-labels', groups.managed, 8.5, nameText,
+      ['all', noRef, hasText('name')], 8, 10.5),
+    label('access-labels', groups.access, 9.5, nameText,
+      ['all', noRef, hasText('name')], 9, 10.5),
+    label('western-trail-labels', groups.trail, 11, nameText,
+      ['all', noRef, hasText('name')], 10, 10.5)
+  ];
+
+  // AEM_ROAD_HALOS_V11
+  // Adjust existing casings only; preserve road centerlines.
+
+  const roadPairs = [
+    ['primary-roads', 'primary-road-casing'],
+    ['state-roads', 'state-road-casing'],
+    ['secondary-roads', 'secondary-road-casing'],
+    ['local-roads', 'local-road-casing'],
+    ['access-roads', 'access-roads-casing'],
+    ['managed-roads', 'managed-road-casing']
+  ];
+
+  const byId = Object.fromEntries(
+    haloLayers.map(layer => [layer.id, layer])
+  );
+
+  for (const [roadId, casingId] of roadPairs) {
+    const road = byId[roadId];
+    const casing = byId[casingId];
+
+    if (!road || !casing) {
+      throw new Error('Missing halo pair: ' + roadId);
+    }
+
+    const color = String(road.paint['line-color']);
+    const bright =
+      /^#(?:f|e)[0-9a-f]{5}$/i.test(color) ||
+      /^rgba?\(\s*2[0-5]\d/i.test(color);
+
+    casing.paint['line-color'] = bright
+      ? '#080c0e'
+      : '#f2f4f3';
+
+    casing.paint['line-opacity'] = 1;
+
+    const width = casing.paint['line-width'];
+
+    if (
+      Array.isArray(width) &&
+      width[0] === 'interpolate' &&
+      width[2]?.[0] === 'zoom'
+    ) {
+      casing.paint['line-width'] = width.map(
+        (value, index) =>
+          index >= 4 && index % 2 === 0
+            ? value + 0.6
+            : value
+      );
+    }
+  }
+
+  return haloLayers;
+}
+
+// Scale thresholds translated from the verified ArcGIS road configuration.
+const ROAD_ZOOM = Object.freeze({
+  primaryLine: 2,
+  primaryLabel: 2,
+  stateLine: 6.1,
+  stateLabel: 6.1,
+  secondaryLine: 7,
+  mainStreetLabel: 7,
+  accessLine: 8.5,
+  accessLabel: 7,
+  localLine: 10.5,
+  localLabel: 8
+});
+// Road classes share the same thresholds throughout the western states.
+
+const SURFACE_MANAGEMENT_QUERY = 'https://gis.blm.gov/azarcgis/rest/services/lands/BLM_AZ_SMA/FeatureServer/0/query';
+const SURFACE_MANAGEMENT_SOURCE = 'surfaceManagement';
+const SURFACE_MANAGEMENT_LAYER_IDS = ['surface-management-fill', 'surface-management-military-hatch', 'surface-management-outline'];
+const SURFACE_MANAGEMENT_MAX_ZOOM = 12;
+const PROPERTY_PARCELS_QUERY = 'https://azgeo.az.gov/arcgis/rest/services/TerraSystems/AZParcelFeatures/FeatureServer/0/query';
+const PROPERTY_PARCELS_SOURCE = 'propertyParcels';
+const PROPERTY_PARCELS_LAYER_IDS = ['property-parcels-fill', 'property-parcels-outline'];
+const PROPERTY_PARCELS_MIN_ZOOM = 12;
+const WITHDRAWAL_AUTHORIZED_QUERY = 'https://gis.blm.gov/nlsdb/rest/services/Land_Tenure/Withdrawals_Case_Disp/MapServer/0/query';
+const WITHDRAWAL_PENDING_QUERY = 'https://gis.blm.gov/nlsdb/rest/services/Land_Tenure/Withdrawals_Case_Disp/MapServer/1/query';
+const WITHDRAWAL_LAYER_IDS = ['withdrawals-authorized-fill', 'withdrawals-authorized-outline', 'withdrawals-pending-fill', 'withdrawals-pending-outline'];
+
+// Shared style definitions; each state attaches one verified VM source lazily.
+const WITHDRAWAL_TEMPLATES = [
+  { id: 'withdrawals-authorized-fill', type: 'fill', 'source-layer': 'withdrawals_authorized', minzoom: 4, paint: { 'fill-color': 'rgba(145,18,30,.34)' } },
+  { id: 'withdrawals-authorized-outline', type: 'line', 'source-layer': 'withdrawals_authorized', minzoom: 4, paint: { 'line-color': 'rgba(105,8,18,1)', 'line-width': 1.1 } },
+  { id: 'withdrawals-pending-fill', type: 'fill', 'source-layer': 'withdrawals_pending', minzoom: 4, paint: { 'fill-color': 'rgba(245,170,45,.30)' } },
+  { id: 'withdrawals-pending-outline', type: 'line', 'source-layer': 'withdrawals_pending', minzoom: 4, paint: { 'line-color': 'rgba(220,120,10,.98)', 'line-width': 1.1 } }
+];
+
+const NOT_CLOSED_CLAIMS_QUERY = 'https://gis.blm.gov/nlsdb/rest/services/HUB/BLM_Natl_MLRS_Mining_Claims_Not_Closed/FeatureServer/0/query';
+const PLSS_ALIQUOT_QUERY = 'https://gis.blm.gov/azarcgis/rest/services/cadastral/BLM_AZ_PLSS/FeatureServer/3/query';
+const MLRS_GEOGRAPHIC_REPORT_URL = 'https://reports.blm.gov/report/MLRS/105/Mining-Claims-Geographic-Report/';
+
+const NOT_CLOSED_CLAIMS_SOURCE = 'notClosedClaims';
+const NOT_CLOSED_CLAIMS_LAYER_IDS = ['not-closed-claims-fill', 'not-closed-claims-outline'];
+const NOT_CLOSED_CLAIMS_MIN_ZOOM = 5;
+const GEOLOGY_SOURCE = 'macrostratGeology';
+const GEOLOGY_LAYER_ID = 'macrostrat-geology';
+const HISTORIC_MINES_ARCHIVE_SOURCE = 'historicMinesArchive';
+const HISTORIC_MINES_ARCHIVE_SOURCE_LAYER = 'historic_mines';
+const HISTORIC_MINES_ARCHIVE_LAYER_ID = 'historic-mines-archive-points';
+
+
+
+
+
+
+
+
+const VISITED_HISTORIC_MINES_STORAGE_KEY = 'az-prospecting-map.visited-historic-mines.v1';
+const PLSS_TOWNSHIPS_QUERY = 'https://gis.blm.gov/azarcgis/rest/services/cadastral/BLM_AZ_PLSS/FeatureServer/1/query';
+const PLSS_SECTIONS_QUERY = 'https://gis.blm.gov/azarcgis/rest/services/cadastral/BLM_AZ_PLSS/FeatureServer/2/query';
+const PLSS_TOWNSHIPS_SOURCE = 'plssTownships';
+const PLSS_SECTIONS_SOURCE = 'plssSections';
+const PLSS_TOWNSHIPS_LAYER_IDS = ['plss-townships-fill', 'plss-townships-outline', 'plss-townships-labels'];
+const PLSS_SECTIONS_LAYER_IDS = ['plss-sections-fill', 'plss-sections-outline', 'plss-sections-labels'];
+const PLSS_TOWNSHIPS_MIN_ZOOM = 9.9;
+const PLSS_SECTIONS_MIN_ZOOM = 11.8;
+const ARCGIS_GEOCODE_QUERY = 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates';
+const COUNTIES_QUERY = 'https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_County/MapServer/1/query';
+const COUNTY_ASSESSORS = Object.freeze({
+  Apache: 'https://www.apachecountyaz.gov/departments/assessor', Cochise: 'https://www.cochise.az.gov/178/Assessor', Coconino: 'https://www.coconino.az.gov/115/Assessor', Gila: 'https://www.gilacountyaz.gov/government/assessor/', Graham: 'https://www.graham.az.gov/197/Assessor', Greenlee: 'https://www.greenlee.az.gov/elected-officials/assessor', 'La Paz': 'https://www.lapazassessor.com/', Maricopa: 'https://www.mcassessor.maricopa.gov/', Mohave: 'https://www.mohave.gov/departments/assessor/', Navajo: 'https://www.navajocountyaz.gov/Departments/Assessor', Pima: 'https://www.asr.pima.gov/', Pinal: 'https://www.pinal.gov/630/Assessor', 'Santa Cruz': 'https://www.santacruzcountyaz.gov/180/Assessor', Yavapai: 'https://gis.yavapaiaz.gov/v4/search.aspx', Yuma: 'https://www.yumacountyaz.gov/government/assessor'
+});
+
+const NEVADA_BORDER_SOURCE = 'nevadaBorder';
+const SURFACE_CATEGORY_COLORS = Object.freeze({
+  BLM: 'rgb(254,230,121)', BR: 'rgb(255,255,179)', 'Bankhead-Jones Act': 'rgb(252,205,207)',
+  County: 'rgb(203,203,203)', 'Indian Lands': 'rgb(253,180,108)', 'Local or State Parks': 'rgb(143,181,190)',
+  Military: 'rgb(220,63,55)', NPS: 'rgb(202,189,220)', IBWC: 'rgb(228,196,159)', Other: 'rgb(228,196,159)',
+  Private: 'rgb(242,242,242)', State: 'rgb(179,227,238)', 'State Wildlife Area': 'rgb(80,180,205)',
+  USFWS: 'rgb(87,171,105)', USFS: 'rgb(87,171,105)'
+});
+
+// Rendering-only exclusions: source attributes remain available to the
+// pin-search/info lookup for agency reporting.
+const HIDDEN_SURFACE_CATEGORIES = Object.freeze(['County', 'Private', 'IBWC', 'State Wildlife Area']);
+
+
+// Agency attributes differ among source datasets. These aliases are shared for
+// every state; unknown or ambiguous values retain the existing neutral color.
+const SURFACE_MANAGEMENT_ALIASES = Object.freeze({
+  CATEGORY: Object.fromEntries(Object.keys(SURFACE_CATEGORY_COLORS).map(value => [value.toUpperCase(), value])),
+  adm_code: { BLM: 'BLM', BLM_LU: 'BLM', BIA: 'Indian Lands', BOR: 'BR', DOD: 'Military', LOCAL: 'County', NPS: 'NPS', PRI: 'Private', STA: 'State', USFS: 'USFS', USFS_LU: 'USFS', USFS_NG: 'USFS', USFW: 'USFWS', OTHER: 'Other' },
+  MGMT_AGNCY: { BLM: 'BLM', BOR: 'BR', IR: 'Indian Lands', MIL: 'Military', NPS: 'NPS', NWR: 'USFWS', PRIVATE: 'Private', STATE: 'State', STATEOTH: 'State', STATEFG: 'State Wildlife Area', STATEPR: 'Local or State Parks', USFS: 'USFS', OTHER: 'Other' },
+  AGNCY_NAME: { BLM: 'BLM', BOR: 'BR', BIA: 'Indian Lands', IR: 'Indian Lands', MIL: 'Military', NPS: 'NPS', NWR: 'USFWS', PRIVATE: 'Private', STATE: 'State', STATEOTH: 'State', STATEFG: 'State Wildlife Area', STATEPR: 'Local or State Parks', USFS: 'USFS' },
+  own: { BLM: 'BLM', BOR: 'BR', DOD: 'Military', FS: 'USFS', FWS: 'USFWS', I: 'Indian Lands', NPS: 'NPS', P: 'Private', S: 'State', SGF: 'State Wildlife Area', SP: 'Local or State Parks' },
+  ABBR: { BLM: 'BLM', BR: 'BR', BIA: 'Indian Lands', DOD: 'Military', FS: 'USFS', FWS: 'USFWS', NPS: 'NPS', NVST: 'State', PVT: 'Private' },
+  ADMIN: { BLM: 'BLM', BR: 'BR', DOD: 'Military', NPS: 'NPS', PRIVATE: 'Private', TRIBAL: 'Indian Lands', USFS: 'USFS', USFWS: 'USFWS', UDWR: 'State Wildlife Area', DNR: 'State', FFSL: 'State', SITLA: 'State', UDOT: 'State' },
+  ADMIN_AGENCY_CODE: { BLM: 'BLM', BIA: 'Indian Lands', USBR: 'BR', DOD: 'Military', FWS: 'USFWS', NPS: 'NPS', ST: 'State', LG: 'County' },
+  PROPERTY_STATUS: { BLM: 'BLM', BIA: 'Indian Lands', BR: 'BR', DOD: 'Military', FWS: 'USFWS', NPS: 'NPS', USFS: 'USFS', PV: 'Private', ST: 'State', STP: 'Local or State Parks', STW: 'State Wildlife Area', LG: 'County' },
+  JURIS_NAME: { BLM: 'BLM', BIA: 'Indian Lands', USBR: 'BR', DOD: 'Military', FWS: 'USFWS', NPS: 'NPS', USFS: 'USFS', PV: 'Private', ST: 'State', STP: 'Local or State Parks', STW: 'State Wildlife Area', LG: 'County' },
+  SMA_ID: { '2': 'BLM', '3': 'Indian Lands', '915': 'USFS', '1535': 'USFWS', '2012': 'NPS', '2366': 'BR', '2365': 'Military', '488': 'Military', '305': 'Military', '2370': 'Military', '2371': 'Military', '2386': 'State', '2387': 'County', '2388': 'Private' },
+  OWNER: { 'US BUREAU OF LAND MANAGEMENT': 'BLM', 'US BUREAU OF RECLAMATION': 'BR', 'US DEPARTMENT OF DEFENSE': 'Military', 'NATIONAL PARK SERVICE': 'NPS', 'US FISH AND WILDLIFE SERVICE': 'USFWS', 'US FOREST SERVICE': 'USFS', 'COUNTY GOVERNMENT': 'County', 'CITY GOVERNMENT': 'County', 'LOCAL GOVERNMENT': 'County', 'MONTANA STATE TRUST LANDS': 'State', 'STATE OF MONTANA': 'State', 'MONTANA DEPARTMENT OF CORRECTIONS': 'State', 'MONTANA DEPARTMENT OF NATURAL RESOURCES AND CONSERVATION': 'State', 'MONTANA DEPARTMENT OF TRANSPORTATION': 'State', 'MONTANA UNIVERSITY SYSTEM': 'State' }
+});
+
+function surfaceManagementCategoryExpression() {
+  let expression = 'Unknown';
+  for (const [field, aliases] of Object.entries(SURFACE_MANAGEMENT_ALIASES).reverse()) {
+    const value = ['upcase', ['to-string', ['coalesce', ['get', field], '']]];
+    const entries = Object.entries(aliases);
+    const recognized = ['match', value, entries.map(([alias]) => alias), true, false];
+    const condition = field === 'SMA_ID'
+      ? ['all', ['!', ['any', ...Object.keys(SURFACE_MANAGEMENT_ALIASES).filter(name => name !== 'SMA_ID').map(name => ['has', name])]], recognized]
+      : recognized;
+    expression = ['case', condition,
+      ['match', value, ...entries.flatMap(([alias, category]) => [alias, category]), 'Unknown'], expression];
+  }
+  return expression;
+}
+
+function surfaceManagementColorExpression() {
+  return ['match', surfaceManagementCategoryExpression(),
+    ...Object.entries(SURFACE_CATEGORY_COLORS).flatMap(([category, color]) => [category, color]),
+    'rgb(190,190,190)'];
+}
+
+function visibleSurfaceManagementFilter() {
+  return ['!', ['match', surfaceManagementCategoryExpression(), HIDDEN_SURFACE_CATEGORIES, true, false]];
+}
+
+const isMobile = matchMedia('(max-width: 700px), (pointer: coarse)').matches;
+const DEVICE = Object.freeze(isMobile ? {
+  targetPitch: 45,
+  targetBearing: -14,
+  terrainTransition: 320,
+  initialTerrainTransition: 850,
+  terrainMaxZoom: 12,
+  mapMaxZoom: 19,
+  accessDebounce: 450,
+  stateRouteDebounce: 500,
+  stateRouteCacheLimit: 8,
+  stateRouteViewportPadding: 0.05,
+  accessCasing: true
+} : {
+  targetPitch: 52,
+  targetBearing: -18,
+  terrainTransition: 380,
+  initialTerrainTransition: 1100,
+  terrainMaxZoom: 15,
+  mapMaxZoom: 22,
+  // Keep post-pan work out of the interaction path. Visible road tiles render
+  // immediately; neighboring data waits until the view has actually settled.
+  accessDebounce: 400,
+  stateRouteDebounce: 400,
+  stateRouteCacheLimit: 24,
+  stateRouteViewportPadding: 0.05,
+  accessCasing: true
+});
+const labelSpacing = Object.freeze({
+  route: isMobile ? 720 : 620,
+  main: isMobile ? 700 : 600,
+  access: isMobile ? 840 : 700,
+  local: isMobile ? 920 : 760
+});
+
+// Shared access-road styling. Keeping this in one place prevents the base,
+// managed, and statewide access layers from drifting apart during later work.
+// Full access roads are part of the normal map, not a deferred decoration.
+// Keeping them visible lets the compact visible tiles draw as soon as they
+// arrive, while the optional overview can still hide them on request.
+const ACCESS_LINE_LAYOUT = Object.freeze({ visibility: 'none', 'line-cap': 'round', 'line-join': 'round' });
+const ACCESS_CASING_PAINT = Object.freeze({
+  'line-color': 'rgba(247,249,250,.72)',
+  'line-width': ['interpolate', ['linear'], ['zoom'], 9, 2.05, 12, 2.30, 16, 2.70, 18, 3.10]
+});
+
+const ACCESS_ROAD_PAINT = Object.freeze({
+  'line-color': '#000000',
+  'line-opacity': .98,
+  'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1.55, 12, 1.8, 16, 2.15, 18, 2.55]
+});
+
+const ACCESS_CASING_LAYER_IDS = ['access-roads-casing', 'managed-access-roads-casing'];
+const ACCESS_LINE_LAYER_IDS = ['access-roads', 'managed-access-roads'];
+const ACCESS_LABEL_LAYER_IDS = ['forest-road-labels', 'access-labels'];
+const ACCESS_PRESENTATION_LAYER_IDS = [...ACCESS_CASING_LAYER_IDS, ...ACCESS_LINE_LAYER_IDS, ...ACCESS_LABEL_LAYER_IDS];
+
+const TRACE_LAYERS =
+  new URLSearchParams(window.location.search).get('trace') === 'layers';
+
+if (TRACE_LAYERS) {
+  console.log('[LAYER TRACE] enabled');
+
+  window.addEventListener('error', (event) => {
+    console.error(
+      '[LAYER TRACE] WINDOW ERROR',
+      event.message,
+      event.filename,
+      event.lineno,
+      event.error
+    );
+  });
+
+  window.addEventListener('unhandledrejection', (event) => {
+    console.error(
+      '[LAYER TRACE] UNHANDLED REJECTION',
+      event.reason
+    );
+  });
+}
+
+const pmtilesProtocol = new pmtiles.Protocol();
+maplibregl.addProtocol('pmtiles', pmtilesProtocol.tile);
+
+/* CONTINUOUS_WESTERN_ROADS_V3
+ *
+ * One PMTiles archive serves roads across all 11 states. Keep this source
+ * mounted for the lifetime of the map; state boundaries never select, clip,
+ * filter, or replace road data.
+ */
+const CONTINUOUS_ROADS_URL = 'https://data.americanexplorationmaps.com/prospectors/western-roads-z4-filtered-20261030.pmtiles';
+
+// AEM_ROAD_PAN_PERFORMANCE_V1
+// Two decoding workers on capable desktop devices.
+if (!isMobile && navigator.hardwareConcurrency >= 4) {
+  if (typeof maplibregl.setWorkerCount === 'function') {
+    maplibregl.setWorkerCount(2);
+  } else if ('workerCount' in maplibregl) {
+    maplibregl.workerCount = 2;
+  }
+}
+
+let PROSPECTOR_STYLE_TEMPLATES = [];
+const PROSPECTOR_STYLE_TEMPLATE_IDS = new Set([
+  'state-boundary-line',
+  ...SURFACE_MANAGEMENT_LAYER_IDS,
+  ...PROPERTY_PARCELS_LAYER_IDS,
+  ...NOT_CLOSED_CLAIMS_LAYER_IDS,
+  HISTORIC_MINES_ARCHIVE_LAYER_ID,
+  ...PLSS_TOWNSHIPS_LAYER_IDS,
+  ...PLSS_SECTIONS_LAYER_IDS
+]);
+
+const map = new maplibregl.Map({
+  container: 'map',
+  center: [-111.40, 33.40],
+  zoom: 4.5,
+  pitch: 0,
+  bearing: 0,
+  maxZoom: DEVICE.mapMaxZoom,
+  maxPitch: 78,
+  antialias: false,
+  pixelRatio: isMobile ? Math.min(window.devicePixelRatio || 1, 1.5) : undefined,
+  fadeDuration: 0,
+  cancelPendingTileRequestsWhileZooming: true,
+  maxTileCacheZoomLevels: 4,
+  attributionControl: false,
+  style: {
+    version: 8,
+    glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
+    sources: {
+      satellite: {
+          type: 'raster',
+          tiles: [
+            'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+          ],
+          tileSize: 256,
+          maxzoom: 19,
+          attribution: 'Sources: Esri and World Imagery contributors'
+        },
+      places: {
+  type:'vector',
+  url:'https://tiles.openfreemap.org/planet'
+},
+roads: {
+        type: 'vector',
+        url: 'pmtiles://' + CONTINUOUS_ROADS_URL,
+        minzoom: 4,
+        maxzoom: 15,
+        attribution: '© OpenStreetMap contributors'
+      },
+      [GEOLOGY_SOURCE]: {
+        type: 'raster',
+        tiles: ['./data/geology/{z}/{x}/{y}.png'],
+        tileSize: 256,
+        minzoom: 0,
+        maxzoom: 6,
+        attribution: 'Geology © Macrostrat, CC BY 4.0; original map sources available from Macrostrat'
+      },
+      terrain: {
+        type: 'raster-dem',
+        tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+        encoding: 'terrarium',
+        tileSize: 256,
+        maxzoom: DEVICE.terrainMaxZoom
+      }
+    },
+    layers: (() => {
+      const layers = [
+      { id: 'satellite', type: 'raster', source: 'satellite', paint: {
+        'raster-fade-duration': 150,
+        'raster-saturation': 0.38,
+        'raster-contrast': 0.18,
+        'raster-brightness-min': 0.03,
+        'raster-brightness-max': 1
+      } },
+
+      { id: 'terrain-shade', type: 'hillshade', source: 'terrain', layout: { visibility:'none' }, paint: { 'hillshade-exaggeration': 0.22, 'hillshade-shadow-color': '#172219', 'hillshade-highlight-color': '#f4e9cd' } },
+      { id: 'surface-management-fill', type: 'fill', source: SURFACE_MANAGEMENT_SOURCE, 'source-layer': 'surface_management', maxzoom: SURFACE_MANAGEMENT_MAX_ZOOM + .01, filter: visibleSurfaceManagementFilter(), layout: { visibility:'none' }, paint: { 'fill-color': surfaceManagementColorExpression(), 'fill-opacity': ['case', ['==', surfaceManagementCategoryExpression(), 'Military'], .43, .28] } },
+      { id: 'surface-management-military-hatch', type: 'fill', source: SURFACE_MANAGEMENT_SOURCE, 'source-layer': 'surface_management', maxzoom: SURFACE_MANAGEMENT_MAX_ZOOM + .01, filter: ['==', surfaceManagementCategoryExpression(), 'Military'], layout: { visibility:'none' }, paint: { 'fill-pattern': 'surface-management-military-slashes' } },
+      { id: 'surface-management-outline', type: 'line', source: SURFACE_MANAGEMENT_SOURCE, 'source-layer': 'surface_management', maxzoom: SURFACE_MANAGEMENT_MAX_ZOOM + .01, filter: visibleSurfaceManagementFilter(), layout: { visibility:'none' }, paint: { 'line-color':'rgba(25,25,25,.55)', 'line-width':.45 } },
+      { id: 'property-parcels-fill', type: 'fill', source: PROPERTY_PARCELS_SOURCE, 'source-layer': 'parcels', minzoom: PROPERTY_PARCELS_MIN_ZOOM, layout: { visibility:'none' }, paint: { 'fill-color':'rgba(255,145,0,.015)' } },
+      { id: 'property-parcels-outline', type: 'line', source: PROPERTY_PARCELS_SOURCE, 'source-layer': 'parcels', minzoom: PROPERTY_PARCELS_MIN_ZOOM, layout: { visibility:'none' }, paint: { 'line-color':'rgba(255,150,20,.98)', 'line-width':['interpolate',['linear'],['zoom'],12,1.05,15,1.5,18,2] } },
+      { id: 'not-closed-claims-fill', type: 'fill', source: NOT_CLOSED_CLAIMS_SOURCE, 'source-layer': 'claims', minzoom: NOT_CLOSED_CLAIMS_MIN_ZOOM, layout: { visibility:'none' }, paint: { 'fill-color':'rgba(128,70,190,.22)' } },
+      { id: 'not-closed-claims-outline', type: 'line', source: NOT_CLOSED_CLAIMS_SOURCE, 'source-layer': 'claims', minzoom: NOT_CLOSED_CLAIMS_MIN_ZOOM, layout: { visibility:'none' }, paint: { 'line-color':'rgba(94,40,155,.95)', 'line-width':['interpolate',['linear'],['zoom'],7.5,.7,12,1.1,16,1.5] } },
+      { id: GEOLOGY_LAYER_ID, type: 'raster', source: GEOLOGY_SOURCE, layout: { visibility: 'none' }, paint: { 'raster-opacity': .82, 'raster-fade-duration': 0, 'raster-resampling': 'nearest' } },
+
+      { id: HISTORIC_MINES_ARCHIVE_LAYER_ID, type: 'circle', source: HISTORIC_MINES_ARCHIVE_SOURCE, 'source-layer': HISTORIC_MINES_ARCHIVE_SOURCE_LAYER, minzoom: 4, layout: { visibility: 'none' }, paint: { 'circle-color': ['case', ['boolean', ['feature-state', 'visited'], false], '#57c987', '#f1b64b'], 'circle-radius': ['interpolate', ['linear'], ['zoom'], 6.5, 4, 10, 6, 14, 8], 'circle-stroke-color': ['case', ['boolean', ['feature-state', 'visited'], false], '#104d2a', '#4a2b08'], 'circle-stroke-width': 1.25 } },
+      { id: 'plss-townships-fill', type: 'fill', source: PLSS_TOWNSHIPS_SOURCE, 'source-layer': 'plss_townships', minzoom: PLSS_TOWNSHIPS_MIN_ZOOM, layout: { visibility:'none' }, paint: { 'fill-color':'rgba(255,215,0,.01)' } },
+      { id: 'plss-townships-outline', type: 'line', source: PLSS_TOWNSHIPS_SOURCE, 'source-layer': 'plss_townships', minzoom: PLSS_TOWNSHIPS_MIN_ZOOM, layout: { visibility:'none' }, paint: { 'line-color':'rgba(255,215,0,.98)', 'line-width':['interpolate',['linear'],['zoom'],9.9,.8,13,1.35,16,1.7] } },
+      { id: 'plss-townships-labels', type: 'symbol', source: PLSS_TOWNSHIPS_SOURCE, 'source-layer': 'plss_townships', minzoom: 11.1, layout: { visibility:'none', 'text-field':['coalesce',['get','TWNSHPLAB'],['get','PLSSID']], 'text-font':['Noto Sans Bold'], 'text-size':['interpolate',['linear'],['zoom'],11.1,10,15,13], 'text-max-width':10, 'text-allow-overlap':false }, paint: { 'text-color':'rgba(255,235,120,1)', 'text-halo-color':'rgba(0,0,0,.9)', 'text-halo-width':1.2 } },
+      { id: 'plss-sections-fill', type: 'fill', source: PLSS_SECTIONS_SOURCE, 'source-layer': 'plss_sections', minzoom: PLSS_SECTIONS_MIN_ZOOM, layout: { visibility:'none' }, paint: { 'fill-color':'rgba(155,240,255,.006)' } },
+      { id: 'plss-sections-outline', type: 'line', source: PLSS_SECTIONS_SOURCE, 'source-layer': 'plss_sections', minzoom: PLSS_SECTIONS_MIN_ZOOM, layout: { visibility:'none' }, paint: { 'line-color':'rgba(155,240,255,.92)', 'line-width':['interpolate',['linear'],['zoom'],11.8,.65,15,1,18,1.35] } },
+      { id: 'plss-sections-labels', type: 'symbol', source: PLSS_SECTIONS_SOURCE, 'source-layer': 'plss_sections', minzoom: 12.9, layout: { visibility:'none', 'text-field':['coalesce',['get','FRSTDIVLAB'],['get','FRSTDIVNO']], 'text-font':['Noto Sans Bold'], 'text-size':['interpolate',['linear'],['zoom'],12.9,9,16,11.5], 'text-allow-overlap':false }, paint: { 'text-color':'rgba(215,250,255,1)', 'text-halo-color':'rgba(0,0,0,.9)', 'text-halo-width':1.1 } },
+      ...westernRoadStyles(),
+      { id: 'place-labels', type: 'symbol', source: 'places',
+        'source-layer': 'place', minzoom: 3,
+        filter: ['match', ['get','class'], ['city','town','village'], true, false],
+        layout: {
+          visibility: 'visible',
+          'text-field': ['coalesce', ['get','name_en'], ['get','name']],
+          'text-font': ['Noto Sans Bold'],
+          'text-size': ['interpolate',['linear'],['zoom'],3,11,8,15,13,18],
+          'text-allow-overlap': false,
+          'symbol-sort-key': ['match',['get','class'],'city',0,'town',1,2]
+        },
+        paint: {
+          'text-color': '#ffffff',
+          'text-halo-color': '#000000',
+          'text-halo-width': 2
+        }
+      },
+
+      { id: 'state-boundary-line', type: 'line', source: 'prospector-template', 'source-layer': 'boundary', minzoom: 4, layout: { visibility:'visible', 'line-join':'round', 'line-cap':'round' }, paint: { 'line-color':'rgba(8,10,9,.96)', 'line-width':['interpolate',['linear'],['zoom'],4,1.7,8,2.35,12,3.25,16,4.1], 'line-blur':.15 } },
+      ];
+      PROSPECTOR_STYLE_TEMPLATES = layers.filter((layer) => PROSPECTOR_STYLE_TEMPLATE_IDS.has(layer.id));
+      return layers.filter((layer) => !PROSPECTOR_STYLE_TEMPLATE_IDS.has(layer.id));
+    })()
+  }
+});
+
+
+const casingLayers = DEVICE.accessCasing ? ACCESS_CASING_LAYER_IDS : [];
+const accessRoadLayers = [...casingLayers, ...ACCESS_LINE_LAYER_IDS];
+const coreRoadLayers = [...WESTERN_ROAD_PRIMARY, ...WESTERN_ROAD_ACCESS];
+const detailedRoadLayers = [...WESTERN_ROAD_PRIMARY, ...WESTERN_ROAD_ACCESS];
+const standardRoadLayers = [...WESTERN_ROAD_PRIMARY];
+const ALL_ROAD_RENDER_LAYER_IDS = [...WESTERN_ROAD_IDS];
+let offRoadTrailsOnly = false;
+let roadRenderingEnabled = document.querySelector('#roadRendering').checked;
+let startupRoadsReady = false;
+
+const is2DTestView = new URLSearchParams(window.location.search).get('view') === '2d';
+let terrainEnabled = !is2DTestView;
+let twoDHillshadeEnabled = document.querySelector('#twoDHillshade').checked;
+let surfaceManagementEnabled = document.querySelector('#surfaceManagement').checked;
+let propertyParcelsEnabled = document.querySelector('#propertyParcels').checked;
+let miningWithdrawalsEnabled = document.querySelector('#miningWithdrawals').checked;
+let notClosedClaimsEnabled = document.querySelector('#notClosedClaims').checked;
+let geologyLayerEnabled = document.querySelector('#geologyLayer').checked;
+let historicMinesEnabled = document.querySelector('#historicMines').checked;
+
+
+
+
+function getVisitedHistoricMineIds() {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(VISITED_HISTORIC_MINES_STORAGE_KEY) || '[]');
+    return new Set(Array.isArray(saved) ? saved.map(String) : []);
+  } catch (error) {
+    console.warn('Visited historic mines could not be read:', error.message);
+    return new Set();
+  }
+}
+
+const visitedHistoricMineIds = getVisitedHistoricMineIds();
+
+function saveVisitedHistoricMineIds() {
+  try {
+    window.localStorage.setItem(VISITED_HISTORIC_MINES_STORAGE_KEY, JSON.stringify([...visitedHistoricMineIds]));
+  } catch (error) {
+    console.warn('Visited historic mines could not be saved:', error.message);
+  }
+}
+
+function setHistoricMineVisited(depId, visited) {
+  const id = String(depId);
+  if (visited) visitedHistoricMineIds.add(id);
+  else visitedHistoricMineIds.delete(id);
+  saveVisitedHistoricMineIds();
+  try {
+    for (const [stateCode] of prospectorStateRegistry) {
+      const source = `prospector-${stateCode}-historic-mines`;
+      const layer = map.getLayer(`prospector-${stateCode}-${HISTORIC_MINES_ARCHIVE_LAYER_ID}`);
+      if (map.getSource(source) && layer) map.setFeatureState({ source, sourceLayer: layer['source-layer'] || HISTORIC_MINES_ARCHIVE_SOURCE_LAYER, id }, { visited });
+    }
+  } catch (error) {}
+
+
+  return visited;
+}
+document.querySelector('#plssTownships').checked = false;
+document.querySelector('#plssSections').checked = false;
+let plssTownshipsEnabled = false;
+let plssSectionsEnabled = false;
+document.querySelector('#terrainButton').classList.toggle('active', terrainEnabled);
+
+function setLayerVisibility(layerIds, visible) {
+  layerIds.forEach((id) => {
+    const exists = Boolean(map.getLayer(id));
+
+    if (TRACE_LAYERS) {
+      console.log('[LAYER TRACE] setLayerVisibility', {
+        id,
+        exists,
+        requested: visible ? 'visible' : 'none',
+        current: exists
+          ? map.getLayoutProperty(id, 'visibility')
+          : 'LAYER MISSING'
+      });
+    }
+
+    if (!exists && TRACE_LAYERS) {
+      console.error(
+        '[LAYER TRACE] LAYER MISSING',
+        id
+      );
+    }
+
+    if (exists) {
+      map.setLayoutProperty(
+        id,
+        'visibility',
+        visible ? 'visible' : 'none'
+      );
+
+      if (TRACE_LAYERS) {
+        console.log(
+          '[LAYER TRACE] visibility after',
+          id,
+          map.getLayoutProperty(id, 'visibility')
+        );
+      }
+    }
+  });
+}
+
+function setGeologyLayerVisible(visible) {
+  geologyLayerEnabled = visible;
+  if (map.isStyleLoaded()) map.setLayoutProperty(GEOLOGY_LAYER_ID, 'visibility', visible ? 'visible' : 'none');
+}
+
+function applyHistoricMineVisitedStates() {
+  for (const [stateCode, state] of prospectorStateRegistry) {
+    const source = `prospector-${stateCode}-historic-mines`;
+    const layer = map.getLayer(`prospector-${stateCode}-${HISTORIC_MINES_ARCHIVE_LAYER_ID}`);
+    if (!map.getSource(source) || !layer) continue;
+    const sourceLayer = layer['source-layer'] || state.datasets?.historicMines?.sourceLayer || HISTORIC_MINES_ARCHIVE_SOURCE_LAYER;
+    for (const id of visitedHistoricMineIds) {
+      try { map.setFeatureState({ source, sourceLayer, id }, { visited: true }); } catch (error) {}
+    }
+  }
+}
+
+function syncHistoricMinesPresentation() {
+  applyHistoricMineVisitedStates();
+}
+
+function setHistoricMinesVisible(visible) {
+  historicMinesEnabled = Boolean(visible);
+  scheduleProspectorStateSync();
+}
+
+function makeHistoricMinePopup(properties = {}) {
+  const content = document.createElement('article');
+  content.className = 'historic-mine-popup';
+  const title = document.createElement('h3');
+  title.textContent = properties.site_name || properties.name || 'Historic mine or occurrence';
+  content.append(title);
+  [['Commodity', properties.commod1 || properties.commodity], ['Status', properties.dev_stat || properties.status], ['Record ID', properties.dep_id || properties.record_id]].forEach(([label, value]) => {
+    if (!value) return;
+    const line = document.createElement('p');
+    line.textContent = `${label}: ${value}`;
+    content.append(line);
+  });
+  if (properties.source_url) {
+    const source = document.createElement('a');
+    source.className = 'historic-mine-popup__source';
+    source.href = properties.source_url;
+    source.target = '_blank';
+    source.rel = 'noopener noreferrer';
+    source.textContent = properties.source_label || 'Open source record ↗';
+    content.append(source);
+  }
+  if (properties.dep_id) {
+    const visitedButton = document.createElement('button');
+    const updateVisitedButton = (visited) => {
+      visitedButton.textContent = visited ? 'Visited ✓' : 'Mark as visited';
+      visitedButton.classList.toggle('is-visited', visited);
+      visitedButton.setAttribute('aria-pressed', String(visited));
+    };
+    visitedButton.type = 'button';
+    visitedButton.className = 'historic-mine-popup__visited';
+    updateVisitedButton(visitedHistoricMineIds.has(String(properties.dep_id)));
+    visitedButton.addEventListener('click', () => updateVisitedButton(setHistoricMineVisited(properties.dep_id, !visitedHistoricMineIds.has(String(properties.dep_id)))));
+    content.append(visitedButton);
+  }
+  return content;
+}
+
+function setMiningWithdrawalsVisible(visible) {
+  miningWithdrawalsEnabled = visible;
+  scheduleProspectorStateSync();
+}
+
+async function queryResearchLocation(query, lngLat, outFields) {
+  const params = new URLSearchParams({
+    where: '1=1', geometry: `${lngLat.lng},${lngLat.lat}`, geometryType: 'esriGeometryPoint', inSR: '4326',
+    spatialRel: 'esriSpatialRelIntersects', outFields, returnGeometry: 'false', resultRecordCount: '25', f: 'json'
+  });
+  const response = await fetch(`${query}?${params}`);
+  if (!response.ok) throw new Error(`Location research: ${response.status}`);
+  const data = await response.json();
+  return data.features || [];
+}
+
+const researchLocationCard = document.querySelector('#researchLocation');
+const researchCoordinates = document.querySelector('#researchCoordinates');
+const researchResults = document.querySelector('#researchResults');
+const researchSaveLocationButton = document.querySelector('#researchSaveLocation');
+const saveLocationCard = document.querySelector('#saveLocation');
+const saveLocationCoordinates = document.querySelector('#saveLocationCoordinates');
+const saveLocationForm = document.querySelector('#saveLocationForm');
+const saveLocationName = document.querySelector('#saveLocationName');
+const saveLocationDescription = document.querySelector('#saveLocationDescription');
+const savedLocationsList = document.querySelector('#savedLocationsList');
+const savedLocationsEmpty = document.querySelector('#savedLocationsEmpty');
+const savedLocationsGroup = document.querySelector('#savedLocationsGroup');
+const savedLocationsStatus = document.querySelector('#savedLocationsStatus');
+const SAVED_LOCATIONS_STORAGE_KEY = 'az-prospecting-map.saved-locations.v1';
+let researchLocationRequest = 0;
+let researchPages = [];
+let researchPageIndex = 0;
+
+const researchPageTitle = document.querySelector('#researchPageTitle');
+const researchPrevPage = document.querySelector('#researchPrevPage');
+const researchNextPage = document.querySelector('#researchNextPage');
+const researchPageIndicator = document.querySelector('#researchPageIndicator');
+
+function renderResearchPage() {
+  if (!researchPages.length) return;
+
+  const page = researchPages[researchPageIndex];
+
+  researchPageTitle.textContent = page.title;
+  researchResults.replaceChildren(...page.nodes);
+
+  researchPageIndicator.textContent =
+    `${researchPageIndex + 1} / ${researchPages.length}`;
+
+  researchPrevPage.disabled = researchPageIndex === 0;
+  researchNextPage.disabled =
+    researchPageIndex === researchPages.length - 1;
+}
+
+researchPrevPage.addEventListener('click', () => {
+  if (researchPageIndex <= 0) return;
+  researchPageIndex -= 1;
+  renderResearchPage();
+});
+
+researchNextPage.addEventListener('click', () => {
+  if (researchPageIndex >= researchPages.length - 1) return;
+  researchPageIndex += 1;
+  renderResearchPage();
+});
+let activeResearchLocation = null;
+let pendingSavedLocation = null;
+let dropPinMode = false;
+const savedLocationMarkers = new Map();
+
+function getSavedLocations() {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(SAVED_LOCATIONS_STORAGE_KEY) || '[]');
+    return Array.isArray(saved) ? saved.filter((location) => Number.isFinite(location?.lng) && Number.isFinite(location?.lat)) : [];
+  } catch (error) {
+    console.warn('Saved locations could not be read:', error.message);
+    return [];
+  }
+}
+
+let savedLocations = getSavedLocations();
+
+function persistSavedLocations() {
+  try {
+    window.localStorage.setItem(SAVED_LOCATIONS_STORAGE_KEY, JSON.stringify(savedLocations));
+    return true;
+  } catch (error) {
+    console.warn('Saved locations could not be stored:', error.message);
+    return false;
+  }
+}
+
+function makeSavedLocationPopup(location) {
+  const content = document.createElement('div');
+  const title = document.createElement('strong');
+  title.textContent = location.name;
+  content.append(title);
+  if (location.description) {
+    const description = document.createElement('div');
+    description.textContent = location.description;
+    description.style.marginTop = '5px';
+    content.append(description);
+  }
+  const coordinates = document.createElement('div');
+  coordinates.textContent = `${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}`;
+  coordinates.style.marginTop = '5px';
+  coordinates.style.fontFamily = 'ui-monospace, SFMono-Regular, Menlo, monospace';
+  coordinates.style.fontSize = '11px';
+  content.append(coordinates);
+  return content;
+}
+
+function addSavedLocationMarker(location) {
+  const existing = savedLocationMarkers.get(location.id);
+  if (existing) existing.remove();
+  const element = document.createElement('div');
+  element.className = 'saved-location-marker';
+  const marker = new maplibregl.Marker({ element, anchor: 'bottom' })
+    .setLngLat([location.lng, location.lat])
+    .setPopup(new maplibregl.Popup({ offset: 16 }).setDOMContent(makeSavedLocationPopup(location)))
+    .addTo(map);
+  savedLocationMarkers.set(location.id, marker);
+}
+
+function renderSavedLocations() {
+  savedLocationsList.replaceChildren();
+  savedLocationsEmpty.hidden = savedLocations.length > 0;
+  savedLocations.forEach((location) => {
+    addSavedLocationMarker(location);
+    const row = document.createElement('article');
+    row.className = 'saved-location';
+    const name = document.createElement('p');
+    name.className = 'saved-location__name';
+    name.textContent = location.name;
+    row.append(name);
+    if (location.description) {
+      const description = document.createElement('p');
+      description.className = 'saved-location__description';
+      description.textContent = location.description;
+      row.append(description);
+    }
+    const coordinates = document.createElement('p');
+    coordinates.className = 'saved-location__coordinates';
+    coordinates.textContent = `${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}`;
+    row.append(coordinates);
+    const actions = document.createElement('div');
+    actions.className = 'saved-location__actions';
+    const flyTo = document.createElement('button');
+    flyTo.type = 'button';
+    flyTo.textContent = 'View';
+    flyTo.addEventListener('click', () => {
+      map.easeTo({ center: [location.lng, location.lat], zoom: Math.max(map.getZoom(), 14), duration: 650, essential: false });
+      savedLocationMarkers.get(location.id)?.togglePopup();
+    });
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'saved-location__delete';
+    remove.textContent = 'Delete';
+    remove.addEventListener('click', () => {
+      savedLocations = savedLocations.filter((saved) => saved.id !== location.id);
+      savedLocationMarkers.get(location.id)?.remove();
+      savedLocationMarkers.delete(location.id);
+      persistSavedLocations();
+      renderSavedLocations();
+    });
+    actions.append(flyTo, remove);
+    row.append(actions);
+    savedLocationsList.append(row);
+  });
+}
+
+function openSaveLocationForm(location) {
+  pendingSavedLocation = location;
+  researchLocationCard.hidden = true;
+  saveLocationCoordinates.textContent = `${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}`;
+  saveLocationName.value = location.name || '';
+  saveLocationDescription.value = '';
+  saveLocationCard.hidden = false;
+  saveLocationName.focus();
+}
+
+function researchTextResult(label, value) {
+  const row = document.createElement('p');
+  row.className = 'research-location__result';
+
+  const title = document.createElement('b');
+  title.textContent = `${label}: `;
+
+  row.append(title, document.createTextNode(value || 'not available'));
+  return row;
+}
+
+function researchLinkResult(label, text, href) {
+  const row = document.createElement('p');
+  row.className = 'research-location__result';
+
+  const title = document.createElement('b');
+  title.textContent = `${label}: `;
+
+  const link = document.createElement('a');
+  link.href = href;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  link.textContent = text;
+
+  row.append(title, link);
+  return row;
+}
+
+
+
+function firstResearchValue(attributes, keys) {
+  for (const key of keys) {
+    const value = attributes?.[key];
+    if (value !== undefined && value !== null && String(value).trim() !== '') {
+      return String(value).trim();
+    }
+  }
+  return '';
+}
+
+function formatTownship(attributes = {}) {
+  const label = firstResearchValue(attributes, ['TWNSHPLAB']);
+  if (label) return label;
+
+  const number = firstResearchValue(attributes, ['TWNSHPNO']);
+  const direction = firstResearchValue(attributes, ['TWNSHPDIR']);
+
+  return number ? `T${Number(number)}${direction}` : '';
+}
+
+function formatRange(attributes = {}) {
+  const number = firstResearchValue(attributes, ['RANGENO']);
+  const direction = firstResearchValue(attributes, ['RANGEDIR']);
+
+  return number ? `R${Number(number)}${direction}` : '';
+}
+
+function formatSection(attributes = {}) {
+  return firstResearchValue(
+    attributes,
+    ['FRSTDIVLAB', 'FRSTDIVNO', 'FRSTDIVTXT']
+  );
+}
+
+function formatMeridian(attributes = {}) {
+  return firstResearchValue(
+    attributes,
+    ['PRINMER', 'PRINMERCD', 'PRINMERID', 'MERIDIAN', 'PM']
+  );
+}
+
+function formatAliquot(attributes = {}) {
+  return firstResearchValue(
+    attributes,
+    ['SECDIVLAB', 'SECDIVTXT', 'SECDIVNO', 'SECDIVTYP']
+  );
+}
+
+function appendClaimResults(nodes, claims) {
+  nodes.push(
+    researchTextResult(
+      'Claims at pin',
+      claims.length ? String(claims.length) : 'none found'
+    )
+  );
+
+  claims.forEach((feature, index) => {
+    const a = feature.attributes || {};
+
+    const parts = [
+      a.CSE_NAME || 'Unnamed claim',
+      a.CSE_NR || 'No case number',
+      a.CSE_DISP || 'Status not listed'
+    ];
+
+    if (a.RCRD_ACRS) parts.push(`${a.RCRD_ACRS} acres`);
+
+    nodes.push(
+      researchTextResult(
+        `Claim ${index + 1}`,
+        parts.join(' · ')
+      )
+    );
+  });
+}
+
+function appendWithdrawalResults(nodes, label, features) {
+  nodes.push(
+    researchTextResult(
+      label,
+      features.length ? String(features.length) : 'none found'
+    )
+  );
+
+  features.forEach((feature, index) => {
+    const a = feature.attributes || {};
+
+    nodes.push(
+      researchTextResult(
+        `${label} ${index + 1}`,
+        [
+          a.CSE_NAME || 'Unnamed case',
+          a.CSE_NR || 'No case number',
+          a.CSE_DISP || 'Status not listed'
+        ].join(' · ')
+      )
+    );
+  });
+}
+
+async function openResearchLocation(lngLat) {
+  const request = ++researchLocationRequest;
+
+  activeResearchLocation = {
+    lng: lngLat.lng,
+    lat: lngLat.lat,
+    name: 'Location research'
+  };
+
+  researchLocationCard.hidden = false;
+  researchCoordinates.textContent =
+    `${lngLat.lat.toFixed(5)}, ${lngLat.lng.toFixed(5)}`;
+  researchResults.textContent = 'Researching location…';
+
+  const checks = await Promise.allSettled([
+    queryResearchLocation(
+      NOT_CLOSED_CLAIMS_QUERY,
+      lngLat,
+      'CSE_NAME,CSE_NR,CSE_DISP,RCRD_ACRS'
+    ),
+
+    queryResearchLocation(
+      SURFACE_MANAGEMENT_QUERY,
+      lngLat,
+      'CATEGORY,DESC_,ACRES'
+    ),
+
+    queryResearchLocation(
+      WITHDRAWAL_AUTHORIZED_QUERY,
+      lngLat,
+      'CSE_NAME,CSE_NR,CSE_DISP,SEG_MIN'
+    ),
+
+    queryResearchLocation(
+      WITHDRAWAL_PENDING_QUERY,
+      lngLat,
+      'CSE_NAME,CSE_NR,CSE_DISP,SEG_MIN'
+    ),
+
+    Promise.resolve(null), // Legacy live ArcGIS parcel lookup retired.
+    countyAtPoint(lngLat),
+
+    queryResearchLocation(
+      PLSS_TOWNSHIPS_QUERY,
+      lngLat,
+      '*'
+    ),
+
+    queryResearchLocation(
+      PLSS_SECTIONS_QUERY,
+      lngLat,
+      '*'
+    ),
+
+    queryResearchLocation(
+      PLSS_ALIQUOT_QUERY,
+      lngLat,
+      '*'
+    )
+  ]);
+
+  if (request !== researchLocationRequest) return;
+
+  const claims = checks[0].status === 'fulfilled' ? checks[0].value : [];
+  const surface = checks[1].status === 'fulfilled' ? checks[1].value : [];
+  const authorized = checks[2].status === 'fulfilled' ? checks[2].value : [];
+  const pending = checks[3].status === 'fulfilled' ? checks[3].value : [];
+  const parcel = checks[4].status === 'fulfilled' ? checks[4].value : null;
+  const county = checks[5].status === 'fulfilled' ? checks[5].value : null;
+  const townships = checks[6].status === 'fulfilled' ? checks[6].value : [];
+  const sections = checks[7].status === 'fulfilled' ? checks[7].value : [];
+  const aliquots = checks[8].status === 'fulfilled' ? checks[8].value : [];
+
+  const parcelProps = parcel?.properties || {};
+  const townshipAttrs = townships[0]?.attributes || {};
+  const sectionAttrs = sections[0]?.attributes || {};
+  const aliquotAttrs = aliquots[0]?.attributes || {};
+  const surfaceAttrs = surface[0]?.attributes || {};
+
+  const township = formatTownship(townshipAttrs);
+  const range = formatRange(townshipAttrs);
+  const section = formatSection(sectionAttrs);
+
+  const meridian =
+    formatMeridian(townshipAttrs) ||
+    formatMeridian(sectionAttrs) ||
+    formatMeridian(aliquotAttrs);
+
+  const aliquot = formatAliquot(aliquotAttrs);
+
+  const locationNodes = [];
+
+  locationNodes.push(
+    researchTextResult(
+      'Coordinates',
+      `${lngLat.lat.toFixed(5)}, ${lngLat.lng.toFixed(5)}`
+    )
+  );
+
+  locationNodes.push(
+    researchTextResult(
+      'City / Place',
+      parcelProps.AZ_PlaceName || 'not available'
+    )
+  );
+
+  locationNodes.push(
+    researchTextResult(
+      'County',
+      county || 'not available'
+    )
+  );
+
+  locationNodes.push(
+    researchTextResult(
+      'Principal Meridian',
+      meridian || 'not available'
+    )
+  );
+
+  locationNodes.push(
+    researchTextResult(
+      'Township',
+      township || 'not available'
+    )
+  );
+
+  locationNodes.push(
+    researchTextResult(
+      'Range',
+      range || 'not available'
+    )
+  );
+
+  locationNodes.push(
+    researchTextResult(
+      'Section',
+      section || 'not available'
+    )
+  );
+
+  locationNodes.push(
+    researchTextResult(
+      'Aliquot / Government Lot',
+      aliquot || 'not available for this location'
+    )
+  );
+
+  const mlrsNodes = [];
+
+  appendClaimResults(mlrsNodes, claims);
+
+  const legalDescription = [
+    meridian && `Meridian ${meridian}`,
+    township,
+    range,
+    section && `Section ${section}`,
+    aliquot && `Aliquot ${aliquot}`
+  ].filter(Boolean).join(' · ');
+
+  mlrsNodes.push(
+    researchTextResult(
+      'Search location',
+      legalDescription || 'PLSS information unavailable'
+    )
+  );
+
+  mlrsNodes.push(
+    researchLinkResult(
+      'BLM records',
+      'Open MLRS Mining Claims Geographic Report',
+      MLRS_GEOGRAPHIC_REPORT_URL
+    )
+  );
+
+  const landStatusNodes = [];
+
+  landStatusNodes.push(
+    researchTextResult(
+      'Surface management',
+      surface.length
+        ? `${surfaceAttrs.CATEGORY || 'Not listed'} · ${surfaceAttrs.DESC_ || 'No description'}`
+        : 'none found'
+    )
+  );
+
+  appendWithdrawalResults(
+    landStatusNodes,
+    'Authorized / Interim withdrawals',
+    authorized
+  );
+
+  appendWithdrawalResults(
+    landStatusNodes,
+    'Pending withdrawals',
+    pending
+  );
+
+  const propertyNodes = [];
+
+  if (parcel) {
+    propertyNodes.push(
+      researchTextResult(
+        'Parcel APN',
+        parcelProps.AZ_APN || 'not listed'
+      )
+    );
+
+    propertyNodes.push(
+      researchTextResult(
+        'Parcel address',
+        parcelProps.AZ_Address ||
+          parcelProps.AZ_PlaceName ||
+          'not listed'
+      )
+    );
+
+    if (county && COUNTY_ASSESSORS[county]) {
+      propertyNodes.push(
+        researchLinkResult(
+          'Parcel records',
+          `Open ${county} County Assessor`,
+          COUNTY_ASSESSORS[county]
+        )
+      );
+    }
+  } else {
+    propertyNodes.push(
+      researchTextResult(
+        'Private parcel',
+        'none found at pin'
+      )
+    );
+  }
+
+  researchPages = [
+    {
+      title: 'Location / PLSS',
+      nodes: locationNodes
+    },
+    {
+      title: 'MLRS / BLM',
+      nodes: mlrsNodes
+    },
+    {
+      title: 'Land Status',
+      nodes: landStatusNodes
+    },
+    {
+      title: 'Property',
+      nodes: propertyNodes
+    }
+  ];
+
+  researchPageIndex = 0;
+  renderResearchPage();
+}
+
+
+
+
+
+function syncNotClosedClaimsPresentation() {
+  return notClosedClaimsEnabled && map.getZoom() >= NOT_CLOSED_CLAIMS_MIN_ZOOM;
+}
+
+function setNotClosedClaimsVisible(visible) {
+  notClosedClaimsEnabled = visible;
+
+  scheduleProspectorStateSync();
+}
+
+function plssIsEnabled(kind) {
+  return kind === 'townships' ? plssTownshipsEnabled : plssSectionsEnabled;
+}
+
+function syncPlssPresentation(kind) {
+  const minZoom = kind === 'townships' ? PLSS_TOWNSHIPS_MIN_ZOOM : PLSS_SECTIONS_MIN_ZOOM;
+  return plssIsEnabled(kind) && map.getZoom() >= minZoom;
+}
+
+function setPlssVisible(kind, visible) {
+  if (kind === 'townships') plssTownshipsEnabled = visible;
+  else plssSectionsEnabled = visible;
+  scheduleProspectorStateSync();
+}
+
+function syncAccessPresentation() {
+  if (!map.getStyle()?.layers) return;
+  setLayerVisibility(WESTERN_ROAD_ACCESS, startupRoadsReady && roadRenderingEnabled);
+}
+
+
+
+
+
+
+
+function surfaceManagementCanRender() {
+  return surfaceManagementEnabled && map.getZoom() <= SURFACE_MANAGEMENT_MAX_ZOOM;
+}
+
+function syncSurfaceManagementPresentation() {
+  const visible = surfaceManagementCanRender();
+  setLayerVisibility(SURFACE_MANAGEMENT_LAYER_IDS, visible);
+  document.querySelector('#surfaceLegend').hidden = !visible;
+  return visible;
+}
+
+function setSurfaceManagementVisible(visible) {
+  surfaceManagementEnabled = visible;
+  scheduleProspectorStateSync();
+}
+
+function propertyParcelsCanRender() {
+  return propertyParcelsEnabled && map.getZoom() >= PROPERTY_PARCELS_MIN_ZOOM;
+}
+
+
+
+
+// Parcel tiles are managed by the state registry.
+
+function syncPropertyParcelsPresentation() {
+  const visible = propertyParcelsCanRender();
+  setLayerVisibility(PROPERTY_PARCELS_LAYER_IDS, visible);
+  return visible;
+}
+
+function setPropertyParcelsVisible(visible) {
+  propertyParcelsEnabled = visible;
+  scheduleProspectorStateSync();
+}
+
+function syncRoadView() {
+  if (!map.getStyle()?.layers) return;
+  const enabled = startupRoadsReady && roadRenderingEnabled;
+  setLayerVisibility(WESTERN_ROAD_PRIMARY, enabled && !offRoadTrailsOnly);
+  setLayerVisibility(WESTERN_ROAD_ACCESS, enabled && !offRoadTrailsOnly);
+  setLayerVisibility(WESTERN_ROAD_TRAILS, enabled && offRoadTrailsOnly);
+  // City labels stay visible independently of all road controls.
+  if (map.getLayer('place-labels')) {
+    map.setLayoutProperty('place-labels', 'visibility', 'visible');
+  }
+}
+
+function showLayers(layerIds) {
+  setLayerVisibility(layerIds, true);
+  syncRoadView();
+}
+
+function syncTwoDHillshade() {
+  const showOption = !terrainEnabled;
+  document.querySelector('#twoDHillshadeOption').hidden = !showOption;
+  document.querySelector('#twoDHillshadeHint').hidden = !showOption;
+  map.setLayoutProperty('terrain-shade', 'visibility', showOption && twoDHillshadeEnabled ? 'visible' : 'none');
+}
+
+function showCoreRoadLayers() {
+  if (startupRoadsReady && map.isStyleLoaded() && map.getZoom() >= ROAD_ZOOM.accessLine) showLayers(coreRoadLayers);
+}
+
+function afterSourceSettles(sourceId, callback, fallbackDelay = 8000) {
+  let completed = false;
+  let fallbackTimer = null;
+
+  const finish = () => {
+    if (completed) return;
+    completed = true;
+    map.off('sourcedata', onSourceData);
+    window.clearTimeout(fallbackTimer);
+    callback();
+  };
+
+  const onSourceData = (event) => {
+    if (event.sourceId === sourceId && event.isSourceLoaded) finish();
+  };
+
+  if (map.isSourceLoaded(sourceId)) {
+    finish();
+    return;
+  }
+
+  map.on('sourcedata', onSourceData);
+  fallbackTimer = window.setTimeout(finish, fallbackDelay);
+}
+
+function addSurfaceManagementMilitaryPattern() {
+  const size = 16;
+  const data = new Uint8Array(size * size * 4);
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      // Two-pixel diagonal red slashes, repeated as a transparent tile.
+      if ((x + y) % 8 < 2) {
+        const offset = (y * size + x) * 4;
+        data[offset] = 132;
+        data[offset + 1] = 18;
+        data[offset + 2] = 15;
+        data[offset + 3] = 225;
+      }
+    }
+  }
+  if (!map.hasImage('surface-management-military-slashes')) {
+    map.addImage('surface-management-military-slashes', { width: size, height: size, data });
+  }
+}
+
+map.once('style.load', () => {
+  addSurfaceManagementMilitaryPattern();
+  requestAnimationFrame(() => map.resize());
+  window.setTimeout(() => map.resize(), 250);
+  const enableTerrain = () => {
+    if (!terrainEnabled) return;
+    map.setTerrain({ source: 'terrain', exaggeration: 1.15 });
+    syncTwoDHillshade();
+    map.easeTo({
+      pitch: DEVICE.targetPitch,
+      bearing: DEVICE.targetBearing,
+      duration: DEVICE.initialTerrainTransition,
+      easing: (progress) => progress * progress * (3 - 2 * progress),
+      essential: false
+    });
+  };
+
+  // Give imagery a head start, then load roads and finally terrain. Fallbacks
+  // keep startup progressing if a remote source is slow or unavailable.
+  syncTwoDHillshade();
+  syncRoadView();
+
+  // Apply the current visibility state of all zoom-dependent overlays
+  // immediately on initial load instead of waiting for the first zoom event.
+  syncZoomPresentation();
+
+
+  // Start tile-backed research overlays immediately.
+  // PMTiles/PBF requests can load in parallel with the base imagery.
+  setMiningWithdrawalsVisible(miningWithdrawalsEnabled);
+  setHistoricMinesVisible(historicMinesEnabled);
+
+  let roadsStarted = false;
+  const startRoads = () => {
+    if (roadsStarted) return;
+    roadsStarted = true;
+    map.off('load', startRoads);
+    window.clearTimeout(roadStartTimer);
+    startupRoadsReady = true;
+    syncRoadView();
+    if (!roadRenderingEnabled) {
+      enableTerrain();
+      return;
+    }
+    requestAnimationFrame(() => afterSourceSettles('roads', enableTerrain, 8000));
+  };
+  const roadStartTimer = window.setTimeout(startRoads, 4000);
+  map.once('load', startRoads);
+});
+
+map.addControl(new maplibregl.NavigationControl({ visualizePitch: true, showCompass: true }), 'top-right');
+map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+
+const zoomReadout = document.querySelector('#zoomReadout');
+function syncZoomPresentation() {
+  zoomReadout.textContent = `Z ${map.getZoom().toFixed(1)}`;
+  showCoreRoadLayers();
+  syncAccessPresentation();
+  syncSurfaceManagementPresentation();
+  syncPropertyParcelsPresentation();
+  syncNotClosedClaimsPresentation();
+  syncHistoricMinesPresentation();
+  syncPlssPresentation('townships');
+  syncPlssPresentation('sections');
+}
+
+// All on-demand sources share the same settled-viewport path. This keeps
+// later layer additions from creating separate, competing pan/zoom handlers.
+map.on('zoom', () => {
+  syncZoomPresentation();
+  
+});
+let unifiedProspectorEventsEnabled = false;
+let unifiedMapSettledUpdateScheduled = false;
+
+function scheduleUnifiedMapSettledUpdates() {
+  const currentState = aemSearchState();
+
+  if (!aemSearchNavigating &&
+      aemSearchLastMapState !== undefined &&
+      currentState !== aemSearchLastMapState) {
+    aemSearchRequestId++;
+    mapSearchInput.disabled = false;
+  }
+
+  aemSearchLastMapState = currentState;
+
+  if (unifiedMapSettledUpdateScheduled) return;
+  unifiedMapSettledUpdateScheduled = true;
+  window.requestAnimationFrame(() => {
+    unifiedMapSettledUpdateScheduled = false;
+    syncDynamicVMMapLayers();
+    syncAccessPresentation();
+
+    if (unifiedProspectorEventsEnabled) scheduleProspectorStateSync();
+  });
+}
+
+map.on('moveend', scheduleUnifiedMapSettledUpdates);
+map.on('zoomend', scheduleUnifiedMapSettledUpdates);
+map.on('click', (event) => {
+  if (!dropPinMode) return;
+
+  setDropPinMode(false);
+
+  const location = {
+    lng: event.lngLat.lng,
+    lat: event.lngLat.lat
+  };
+
+  openResearchLocation(location);
+});
+let lastResearchTouchStart = 0;
+map.on('contextmenu', (event) => {
+  event.preventDefault();
+  // iOS can send a context-menu event for the same touch-and-hold gesture.
+  // Let the intentional mobile long-press handler below own that interaction.
+  if (Date.now() - lastResearchTouchStart < 2000) return;
+  openResearchLocation(event.lngLat);
+});
+let researchLongPressTimer = 0;
+map.on('touchstart', (event) => {
+  const location = event.lngLat;
+  lastResearchTouchStart = Date.now();
+  window.clearTimeout(researchLongPressTimer);
+  // A deliberate hold keeps research available without interrupting a slow drag.
+  researchLongPressTimer = window.setTimeout(() => openResearchLocation(location), 450);
+});
+['touchmove', 'touchend', 'touchcancel'].forEach((name) => map.on(name, () => {
+  window.clearTimeout(researchLongPressTimer);
+  researchLongPressTimer = 0;
+}));
+
+
+// AEM_EDGE_LAYOUT_V1: road-only density control.
+const aemDensitySlider = document.getElementById('aemRoadDensity');
+const aemDensityOutput = document.getElementById('aemRoadDensityValue');
+const aemOriginalRoadFilters = new Map();
+
+function aemUpdateRoadDensity() {
+  if (!map.isStyleLoaded()) return;
+  const value = Number(aemDensitySlider.value);
+  const classes = ['motorway', 'motorway_link',
+    'trunk', 'trunk_link'];
+  if (value >= 20) classes.push('primary', 'primary_link');
+  if (value >= 40) classes.push('secondary', 'secondary_link');
+  if (value >= 55) classes.push('tertiary', 'tertiary_link');
+  if (value >= 70) classes.push('residential', 'unclassified',
+    'living_street');
+  if (value >= 85) classes.push('service', 'track',
+    'path', 'footway', 'cycleway');
+
+  for (const layer of map.getStyle().layers || []) {
+    if (layer.source !== 'roads' ||
+        layer['source-layer'] !== 'roads' ||
+        !map.getLayer(layer.id)) continue;
+
+    if (!aemOriginalRoadFilters.has(layer.id)) {
+      aemOriginalRoadFilters.set(
+        layer.id, map.getFilter(layer.id) || true);
+    }
+    const original = aemOriginalRoadFilters.get(layer.id);
+    const selected = ['in', ['get', 'highway'],
+      ['literal', classes]];
+    map.setFilter(layer.id, ['all', original, selected]);
+  }
+}
+
+aemDensitySlider.addEventListener('input', () => {
+  aemDensityOutput.textContent = aemDensitySlider.value + '%';
+  aemUpdateRoadDensity();
+});
+
+map.on('style.load', () => {
+  aemOriginalRoadFilters.clear();
+  map.once('idle', aemUpdateRoadDensity);
+});
+
+const toolbarMenus = [...document.querySelectorAll('.toolbar-menu')];
+toolbarMenus.forEach((menu) => {
+  menu.addEventListener('toggle', () => {
+    if (!menu.open) return;
+
+    toolbarMenus.forEach((otherMenu) => {
+      if (otherMenu === menu) return;
+
+      // Preserve the parent Layers panel and its nested menus.
+      if (menu.contains(otherMenu) ||
+          otherMenu.contains(menu)) return;
+
+      // Never close nested categories while using Layers.
+      if (menu.closest('#aemLayersPanel') ||
+          otherMenu.closest('#aemLayersPanel')) return;
+
+      otherMenu.open = false;
+    });
+  });
+});
+
+const accountEmail = document.querySelector('#accountEmail');
+const accountStatus = document.querySelector('#accountStatus');
+const signOutButton = document.querySelector('#signOutButton');
+
+function showAccountStatus(message = '') {
+  accountStatus.textContent = message;
+  accountStatus.hidden = !message;
+}
+
+async function initializeAccountControls() {
+  try {
+    const response = await fetch('/api/auth/session', {
+      method: 'GET',
+      credentials: 'same-origin',
+      headers: { Accept: 'application/json' }
+    });
+
+    if (!response.ok) {
+      accountEmail.textContent = 'Session expired';
+      signOutButton.disabled = true;
+      showAccountStatus('Please sign in again.');
+      return;
+    }
+
+    const session = await response.json();
+
+    accountEmail.textContent =
+      session?.user?.email ||
+      session?.email ||
+      'Signed in';
+
+    signOutButton.disabled = false;
+    showAccountStatus('');
+  } catch {
+    accountEmail.textContent = 'Account unavailable';
+    signOutButton.disabled = true;
+    showAccountStatus('Refresh the page to reload account controls.');
+  }
+}
+
+signOutButton.addEventListener('click', async () => {
+  signOutButton.disabled = true;
+  showAccountStatus('Signing out…');
+
+  try {
+    const response = await fetch('/api/auth/logout', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { Accept: 'application/json' }
+    });
+
+    if (!response.ok) {
+      throw new Error('Sign out failed');
+    }
+
+    window.location.replace('https://americanexplorationmaps.com/');
+  } catch {
+    signOutButton.disabled = false;
+    showAccountStatus('Sign out failed. Please try again.');
+  }
+});
+
+window.addEventListener('load', initializeAccountControls, { once: true });
+
+const gpsTrackingButton = document.querySelector('#gpsTrackingButton');
+const gpsTrackingStatus = document.querySelector('#gpsTrackingStatus');
+const dropPinButton = document.querySelector('#dropPinButton');
+const dropPinStatus = document.querySelector('#dropPinStatus');
+let gpsWatchId = null;
+let gpsMarker = null;
+
+function setDropPinMode(enabled) {
+  dropPinMode = enabled;
+  dropPinButton.setAttribute('aria-pressed', String(enabled));
+  dropPinButton.classList.toggle('is-placing', enabled);
+  dropPinButton.textContent = enabled ? 'Tap a spot on the map' : 'Drop & save pin';
+  dropPinStatus.textContent = enabled ? 'Tap the exact spot to save' : 'Tap this, then tap the map';
+  map.getCanvas().style.cursor = enabled ? 'crosshair' : '';
+}
+
+dropPinButton.addEventListener('click', () => setDropPinMode(!dropPinMode));
+
+function stopGpsTracking(status = 'GPS off') {
+  if (gpsWatchId !== null) navigator.geolocation?.clearWatch(gpsWatchId);
+  gpsWatchId = null;
+  gpsTrackingButton.textContent = 'Start GPS tracking';
+  gpsTrackingButton.classList.remove('is-tracking');
+  gpsTrackingButton.setAttribute('aria-pressed', 'false');
+  gpsTrackingStatus.textContent = status;
+}
+
+function updateGpsPosition(position) {
+  const { longitude, latitude, accuracy } = position.coords;
+  if (!gpsMarker) {
+    const element = document.createElement('div');
+    element.className = 'gps-marker';
+    element.setAttribute('aria-label', 'Your current location');
+    gpsMarker = new maplibregl.Marker({ element, rotationAlignment: 'map' }).setLngLat([longitude, latitude]).addTo(map);
+  } else {
+    gpsMarker.setLngLat([longitude, latitude]);
+  }
+  gpsTrackingStatus.textContent = `Tracking ±${Math.round(accuracy)} m`;
+}
+
+gpsTrackingButton.addEventListener('click', () => {
+  if (gpsWatchId !== null) {
+    stopGpsTracking();
+    return;
+  }
+  if (!navigator.geolocation) {
+    gpsTrackingStatus.textContent = 'GPS unavailable';
+    return;
+  }
+  gpsTrackingStatus.textContent = 'Locating…';
+  gpsTrackingButton.textContent = 'Stop GPS tracking';
+  gpsTrackingButton.classList.add('is-tracking');
+  gpsTrackingButton.setAttribute('aria-pressed', 'true');
+  gpsWatchId = navigator.geolocation.watchPosition(
+    updateGpsPosition,
+    (error) => {
+      const status = error.code === error.PERMISSION_DENIED ? 'GPS permission denied' : 'GPS unavailable';
+      stopGpsTracking(status);
+    },
+    { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
+  );
+});
+
+const mapSearchForm = document.querySelector('#mapSearchForm');
+const mapSearchInput = document.querySelector('#mapSearch');
+const mapSearchStatus = document.querySelector('#mapSearchStatus');
+let searchMarker = null;
+
+function setSearchStatus(message, state = '') {
+  mapSearchStatus.textContent = message;
+  mapSearchStatus.className = `map-search__status${state ? ` ${state}` : ''}`;
+}
+
+function parseCoordinates(text) {
+  const match = text.match(/^\s*(-?\d{1,3}(?:\.\d+)?)\s*[, ]\s*(-?\d{1,3}(?:\.\d+)?)\s*$/);
+  if (!match) return null;
+  const first = Number(match[1]);
+  const second = Number(match[2]);
+  const latitude = Math.abs(first) > 90 && Math.abs(second) <= 90 ? second : first;
+  const longitude = Math.abs(first) > 90 && Math.abs(second) <= 90 ? first : second;
+  return Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180 ? { latitude, longitude } : null;
+}
+
+function parsePlss(text) {
+  const compact = text.toUpperCase().replaceAll(',', ' ').replace(/\s+/g, ' ').trim();
+  const match = compact.match(/(?:^|\s)T(?:OWNSHIP)?\s*(\d{1,3})\s*([NS])\s+R(?:ANGE)?\s*(\d{1,3})\s*([EW])(?:\s+(?:GSRM|G&SRM|GILA(?:\s+AND)?\s+SALT\s+RIVER(?:\s+MERIDIAN)?))?(?:\s+(?:S(?:EC(?:TION)?)?\s*)?(\d{1,2}))?\s*$/);
+  if (!match) return null;
+  return { township: Number(match[1]), townshipDirection: match[2], range: Number(match[3]), rangeDirection: match[4], section: match[5] ? Number(match[5]) : null };
+}
+
+function featureBounds(feature) {
+  const bounds = new maplibregl.LngLatBounds();
+  const visit = (coordinates) => {
+    if (!Array.isArray(coordinates)) return;
+    if (typeof coordinates[0] === 'number' && typeof coordinates[1] === 'number') bounds.extend(coordinates);
+    else coordinates.forEach(visit);
+  };
+  visit(feature?.geometry?.coordinates);
+  return bounds.isEmpty() ? null : bounds;
+}
+
+function makeSearchPopup(label, details = null, lngLat = null) {
+  const content = document.createElement('div');
+  const title = document.createElement('strong');
+  title.textContent = label;
+  content.append(title);
+  if (details?.apn) {
+    const apn = document.createElement('div');
+    apn.textContent = `APN: ${details.apn}`;
+    content.append(apn);
+  }
+  if (details?.address) {
+    const address = document.createElement('div');
+    address.textContent = details.address;
+    content.append(address);
+  }
+  if (details?.assessorUrl) {
+    const link = document.createElement('a');
+    link.href = details.assessorUrl;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = `Open ${details.countyName} County Assessor`;
+    link.style.display = 'block';
+    link.style.marginTop = '6px';
+    content.append(link);
+  }
+  if (lngLat) {
+    const save = document.createElement('button');
+    save.type = 'button';
+    save.textContent = 'Save location';
+    save.style.display = 'block';
+    save.style.width = '100%';
+    save.style.marginTop = '8px';
+    save.addEventListener('click', () => openSaveLocationForm({ lng: lngLat.lng, lat: lngLat.lat, name: label }));
+    content.append(save);
+  }
+  return content;
+}
+
+function showSearchPin(lngLat, label, bounds = null, details = null) {
+  document.getElementById('aem-navigate-result')?.remove();
+
+  const button = document.createElement('button');
+  button.id = 'aem-navigate-result';
+  button.type = 'button';
+  button.textContent = 'Navigate to Result';
+
+  button.addEventListener('click', () => {
+    button.remove();
+
+    const center = Array.isArray(lngLat)
+      ? lngLat
+      : [lngLat.lng, lngLat.lat];
+
+    if (!center.every(Number.isFinite)) {
+      setSearchStatus('Invalid result coordinates.', 'error');
+      return;
+    }
+
+    if (!searchMarker) {
+      const element = document.createElement('div');
+      element.className = 'search-marker';
+      element.innerHTML = '<span>⌖</span>';
+      searchMarker = new maplibregl.Marker({
+        element, anchor: 'bottom'
+      }).setLngLat(center).addTo(map);
+    } else {
+      searchMarker.setLngLat(center);
+    }
+
+    const point = { lng: center[0], lat: center[1] };
+    searchMarker.setPopup(
+      new maplibregl.Popup({
+        offset: 20, closeButton: false
+      }).setDOMContent(makeSearchPopup(label, details, point))
+    );
+    searchMarker.togglePopup();
+
+    aemSearchLastMapState = undefined;
+
+    if (bounds) {
+      aemSearchNavigating = true;
+      map.once('moveend', () => {
+        aemSearchNavigating = false;
+      });
+      map.fitBounds(bounds, {
+        padding: 72,
+        maxZoom: 14,
+        duration: 650,
+        essential: false
+      });
+    } else {
+      aemNavigateToSearchResult(
+        center, Math.max(map.getZoom(), 14)
+      );
+    }
+  });
+
+  mapSearchForm.appendChild(button);
+  mapSearchForm.addEventListener(
+    'submit', () => button.remove(), { once: true }
+  );
+}
+
+function normalizeEsriGeometry(geometry = {}) {
+
+  if (
+    Number.isFinite(geometry.x)
+    &&
+    Number.isFinite(geometry.y)
+  ) {
+
+    return {
+      type: 'Point',
+
+      coordinates: [
+        geometry.x,
+        geometry.y
+      ]
+    };
+  }
+
+  if (
+    Array.isArray(
+      geometry.paths
+    )
+  ) {
+
+    return (
+      geometry.paths.length === 1
+
+        ? {
+            type: 'LineString',
+
+            coordinates:
+              geometry.paths[0]
+          }
+
+        : {
+            type: 'MultiLineString',
+
+            coordinates:
+              geometry.paths
+          }
+    );
+  }
+
+  if (
+    Array.isArray(
+      geometry.rings
+    )
+  ) {
+
+    return {
+      type: 'Polygon',
+
+      coordinates:
+        geometry.rings
+    };
+  }
+
+  if (
+    Array.isArray(
+      geometry.points
+    )
+  ) {
+
+    return {
+      type: 'MultiPoint',
+
+      coordinates:
+        geometry.points
+    };
+  }
+
+  return null;
+}
+
+function normalizeEsriFeature(feature) {
+
+  if (!feature)
+    return null;
+
+  return {
+    type: 'Feature',
+
+    properties:
+      feature.attributes
+      || {},
+
+    geometry:
+      normalizeEsriGeometry(
+        feature.geometry
+        || {}
+      )
+  };
+}
+
+async function queryFirstFeature(query, where, geometry = null) {
+  const params = new URLSearchParams({
+    where,
+    outFields: '*',
+    returnGeometry: 'true',
+    outSR: '4326',
+    resultRecordCount: '1',
+    f: 'json'
+  });
+
+  if (geometry) {
+    const bounds =
+      featureBounds(
+        geometry
+      );
+
+    if (bounds) {
+
+      params.set(
+        'geometry',
+        `${bounds.getWest()},${bounds.getSouth()},${bounds.getEast()},${bounds.getNorth()}`
+      );
+
+      params.set(
+        'geometryType',
+        'esriGeometryEnvelope'
+      );
+
+      params.set(
+        'inSR',
+        '4326'
+      );
+
+      params.set(
+        'spatialRel',
+        'esriSpatialRelIntersects'
+      );
+    }
+  }
+
+  const response =
+    await fetch(
+      `${query}?${params}`
+    );
+
+  if (!response.ok) {
+    throw new Error(
+      'Search service is unavailable.'
+    );
+  }
+
+  const data =
+    await response.json();
+
+  return normalizeEsriFeature(
+    data?.features?.[0]
+    || null
+  );
+}
+
+async function searchPlss(plss) {
+  const number = (value) => String(value);
+  const padded = (value) => String(value).padStart(3, '0');
+  const townshipWhere = `(TWNSHPNO = '${number(plss.township)}' OR TWNSHPNO = '${padded(plss.township)}') AND TWNSHPDIR = '${plss.townshipDirection}' AND (RANGENO = '${number(plss.range)}' OR RANGENO = '${padded(plss.range)}') AND RANGEDIR = '${plss.rangeDirection}'`;
+  const township = await queryFirstFeature(PLSS_TOWNSHIPS_QUERY, townshipWhere);
+  if (!township) throw new Error('That township and range was not found.');
+  if (!plss.section) return { feature: township, label: `T${plss.township}${plss.townshipDirection} R${plss.range}${plss.rangeDirection}` };
+  const sectionNumber = String(plss.section);
+  const section = await queryFirstFeature(PLSS_SECTIONS_QUERY, `(FRSTDIVNO = '${sectionNumber}' OR FRSTDIVNO = '${sectionNumber.padStart(3, '0')}')`, township);
+  if (!section) throw new Error('That section was not found in the selected township.');
+  return { feature: section, label: `T${plss.township}${plss.townshipDirection} R${plss.range}${plss.rangeDirection} Section ${plss.section}` };
+}
+
+async function searchAddress(value) {
+  const params = new URLSearchParams({
+    SingleLine: value,
+    countryCode: 'USA',
+    maxLocations: '5',
+    outFields: 'Match_addr,LongLabel,RegionAbbr',
+    f: 'json'
+  });
+
+  const response = await fetch(
+    `${ARCGIS_GEOCODE_QUERY}?${params}`
+  );
+
+  if (!response.ok) {
+    throw new Error('Address search is unavailable.');
+  }
+
+  const data = await response.json();
+
+  if (data.error) {
+    throw new Error(data.error.message || 'Geocoder error.');
+  }
+
+  // Accept results from any US state.
+  return data.candidates?.[0] || null;
+}
+
+function sqlText(value) {
+  return String(value).replaceAll("'", "''");
+}
+
+async function searchParcel(value) {
+  return queryFirstFeature(PROPERTY_PARCELS_QUERY, `AZ_APN = '${sqlText(value)}'`);
+}
+
+async function countyAtPoint(lngLat) {
+  const counties = await queryResearchLocation(COUNTIES_QUERY, { lng: lngLat.lng, lat: lngLat.lat }, 'BASENAME');
+  return counties[0]?.attributes?.BASENAME || null;
+}
+
+async function searchClaim(value, partial = false) {
+  const cleaned = sqlText(value.replace(/\s+/g, '').toUpperCase());
+  const where = partial
+    ? `(UPPER(CSE_NR) LIKE '%${cleaned}%' OR UPPER(CSE_NAME) LIKE '%${sqlText(value).toUpperCase()}%')`
+    : `(UPPER(CSE_NR) = '${cleaned}' OR UPPER(CSE_NAME) = '${sqlText(value).toUpperCase()}')`;
+  return queryFirstFeature(NOT_CLOSED_CLAIMS_QUERY, where);
+}
+
+function showFeatureSearchResult(feature, label) {
+  const bounds = featureBounds(feature);
+  if (!bounds) throw new Error('That record does not include a map boundary.');
+  showSearchPin(bounds.getCenter(), label, bounds);
+}
+
+async function showParcelSearchResult(feature, label) {
+  const bounds = featureBounds(feature);
+  if (!bounds) throw new Error('That parcel record does not include a map boundary.');
+  const center = bounds.getCenter();
+  let countyName = null;
+  try { countyName = await countyAtPoint(center); } catch (error) { console.warn('County lookup unavailable:', error.message); }
+  const properties = feature.properties || {};
+  showSearchPin(center, label, bounds, {
+    apn: properties.AZ_APN,
+    address: properties.AZ_Address || properties.AZ_PlaceName,
+    countyName,
+    assessorUrl: countyName ? COUNTY_ASSESSORS[countyName] : null
+  });
+}
+
+async function showPointSearchResult(lngLat, label, bounds = null, isCurrent = () => true) {
+  const point = { lng: lngLat[0], lat: lngLat[1] };
+
+  // Existing Arizona parcel enrichment applies only in Arizona.
+  // Other states must not depend on Arizona's parcel service.
+  const inArizona =
+    point.lng >= -114.95 && point.lng <= -108.85 &&
+    point.lat >= 31.2 && point.lat <= 37.1;
+
+  const [parcelResult, countyResult] = await Promise.allSettled([
+    aemParcelAtPoint(point),
+    inArizona ? countyAtPoint(point) : Promise.resolve(null)
+  ]);
+  if (!isCurrent()) return;
+  const parcel = parcelResult.status === 'fulfilled' ? parcelResult.value : null;
+  const countyName = countyResult.status === 'fulfilled' ? countyResult.value : null;
+  const properties = parcel?.properties || {};
+  showSearchPin(lngLat, label, bounds, parcel ? {
+    apn: properties.AZ_APN,
+    address: properties.AZ_Address || properties.AZ_PlaceName,
+    countyName,
+    assessorUrl: countyName ? COUNTY_ASSESSORS[countyName] : null
+  } : null);
+}
+
+/* AEM MULTISTATE SEARCH ROUTING V1 */
+const AEM_SEARCH_API =
+  'https://tiles.americanexplorationmaps.com/api/search';
+
+function aemSearchState() {
+  const center = map.getCenter();
+
+  for (const [code, state] of prospectorStateRegistry) {
+    const b = state?.bounds;
+    if (
+      code !== 'az' &&
+      Array.isArray(b) && b.length === 4 &&
+      center.lng >= b[0] && center.lng <= b[2] &&
+      center.lat >= b[1] && center.lat <= b[3]
+    ) {
+      return code;
+    }
+  }
+
+  // Preserve the legacy Arizona search behavior.
+  if (
+    center.lng >= -114.95 && center.lng <= -108.85 &&
+    center.lat >= 31.2 && center.lat <= 37.1
+  ) return 'az';
+
+  return null;
+}
+
+function aemParseStateSearch(raw) {
+  const names = {
+    AZ: 'az', ARIZONA: 'az',
+    CA: 'ca', CALIFORNIA: 'ca',
+    CO: 'co', COLORADO: 'co',
+    ID: 'id', IDAHO: 'id',
+    MT: 'mt', MONTANA: 'mt',
+    NV: 'nv', NEVADA: 'nv',
+    NM: 'nm', 'NEW MEXICO': 'nm',
+    OR: 'or', OREGON: 'or',
+    UT: 'ut', UTAH: 'ut',
+    WA: 'wa', WASHINGTON: 'wa',
+    WY: 'wy', WYOMING: 'wy'
+  };
+
+  const match = raw.match(
+    /^(NEW MEXICO|ARIZONA|CALIFORNIA|COLORADO|IDAHO|MONTANA|NEVADA|OREGON|UTAH|WASHINGTON|WYOMING|AZ|CA|CO|ID|MT|NV|NM|OR|UT|WA|WY)\s*[:,-]?\s+(.+)$/i
+  );
+
+  if (!match) {
+    return { state: aemSearchState(), value: raw };
+  }
+
+  return {
+    state: names[match[1].toUpperCase()],
+    value: match[2].trim()
+  };
+}
+
+async function aemSearchApi(state, type, params) {
+  const url = new URL(
+    `${AEM_SEARCH_API}/${state}/${type}`
+  );
+
+  for (const [key, value] of Object.entries(params)) {
+    if (value != null) {
+      url.searchParams.set(key, String(value));
+    }
+  }
+
+  const response = await fetch(url);
+
+  if (response.status === 404) {
+    throw new Error('State search service unavailable (' +
+      response.status + ').');
+  }
+
+  if (!response.ok) {
+    throw new Error('State search service unavailable (' +
+      response.status + ').');
+  }
+
+  const data = await response.json();
+  if (Array.isArray(data.features) && data.features.length === 0) {
+    throw new Error('No matching record found in ' +
+      state.toUpperCase() + '.');
+  }
+  const feature = data.features?.[0];
+
+  if (!feature?.geometry) {
+    throw new Error('Search returned no usable map geometry.');
+  }
+
+  return feature;
+}
+
+async function aemSearchPlss(state, plss) {
+  if (!state) {
+    throw new Error('Select a state before searching PLSS.');
+  }
+
+  const feature = await aemSearchApi(state, 'plss', {
+    township: plss.township,
+    township_dir: plss.townshipDirection,
+    range_num: plss.range,
+    range_dir: plss.rangeDirection,
+    section: plss.section
+  });
+
+  return {
+    feature,
+    label: `${state.toUpperCase()} T${plss.township}${plss.townshipDirection}` +
+      ` R${plss.range}${plss.rangeDirection}` +
+      (plss.section ? ` Section ${plss.section}` : '')
+  };
+}
+
+async function aemSearchClaim(state, value) {
+  if (!state) {
+    throw new Error('Select a state before searching claims.');
+  }
+
+  return aemSearchApi(state, 'claims', { value });
+}
+
+let aemSearchRequestId = 0;
+let aemSearchLastMapState;
+let aemSearchNavigating = false;
+
+function aemNavigateToSearchResult(lngLat, zoom = 13) {
+  if (!Array.isArray(lngLat) || lngLat.length !== 2 ||
+      !lngLat.every(Number.isFinite)) {
+    throw new Error('Invalid navigation coordinates.');
+  }
+
+  aemSearchNavigating = true;
+
+  map.once('moveend', () => {
+    aemSearchNavigating = false;
+  });
+
+  try {
+    map.flyTo({ center: lngLat, zoom });
+  } catch (error) {
+    aemSearchNavigating = false;
+    throw error;
+  }
+}
+
+
+mapSearchForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const requestId = ++aemSearchRequestId;
+  aemSearchLastMapState = aemSearchState();
+  const isCurrent = () => requestId === aemSearchRequestId;
+  const raw = mapSearchInput.value.trim();
+  if (!raw) return setSearchStatus('Enter an address, coordinates, or PLSS reference.', 'error');
+  mapSearchInput.disabled = true;
+  setSearchStatus('Searching…');
+  try {
+    const coordinates = parseCoordinates(raw);
+    if (coordinates) {
+      await showPointSearchResult([coordinates.longitude, coordinates.latitude], `${coordinates.latitude.toFixed(5)}, ${coordinates.longitude.toFixed(5)}`, null, isCurrent);
+      if (!isCurrent()) return;
+      setSearchStatus('Result ready. Choose Navigate to Result.', 'success');
+      return;
+    }
+    const searchContext = aemParseStateSearch(raw);
+    const state = searchContext.state;
+    const searchValue = searchContext.value;
+    const plss = parsePlss(searchValue);
+    if (plss) {
+      const result = await aemSearchPlss(state, plss);
+      if (!isCurrent()) return;
+      const bounds = featureBounds(result.feature);
+      const center = bounds.getCenter();
+      await showPointSearchResult([center.lng, center.lat], result.label, bounds, isCurrent);
+      if (!isCurrent()) return;
+      setSearchStatus('Result ready. Choose Navigate to Result.', 'success');
+      return;
+    }
+    const apnPrefix = searchValue.match(/^(?:APN|PARCEL)\s*[:#-]?\s*(.+)$/i);
+    if (apnPrefix) {
+      const value = apnPrefix[1].trim();
+      if (state && state !== 'az') {
+        const feature = await aemSearchApi(state, 'parcels', { value });
+        if (!isCurrent()) return;
+        const bounds = featureBounds(feature);
+        if (!bounds) throw new Error('Parcel geometry unavailable.');
+        const details = feature.properties || {};
+        const parcelId = details.APN || details.parcel_id || value;
+        showSearchPin(
+          bounds.getCenter(),
+          `${state.toUpperCase()} Parcel ${parcelId}`,
+          bounds,
+          {
+            apn: parcelId,
+            address: details.situsAdd || details.SiteAddress || '',
+            countyName: det {
+        const feature = await searchParcel(value);
+        if (!isCurrent()) return;
+        if (!feature) throw new Error('That parcel APN was not found.');
+        await showParcelSearchResult(feature, `Parcel ${feature.properties?.AZ_APN || value}`);
+      } else {
+       throw new Error('Select a supported state for parcel search.');
+      }
+      if (!isCurrent()) return;
+      setSearchStatus('Result ready. Choose Navigate to Result.', 'success');
+      return;
+    }
+    const claimPrefix = searchValue.match(/^(?:CLAIM|BLM|CASE)\s*[:#-]?\s*(.+)$/i);
+    const looksLikeClaimNumber = /^(?:AMC|AZA|AZAR|NMC|NVN|UMC|UTU)\s*\d+/i.test(searchValue);
+    if (claimPrefix || looksLikeClaimNumber) {
+      const value = claimPrefix?.[1] || searchValue;
+      const feature = await aemSearchClaim(state, value);
+      if (!isCurrent()) return;
+      if (!feature) throw new Error('That BLM not-closed claim or case was not found.');
+      showFeatureSearchResult(feature, `Claim ${feature.properties?.CSE_NAME || value}`);
+      if (!isCurrent()) return;
+      setSearchStatus('Result ready. Choose Navigate to Result.', 'success');
+      return;
+    }
+    const address = await searchAddress(raw);
+    if (!isCurrent()) return;
+    if (!address?.location) throw new Error('No matching US address was found.');
+    await showPointSearchResult([address.location.x, address.location.y], address.attributes?.LongLabel || address.address || raw, null, isCurrent);
+    if (!isCurrent()) return;
+    setSearchStatus('Result ready. Choose Navigate to Result.', 'success');
+  } catch (error) {
+    if (!isCurrent()) return;
+    setSearchStatus(error.message || 'Search is temporarily unavailable.', 'error');
+  } finally {
+    if (isCurrent()) {
+      mapSearchInput.disabled = false;
+    }
+  }
+});
+
+document.querySelector('#researchLocationClose').addEventListener('click', () => {
+  researchLocationCard.hidden = true;
+  researchLocationRequest += 1;
+});
+
+researchSaveLocationButton.addEventListener('click', () => {
+  if (activeResearchLocation) openSaveLocationForm(activeResearchLocation);
+});
+
+document.querySelector('#saveLocationClose').addEventListener('click', () => {
+  saveLocationCard.hidden = true;
+  pendingSavedLocation = null;
+});
+
+saveLocationForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  if (!pendingSavedLocation) return;
+  const name = saveLocationName.value.trim();
+  if (!name) return saveLocationName.focus();
+  const location = {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    name,
+    description: saveLocationDescription.value.trim(),
+    lng: pendingSavedLocation.lng,
+    lat: pendingSavedLocation.lat,
+    createdAt: new Date().toISOString()
+  };
+  savedLocations.unshift(location);
+  if (!persistSavedLocations()) {
+    savedLocations = savedLocations.filter((saved) => saved.id !== location.id);
+    return window.alert('This browser could not save the location. Check that website storage is allowed.');
+  }
+  addSavedLocationMarker(location);
+  renderSavedLocations();
+  savedLocationsGroup.open = true;
+  savedLocationsStatus.textContent = `Saved “${location.name}” on this device.`;
+  savedLocationsStatus.hidden = false;
+  saveLocationCard.hidden = true;
+  pendingSavedLocation = null;
+});
+
+renderSavedLocations();
+
+document.querySelector('#satelliteButton').addEventListener('click', (event) => {
+  const visible = map.getLayoutProperty('satellite', 'visibility') !== 'none';
+  map.setLayoutProperty('satellite', 'visibility', visible ? 'none' : 'visible');
+  event.currentTarget.classList.toggle('active', !visible);
+});
+
+document.querySelector('#terrainButton').addEventListener('click', (event) => {
+  terrainEnabled = !terrainEnabled;
+  if (map.isStyleLoaded()) {
+  map.setTerrain(terrainEnabled ? { source: 'terrain', exaggeration: 1.15 } : null);
+    syncTwoDHillshade();
+    if (terrainEnabled) {
+      map.easeTo({ pitch: DEVICE.targetPitch, bearing: DEVICE.targetBearing, duration: DEVICE.terrainTransition, essential: false });
+    }
+  }
+  event.currentTarget.classList.toggle('active', terrainEnabled);
+  document.querySelector('#twoDButton').classList.toggle('active', !terrainEnabled);
+});
+
+document.querySelector('#twoDButton').addEventListener('click', (event) => {
+  terrainEnabled = false;
+  if (map.isStyleLoaded()) {
+    map.setTerrain(null);
+    syncTwoDHillshade();
+    map.easeTo({ pitch: 0, bearing: 0, duration: DEVICE.terrainTransition, essential: false });
+  }
+  document.querySelector('#terrainButton').classList.remove('active');
+  event.currentTarget.classList.add('active');
+});
+
+document.querySelector('#twoDHillshade').addEventListener('change', (event) => {
+  twoDHillshadeEnabled = event.target.checked;
+  syncTwoDHillshade();
+});
+
+/* PROSPECTORS SHARED STATE LOADER v2 — LAZY PMTILES */
+
+
+const prospectorStateRegistry = new Map();
+let stateDiscoveryPromise = null;
+
+function loadStateDiscovery(refresh = false) {
+  if (!stateDiscoveryPromise || refresh) {
+    const request = fetch(
+      'https://tiles.americanexplorationmaps.com/api/states/discover-v2',
+      { cache: 'no-store' }
+    ).then(async (response) => {
+      if (!response.ok) throw new Error(`State discovery HTTP ${response.status}`);
+      const data = await response.json();
+      if (data.schemaVersion !== 2 || !data.states || typeof data.states !== 'object') {
+        throw new Error('Invalid state discovery response');
+      }
+      return data;
+    });
+    stateDiscoveryPromise = request;
+    request.catch(() => {
+      if (stateDiscoveryPromise === request) stateDiscoveryPromise = null;
+    });
+  }
+  return stateDiscoveryPromise;
+}
+
+/*
+ * A state can be initialized without opening any of its large PMTiles
+ * archives. Individual dataset groups are attached only when needed.
+ */
+const initializedProspectorStates = new Set();
+const readyProspectorGroups = new Set();
+const prospectorStateLayers = new Map();
+const prospectorLayerListeners = new Map();
+const offscreenEvictionTimers = new Map();
+const OFFSCREEN_EVICTION_DELAY = 30000;
+
+function scheduleOffscreenEviction(key, bounds, inView, evict) {
+  const pending = offscreenEvictionTimers.get(key);
+  if (inView) {
+    if (pending !== undefined) window.clearTimeout(pending);
+    offscreenEvictionTimers.delete(key);
+    return;
+  }
+  if (pending !== undefined) return;
+  const timer = window.setTimeout(() => {
+    offscreenEvictionTimers.delete(key);
+    if (!prospectorsStateIntersectsView(bounds)) evict();
+  }, OFFSCREEN_EVICTION_DELAY);
+  offscreenEvictionTimers.set(key, timer);
+}
+
+function evictProspectorOverlays(stateCode) {
+  const groups = prospectorStateLayers.get(stateCode);
+  if (!groups) return;
+  const sources = new Set();
+  for (const group of PROSPECTOR_GROUP_NAMES) {
+    if (group === 'boundary') continue;
+    for (const id of groups[group]) {
+      const layer = map.getLayer(id);
+      if (layer?.source) sources.add(layer.source);
+      for (const [event, listener] of prospectorLayerListeners.get(id) || []) {
+        map.off(event, id, listener);
+      }
+      prospectorLayerListeners.delete(id);
+      if (layer) map.removeLayer(id);
+    }
+    groups[group] = [];
+    readyProspectorGroups.delete(`${stateCode}:${group}`);
+  }
+  for (const source of sources) {
+    if (map.getSource(source)) map.removeSource(source);
+  }
+}
+
+const PROSPECTOR_EXTRA_PLSS = Object.freeze({
+  plssGovernmentLots: { suffix: 'government-lots', point: false },
+  plssSpecialSurveys: { suffix: 'special-surveys', point: false },
+  plssQuarterSections: { suffix: 'quarter-sections', point: false },
+  plssQuarterQuarterSections: { suffix: 'quarter-quarter-sections', point: false },
+  plssSurveyPoints: { suffix: 'survey-points', point: true },
+  plssIntersected: { suffix: 'intersected', point: false },
+  plssSecondDivision: { suffix: 'second-division', point: false }
+});
+
+const PROSPECTOR_GROUP_NAMES = Object.freeze([
+  'boundary',
+  'surfaceManagement',
+  'claims',
+  'withdrawals',
+  'plssTownships',
+  'plssSections',
+  'historicMines',
+  ...Object.keys(PROSPECTOR_EXTRA_PLSS),
+  'parcels'
+]);
+
+function prospectorsStateIntersectsView(stateBounds) {
+  if (!Array.isArray(stateBounds) || stateBounds.length !== 4) {
+    return false;
+  }
+
+  const view = map.getBounds();
+  const [west, south, east, north] = stateBounds;
+
+  return !(
+    view.getEast() < west ||
+    view.getWest() > east ||
+    view.getNorth() < south ||
+    view.getSouth() > north
+  );
+}
+
+const PROSPECTOR_R2_BASE_URL = 'https://data.americanexplorationmaps.com/prospectors/';
+const WESTERN_PROSPECTOR_STATES = new Set(['az', 'ca', 'co', 'id', 'mt', 'nm', 'nv', 'or', 'ut', 'wa', 'wy']);
+
+const CA_HISTORIC_MINES_URL =
+  'https://data.americanexplorationmaps.com/prospectors/ca/historic-mines.pmtiles';
+
+function prospectorsDatasetUrl(state, dataset) {
+  // Archive fallback is VM-only. Discovery owns the exact object path.
+  const raw = dataset?.path || dataset?.file;
+  if (typeof raw !== 'string' || !raw || !state.baseUrl) return null;
+  try {
+    const base = state.baseUrl.endsWith('/') ? state.baseUrl : state.baseUrl + '/';
+    const url = new URL(raw, base);
+    return url.origin === 'https://tiles.americanexplorationmaps.com' &&
+      url.pathname.endsWith('.pmtiles') ? 'pmtiles://' + url.href : null;
+  } catch {
+    return null;
+  }
+}
+
+function prospectorVmDatasets(incoming) {
+  // Retain VM routes, PLSS sublayers, and claims semantics exactly as discovered.
+  const datasets = { ...(incoming.datasets || {}) };
+  // The backend owns normalization, unknown-value auditing and per-feature exclusion.
+  // Never accept an Active-only or unverified legacy claims source under either control.
+  for (const group of ['claims']) {
+    const dataset = datasets[group];
+    if (dataset && (dataset.semantics !== 'notClosed' ||
+        dataset.classificationFilter?.rule !== 'notClosed' ||
+        dataset.classificationFilter?.unknownPolicy !== 'report-separately')) delete datasets[group];
+  }
+  delete datasets.claimsBlmLands;
+  delete datasets.historicMines;
+  return datasets;
+}
+
+async function prepareProspectorDatasets(stateCode, incoming) {
+  const datasets = prospectorVmDatasets(incoming);
+  if (!WESTERN_PROSPECTOR_STATES.has(stateCode)) return datasets;
+  const url = `${PROSPECTOR_R2_BASE_URL}${stateCode}/historic-mines.pmtiles`;
+  try {
+    const archive = new pmtiles.PMTiles(url);
+    const [header, metadata] = await Promise.all([archive.getHeader(), archive.getMetadata()]);
+    const layers = metadata.vector_layers || [];
+    const discoveredLayer =
+    layers.find(item =>
+      item.id === incoming.datasets?.historicMines?.sourceLayer &&
+      !/(?:^|_)polygons?$/i.test(item.id)
+    )?.id ||
+    layers.find(item =>
+      /historic.*min|mine/i.test(item.id) &&
+      !/(?:^|_)polygons?$/i.test(item.id)
+    )?.id ||
+    layers.find(item =>
+      !/(?:^|_)polygons?$/i.test(item.id)
+    )?.id;
+    const pointLayers = layers.filter(item => /(?:^|_)points?$/i.test(item.id || ''));
+    const layer = layers.find(item => item.id === discoveredLayer && !/(?:^|_)polygons?$/i.test(item.id)) ||
+      (pointLayers.length === 1 ? pointLayers[0] : null) ||
+      (layers.length === 1 ? layers[0] : null);
+    if (!layer || typeof layer.id !== 'string' || !layer.id) {
+      throw new Error('Historic mine source-layer metadata is missing or ambiguous');
+    }
+    const bounds = [header.minLon, header.minLat, header.maxLon, header.maxLat];
+    if (!bounds.every(Number.isFinite) || bounds[0] >= bounds[2] || bounds[1] >= bounds[3] ||
+        !Number.isFinite(header.minZoom) || !Number.isFinite(header.maxZoom) ||
+        header.minZoom > header.maxZoom) throw new Error('Invalid historic mine archive extent');
+    datasets.historicMines = {
+      url: 'pmtiles://' + url,
+      sourceLayer: layer.id,
+      minzoom: header.minZoom,
+      maxzoom: header.maxZoom,
+      bounds,
+      ...(Object.hasOwn(layer.fields || {}, 'dep_id') ? { promoteId: 'dep_id' } : {})
+    };
+  } catch (error) {
+    console.warn(`Historic mines metadata unavailable for ${stateCode}:`, error.message);
+  }
+  return datasets;
+}
+
+function requestHistoricMineDataset(stateCode, state) {
+  if (state.historicMinesRequest || !WESTERN_PROSPECTOR_STATES.has(stateCode)) return;
+  state.historicMinesRequest = prepareProspectorDatasets(stateCode, {
+    datasets: { historicMines: state.discoveredHistoricMines }
+  }).then((datasets) => {
+    if (datasets.historicMines) {
+      state.datasets.historicMines = datasets.historicMines;
+      scheduleProspectorStateSync();
+    } else {
+      // Retry on the next map update after a transient metadata failure.
+      state.historicMinesRequest = null;
+    }
+  });
+}
+
+function addProspectorSource(
+  id,
+  state,
+  dataset,
+  extra = {}
+) {
+  if (map.getSource(id)) return id;
+
+  if (!dataset) return null;
+
+  const source = {
+    type: 'vector'
+  };
+
+  if (Array.isArray(dataset.tiles) && dataset.tiles.length) {
+    source.tiles = dataset.tiles;
+    source.minzoom = dataset.minzoom ?? 0;
+    source.maxzoom = dataset.maxzoom ?? 18;
+  } else if (typeof dataset.url === 'string' && dataset.url) {
+    source.url = dataset.url;
+  } else {
+    const url = prospectorsDatasetUrl(state, dataset);
+    if (!url) return null;
+    source.url = url;
+  }
+
+  for (const key of ['minzoom', 'maxzoom', 'bounds']) {
+    if (dataset[key] !== undefined) source[key] = dataset[key];
+  }
+
+  map.addSource(id, {
+    ...source,
+    ...extra
+  });
+
+  return id;
+}
+
+function initializeProspectorState(stateCode) {
+  if (initializedProspectorStates.has(stateCode)) {
+    return;
+  }
+
+  const groups = {};
+
+  for (const group of PROSPECTOR_GROUP_NAMES) {
+    groups[group] = [];
+  }
+
+  prospectorStateLayers.set(
+    stateCode,
+    groups
+  );
+
+  initializedProspectorStates.add(stateCode);
+}
+
+function addProspectorLayer({
+  stateCode,
+  group,
+  templateId,
+  source,
+  sourceLayer
+}) {
+  const template = [...PROSPECTOR_STYLE_TEMPLATES, ...WITHDRAWAL_TEMPLATES]
+    .find((layer) => layer.id === templateId);
+
+  if (!template) {
+    console.warn(
+      `Prospector loader: template layer missing: ${templateId}`
+    );
+
+    return null;
+  }
+
+  const id = `prospector-${stateCode}-${templateId}`;
+
+  if (map.getLayer(id)) {
+    return id;
+  }
+
+  const clone =
+    JSON.parse(JSON.stringify(template));
+
+  clone.id = id;
+  clone.source = source;
+
+  // State historic-mine overview begins at zoom 6.5.
+  // Leave Arizona's original template unchanged.
+  if (
+    group === 'historicMines' &&
+    templateId === HISTORIC_MINES_ARCHIVE_LAYER_ID
+  ) {
+    clone.minzoom = 4;
+  }
+
+  if (sourceLayer) {
+    clone['source-layer'] = sourceLayer;
+  } else {
+    delete clone['source-layer'];
+  }
+
+  clone.layout = {
+    ...(clone.layout || {}),
+    visibility: 'none'
+  };
+
+  const layers =
+    map.getStyle().layers || [];
+
+  const templateIndex =
+    layers.findIndex(
+      (layer) => layer.id === templateId
+    );
+
+  const beforeLayer =
+    templateIndex >= 0
+      ? layers
+          .slice(templateIndex + 1)
+          .find(
+            (layer) =>
+              !layer.id.startsWith('prospector-') &&
+              map.getLayer(layer.id)
+          )
+      : null;
+
+  map.addLayer(
+    clone,
+    beforeLayer?.id
+  );
+
+  if (group === 'historicMines' && templateId === HISTORIC_MINES_ARCHIVE_LAYER_ID) {
+    const listeners = [['click', (event) => {
+      const feature = event.features?.[0];
+      if (!feature) return;
+      new maplibregl.Popup({ offset: 12 }).setLngLat(feature.geometry.coordinates).setDOMContent(makeHistoricMinePopup(feature.properties)).addTo(map);
+    }], ['mouseenter', () => { map.getCanvas().style.cursor = 'pointer'; }],
+    ['mouseleave', () => { map.getCanvas().style.cursor = ''; }]];
+    for (const [event, listener] of listeners) map.on(event, id, listener);
+    prospectorLayerListeners.set(id, listeners);
+  }
+
+  const stateGroups =
+    prospectorStateLayers.get(stateCode);
+
+  if (
+    stateGroups &&
+    !stateGroups[group].includes(id)
+  ) {
+    stateGroups[group].push(id);
+  }
+
+  return id;
+}
+
+/*
+ * This is important:
+ *
+ * We do NOT duplicate Arizona zoom constants here.
+ *
+ * The current Arizona style layer remains the authority. Its minzoom
+ * and maxzoom are read directly, so every state automatically follows
+ * the same display parameters.
+ */
+function prospectorTemplatesCanRender(
+  templateIds
+) {
+  const zoom = map.getZoom();
+
+  const styleLayers =
+    [...PROSPECTOR_STYLE_TEMPLATES, ...WITHDRAWAL_TEMPLATES];
+
+  const byId =
+    new Map(
+      styleLayers.map(
+        (layer) => [layer.id, layer]
+      )
+    );
+
+  return templateIds.some(
+    (templateId) => {
+      const layer = byId.get(templateId);
+
+      if (!layer) return false;
+
+      const minZoom =
+        Number.isFinite(layer.minzoom)
+          ? layer.minzoom
+          : -Infinity;
+
+      const maxZoom =
+        Number.isFinite(layer.maxzoom)
+          ? layer.maxzoom
+          : Infinity;
+
+      return (
+        zoom >= minZoom &&
+        zoom < maxZoom
+      );
+    }
+  );
+}
+
+function prospectorToggleChecked(id) {
+  return Boolean(
+    document.querySelector(`#${id}`)?.checked
+  );
+}
+
+/* AEM UNIVERSAL PLSS ROUTE RESOLUTION V1 */
+function resolveProspectorPlss(stateCode, datasets, kind) {
+  const key = kind === 'townships'
+    ? 'plssTownships'
+    : 'plssSections';
+
+  return datasets[key] || datasets.plss || null;
+}
+
+const PROSPECTOR_STANDARD_GROUPS = Object.freeze({
+  surfaceManagement: {
+    suffix: 'surface-management',
+    templates: SURFACE_MANAGEMENT_LAYER_IDS
+  },
+  claims: {
+    suffix: 'claims',
+    templates: NOT_CLOSED_CLAIMS_LAYER_IDS
+  },
+  plssTownships: {
+    suffix: 'plss-townships',
+    templates: PLSS_TOWNSHIPS_LAYER_IDS,
+    plssKind: 'townships'
+  },
+  plssSections: {
+    suffix: 'plss-sections',
+    templates: PLSS_SECTIONS_LAYER_IDS,
+    plssKind: 'sections'
+  },
+  historicMines: {
+    suffix: 'historic-mines',
+    templates: [HISTORIC_MINES_ARCHIVE_LAYER_ID],
+    promoteId: 'dep_id'
+  },
+  parcels: {
+    suffix: 'parcels',
+    templates: PROPERTY_PARCELS_LAYER_IDS
+  }
+});
+
+function attachProspectorStandardGroup(
+  stateCode,
+  state,
+  group,
+  datasets,
+  prefix
+) {
+  const config = PROSPECTOR_STANDARD_GROUPS[group];
+
+  if (!config) return false;
+
+  const dataset = config.plssKind
+    ? resolveProspectorPlss(
+        stateCode,
+        datasets,
+        config.plssKind
+      )
+    : datasets[group];
+
+  if (!dataset) return false;
+
+  const source = addProspectorSource(
+    `${prefix}-${config.suffix}`,
+    state,
+    dataset,
+    dataset.promoteId
+      ? { promoteId: dataset.promoteId }
+      : {}
+  );
+
+  if (!source) return false;
+
+  const sourceLayer =
+    config.plssKind === 'townships'
+      ? dataset.layer || dataset.townshipsLayer || dataset.sourceLayer
+      : config.plssKind === 'sections'
+        ? dataset.layer || dataset.sectionsLayer || dataset.sourceLayer
+        : dataset.sourceLayer;
+
+  for (const templateId of config.templates) {
+    addProspectorLayer({
+      stateCode,
+      group,
+      templateId,
+      source,
+      sourceLayer
+    });
+  }
+
+  return true;
+}
+
+function ensureProspectorGroup(
+  stateCode,
+  state,
+  group
+) {
+  initializeProspectorState(stateCode);
+
+  const key =
+    `${stateCode}:${group}`;
+
+  const plssTemplates =
+    group === 'plssTownships'
+      ? PLSS_TOWNSHIPS_LAYER_IDS
+      : group === 'plssSections'
+        ? PLSS_SECTIONS_LAYER_IDS
+        : null;
+
+  const plssLayerIds = plssTemplates?.map(
+    (templateId) => `prospector-${stateCode}-${templateId}`
+  );
+
+  if (readyProspectorGroups.has(key)) {
+    if (
+      !plssLayerIds ||
+      plssLayerIds.every((id) => Boolean(map.getLayer(id)))
+    ) {
+      return true;
+    }
+
+    // A PLSS group is not ready if its layers are absent.
+    readyProspectorGroups.delete(key);
+  }
+
+  const datasets =
+    state.datasets || {};
+
+  const prefix =
+    `prospector-${stateCode}`;
+
+  if (group === 'boundary') {
+    const dataset = datasets.boundary;
+
+    if (!dataset) return false;
+
+    const source =
+      addProspectorSource(
+        `${prefix}-boundary`,
+        state,
+        dataset
+      );
+
+    if (!source) return false;
+
+    addProspectorLayer({
+      stateCode,
+      group,
+      templateId: 'state-boundary-line',
+      source,
+      sourceLayer: dataset.sourceLayer
+    });
+  }
+
+  else if (PROSPECTOR_EXTRA_PLSS[group]) {
+    const dataset = datasets[group];
+    if (!dataset?.sourceLayer) return false;
+    const config = PROSPECTOR_EXTRA_PLSS[group];
+    const source = addProspectorSource(`${prefix}-${config.suffix}`, state, dataset);
+    if (!source) return false;
+    const id = `${prefix}-plss-${config.suffix}`;
+    if (!map.getLayer(id)) {
+      map.addLayer({
+        id, source, 'source-layer': dataset.sourceLayer,
+        type: config.point ? 'circle' : 'line',
+        minzoom: dataset.minzoom ?? 0,
+        layout: { visibility: 'none' },
+        paint: config.point
+          ? { 'circle-radius': 2.5, 'circle-color': '#c9f5ff', 'circle-stroke-width': 0.5, 'circle-stroke-color': '#173f4a' }
+          : { 'line-color': '#9befff', 'line-width': 0.8, 'line-opacity': 0.75 }
+      });
+    }
+    const layers = prospectorStateLayers.get(stateCode)[group];
+    if (!layers.includes(id)) layers.push(id);
+  }
+
+  else if (group === 'withdrawals') {
+    const dataset = datasets.withdrawals;
+    if (!dataset) return false;
+    let attached = false;
+    for (const kind of ['authorized', 'pending']) {
+      const part = dataset[kind] || (dataset.tiles || dataset.url ? dataset : null);
+      if (!part) continue;
+      const source = addProspectorSource(`${prefix}-withdrawals-${kind}`, state, part);
+      if (!source) continue;
+      const sourceLayer = dataset[kind]?.sourceLayer || dataset[`${kind}Layer`] || `withdrawals_${kind}`;
+      for (const template of WITHDRAWAL_TEMPLATES.filter(item => item.id.startsWith(`withdrawals-${kind}-`))) {
+        addProspectorLayer({ stateCode, group, templateId: template.id, source, sourceLayer });
+      }
+      attached = true;
+    }
+    if (!attached) return false;
+  }
+
+  else if (PROSPECTOR_STANDARD_GROUPS[group]) {
+    if (!attachProspectorStandardGroup(
+      stateCode,
+      state,
+      group,
+      datasets,
+      prefix
+    )) {
+      return false;
+    }
+  }
+
+  else {
+    return false;
+  }
+
+  if (plssLayerIds) {
+    const missing = plssLayerIds.filter(
+      (id) => !map.getLayer(id)
+    );
+
+    if (missing.length) {
+      console.warn(
+        `AEM PLSS attachment incomplete: ${key}`,
+        { missing, source: `prospector-${stateCode}-plss` }
+      );
+      return false;
+    }
+
+    console.info(
+      `AEM PLSS layers confirmed: ${key}`,
+      plssLayerIds
+    );
+  }
+
+  readyProspectorGroups.add(key);
+  if (group === 'historicMines') applyHistoricMineVisitedStates();
+
+  console.log(
+    `Prospector dataset attached: ` +
+    `${stateCode.toUpperCase()} / ${group}`
+  );
+
+  return true;
+}
+
+function prospectorGroupTemplates(group) {
+  if (group === 'surfaceManagement') {
+    return SURFACE_MANAGEMENT_LAYER_IDS;
+  }
+
+  if (group === 'claims') {
+    return NOT_CLOSED_CLAIMS_LAYER_IDS;
+  }
+
+  if (group === 'withdrawals') {
+    return [
+      'withdrawals-authorized-fill',
+      'withdrawals-authorized-outline',
+      'withdrawals-pending-fill',
+      'withdrawals-pending-outline'
+    ];
+  }
+
+  if (group === 'plssTownships') {
+    return PLSS_TOWNSHIPS_LAYER_IDS;
+  }
+
+  if (group === 'plssSections') {
+    return PLSS_SECTIONS_LAYER_IDS;
+  }
+
+  if (group === 'historicMines') {
+    return [
+      HISTORIC_MINES_ARCHIVE_LAYER_ID
+    ];
+  }
+
+
+  if (group === 'parcels') {
+    return PROPERTY_PARCELS_LAYER_IDS;
+  }
+
+  return [];
+}
+
+function prospectorGroupToggleEnabled(group) {
+  if (PROSPECTOR_EXTRA_PLSS[group]) return prospectorToggleChecked('plssSections');
+  if (group === 'boundary') {
+    return true;
+  }
+
+  if (group === 'surfaceManagement') {
+    return prospectorToggleChecked(
+      'surfaceManagement'
+    );
+  }
+
+  if (group === 'claims') {
+    return prospectorToggleChecked(
+      'notClosedClaims'
+    );
+  }
+
+  if (group === 'withdrawals') {
+    return prospectorToggleChecked(
+      'miningWithdrawals'
+    );
+  }
+
+  if (group === 'plssTownships') {
+    return prospectorToggleChecked(
+      'plssTownships'
+    );
+  }
+
+  if (group === 'plssSections') {
+    return prospectorToggleChecked(
+      'plssSections'
+    );
+  }
+
+  if (group === 'historicMines') {
+    return prospectorToggleChecked(
+      'historicMines'
+    );
+  }
+
+
+  if (group === 'parcels') {
+    return prospectorToggleChecked(
+      'propertyParcels'
+    );
+  }
+
+  return false;
+}
+
+function prospectorGroupShouldRender(
+  state,
+  group
+) {
+  if (
+    !prospectorsStateIntersectsView(
+      state?.bounds
+    )
+  ) {
+    return false;
+  }
+
+  if (!prospectorGroupToggleEnabled(group)) {
+    return false;
+  }
+
+  if (group === 'boundary') {
+    return true;
+  }
+
+  // Universal historic-mines overview begins at zoom 6.5.
+  // Do not depend on unrelated style-layer eligibility.
+  if (group === 'historicMines') {
+    return map.getZoom() >= 6.5;
+  }
+
+  if (PROSPECTOR_EXTRA_PLSS[group]) {
+    return Boolean(state.datasets?.[group]) && map.getZoom() >= (state.datasets[group].minzoom ?? 0);
+  }
+
+  const templates =
+    prospectorGroupTemplates(group);
+
+  return prospectorTemplatesCanRender(
+    templates
+  );
+}
+
+function syncProspectorStates() {
+  // MapLibre can report the style as not fully loaded while
+  // imagery and other resources are still being retrieved.
+  // Check that our required style templates exist instead.
+  const style = map.getStyle();
+  if (!style?.layers) return;
+
+  for (
+    const [stateCode, state]
+    of prospectorStateRegistry
+  ) {
+    const inView =
+      prospectorsStateIntersectsView(
+        state?.bounds
+      );
+
+    /*
+     * Do absolutely nothing for untouched states.
+     * This is what prevents all state archives from opening
+     * during application startup.
+     */
+    if (
+      !inView &&
+      !initializedProspectorStates.has(
+        stateCode
+      )
+    ) {
+      continue;
+    }
+
+    if (inView) {
+      initializeProspectorState(
+        stateCode
+      );
+    }
+
+    const groups =
+      prospectorStateLayers.get(
+        stateCode
+      );
+
+    if (!groups) continue;
+
+    if (inView || PROSPECTOR_GROUP_NAMES.some(group => group !== 'boundary' && groups[group].length)) {
+      scheduleOffscreenEviction(`prospector:${stateCode}`, state.bounds, inView,
+        () => evictProspectorOverlays(stateCode));
+    }
+
+    for (
+      const group
+      of PROSPECTOR_GROUP_NAMES
+    ) {
+      const visible =
+        prospectorGroupShouldRender(
+          state,
+          group
+        );
+
+      /*
+       * This is the speed optimization:
+       *
+       * No PMTiles source is even added to MapLibre until
+       * the group is actually capable of rendering.
+       */
+      if (visible) {
+        if (group === 'historicMines' && !state.datasets?.historicMines) {
+          requestHistoricMineDataset(stateCode, state);
+        } else {
+          ensureProspectorGroup(stateCode, state, group);
+        }
+      }
+
+      setLayerVisibility(
+        groups[group],
+        visible
+      );
+    }
+  }
+}
+
+/*
+ * moveend / zoomend already mean the user has stopped moving.
+ * requestAnimationFrame simply collapses duplicate events without
+ * imposing the old extra 120 ms delay.
+ */
+let prospectorStateSyncScheduled = false;
+
+
+function scheduleProspectorStateSync() {
+  if (prospectorStateSyncScheduled) {
+    return;
+  }
+
+  prospectorStateSyncScheduled = true;
+
+  window.requestAnimationFrame(() => {
+    prospectorStateSyncScheduled = false;
+    syncProspectorStates();
+  });
+}
+
+async function initializeProspectorStateLoader() {
+  try {
+    /* Canonical VM dataset registry: non-road state layers */
+    const discovered = await loadStateDiscovery();
+    const mergedStates = {};
+
+    for (const [rawCode, incoming] of Object.entries(
+      discovered.states || {}
+    )) {
+      const code = rawCode.toLowerCase();
+
+      if (!/^[a-z]{2}$/.test(code)) continue;
+      if (!incoming || typeof incoming !== 'object') continue;
+
+      const bounds = incoming.bounds;
+
+      if (!Array.isArray(bounds) ||
+          bounds.length !== 4 ||
+          !bounds.every(Number.isFinite) ||
+          bounds[0] >= bounds[2] ||
+          bounds[1] >= bounds[3]) continue;
+
+      mergedStates[code] = {
+        ...incoming,
+        discoveredHistoricMines: incoming.datasets?.historicMines,
+        datasets: prospectorVmDatasets(incoming)
+      };
+    }
+
+    console.log('AEM VM state discovery loaded');
+
+    for (
+      const [stateCode, state]
+      of Object.entries(
+        mergedStates
+      )
+    ) {
+      prospectorStateRegistry.set(
+        stateCode.toLowerCase(),
+        state
+      );
+    }
+
+    console.log(
+      `Prospector state registry loaded: ` +
+      `${prospectorStateRegistry.size} state(s)`
+    );
+
+    syncProspectorStates();
+
+    unifiedProspectorEventsEnabled = true;
+
+    document.addEventListener(
+      'change',
+      (event) => {
+        if ([
+          'roadRendering',
+          'surfaceManagement',
+          'propertyParcels',
+          'miningWithdrawals',
+          'notClosedClaims',
+          'historicMines',
+          'plssTownships',
+          'plssSections'
+        ].includes(event.target?.id)) {
+          scheduleProspectorStateSync();
+        }
+      }
+    );
+
+  } catch (error) {
+    console.warn(
+      'Prospector state registry unavailable:',
+      error.message
+    );
+  }
+}
+
+if (map.loaded()) {
+  initializeProspectorStateLoader();
+} else {
+  map.once(
+    'style.load',
+    initializeProspectorStateLoader
+  );
+}
+
+const layerToggleHandlers = Object.freeze({
+  roadRendering: (visible) => {
+    roadRenderingEnabled = visible;
+    syncRoadView();
+    syncAccessPresentation();
+  },
+  offRoadTrailsOnly: (visible) => {
+    offRoadTrailsOnly = false;
+    syncRoadView();
+  },
+  surfaceManagement: setSurfaceManagementVisible,
+  propertyParcels: setPropertyParcelsVisible,
+  miningWithdrawals: setMiningWithdrawalsVisible,
+  notClosedClaims: setNotClosedClaimsVisible,
+  geologyLayer: setGeologyLayerVisible,
+  historicMines: setHistoricMinesVisible,
+  plssTownships: (visible) => setPlssVisible('townships', visible),
+  plssSections: (visible) => setPlssVisible('sections', visible)
+});
+
+Object.entries(layerToggleHandlers).forEach(([id, handler]) => {
+  const element = document.querySelector(`#${id}`);
+
+  if (TRACE_LAYERS) {
+    console.log('[LAYER TRACE] bind toggle', {
+      id,
+      elementExists: Boolean(element),
+      checked: element?.checked
+    });
+  }
+
+  element.addEventListener('change', (event) => {
+    if (TRACE_LAYERS) {
+      console.log('[LAYER TRACE] TOGGLE FIRED', {
+        id,
+        checked: event.target.checked,
+        zoom: map.getZoom(),
+        styleLoaded: map.isStyleLoaded()
+      });
+    }
+
+    handler(event.target.checked);
+
+    if (TRACE_LAYERS) {
+      console.log(
+        '[LAYER TRACE] HANDLER FINISHED',
+        id
+      );
+    }
+  });
+});
+
+const geologyKey = document.querySelector('#geologyKey');
+document.querySelector('#geologyKeyButton').addEventListener('click', () => geologyKey.showModal());
+document.querySelector('#geologyKeyClose').addEventListener('click', () => geologyKey.close());
+geologyKey.addEventListener('click', (event) => {
+  if (event.target === geologyKey) geologyKey.close();
+});
+
+map.on('error', (event) => console.warn('Map resource warning:', event.error?.message || event));
+
+
+
+// AEM VM AUTO VECTOR LAYERS
+// Shared renderer for published VM vector source layers.
+
+const aemVMRegistry = new Map();
+const aemVMHidden = new Set();
+
+let aemVMControls = null;
+
+const aemVMStyles = [
+  {
+    suffix: 'fill',
+    type: 'fill',
+    geometry: 'Polygon',
+    paint: {
+      'fill-color': '#7298b2',
+      'fill-opacity': 0.22
+    }
+  },
+  {
+    suffix: 'line',
+    type: 'line',
+    geometry: 'LineString',
+    paint: {
+      'line-color': '#416782',
+      'line-width': 1.5
+    }
+  },
+  {
+    suffix: 'point',
+    type: 'circle',
+    geometry: 'Point',
+    paint: {
+      'circle-color': '#bb8244',
+      'circle-radius': 3.5,
+      'circle-stroke-color': '#ffffff',
+      'circle-stroke-width': 0.7
+    }
+  }
+];
+
+function aemVMSourceId(code, item) {
+  return `aem-vm-${code}-${item.id}`;
+}
+
+function aemVMRemove(code, item) {
+  const sourceId = aemVMSourceId(code, item);
+
+  for (const style of aemVMStyles) {
+    const id = `${sourceId}-${style.suffix}`;
+    if (map.getLayer(id)) map.removeLayer(id);
+  }
+
+  if (map.getSource(sourceId)) {
+    map.removeSource(sourceId);
+  }
+}
+
+function aemVMSourceDefinition(item) {
+  const source = {
+    type: 'vector',
+    minzoom: item.minzoom ?? 0,
+    maxzoom: item.maxzoom ?? 18
+  };
+
+  const prefix =
+    'https://tiles.americanexplorationmaps.com/api/vm-data/';
+
+  if (
+    Array.isArray(item.tiles) &&
+    item.tiles.length &&
+    item.tiles.every(url =>
+      typeof url === 'string' &&
+      url.startsWith(prefix)
+    )
+  ) {
+    source.tiles = item.tiles;
+    return source;
+  }
+
+  if (
+    typeof item.url === 'string' &&
+    item.url.startsWith('pmtiles://' + prefix)
+  ) {
+    source.url = item.url;
+    return source;
+  }
+
+  return null;
+}
+
+// Render additional published dataset groups using the shared generic renderer.
+// Known groups retain their normal controls and styling; unverified claims remain
+// separately labelled rather than appearing under the non-closed claims control.
+function discoverGenericVmLayers(state) {
+  const layers = Array.isArray(state.autoLayers) ? [...state.autoLayers] : [];
+  const known = new Set(PROSPECTOR_GROUP_NAMES);
+  const accepted = prospectorVmDatasets(state);
+  for (const [group, item] of Object.entries(state.datasets || {})) {
+    if (!/^[A-Za-z][A-Za-z0-9]*$/.test(group) || !item || typeof item !== 'object') continue;
+    if (group === 'historicMines' || group === 'claimsBlmLands' ||
+        (known.has(group) && accepted[group])) continue;
+    if (!item.sourceLayer || !aemVMSourceDefinition(item)) continue;
+    layers.push({ ...item, id: `dataset_${group}`, name: group });
+  }
+  return layers;
+}
+
+function isGenericVmLayerId(id) {
+  return /^auto_[a-f0-9]{16}$/.test(id || '') || /^dataset_[A-Za-z][A-Za-z0-9]*$/.test(id || '');
+}
+
+function syncDynamicVMMapLayers() {
+  if (!map.getStyle()?.layers?.length) return;
+
+  for (const [code, state] of aemVMRegistry) {
+    const inView = prospectorsStateIntersectsView(
+      state.bounds
+    );
+
+    if (inView || state.autoLayers.some(item => map.getSource(aemVMSourceId(code, item)))) {
+      scheduleOffscreenEviction(`auto:${code}`, state.bounds, inView, () => {
+        for (const item of aemVMRegistry.get(code)?.autoLayers || []) aemVMRemove(code, item);
+      });
+    }
+
+    for (const item of state.autoLayers) {
+      if (
+        !isGenericVmLayerId(item.id) ||
+        typeof item.sourceLayer !== 'string' ||
+        !item.sourceLayer
+      ) continue;
+
+      const sourceId = aemVMSourceId(code, item);
+
+      const visible =
+        inView &&
+        !aemVMHidden.has(code + '/' + item.id);
+
+      if (visible && !map.getSource(sourceId)) {
+        const definition =
+          aemVMSourceDefinition(item);
+
+        if (!definition) continue;
+
+        try {
+          map.addSource(sourceId, definition);
+        } catch (error) {
+          console.warn('VM source error:', error);
+          continue;
+        }
+      }
+
+      for (const style of aemVMStyles) {
+        const id = `${sourceId}-${style.suffix}`;
+
+        if (
+          visible &&
+          map.getSource(sourceId) &&
+          !map.getLayer(id)
+        ) {
+          try {
+            map.addLayer({
+              id,
+              type: style.type,
+              source: sourceId,
+              'source-layer': item.sourceLayer,
+              filter: [
+                '==',
+                ['geometry-type'],
+                style.geometry
+              ],
+              layout: {
+                visibility: 'none'
+              },
+              paint: style.paint
+            });
+          } catch (error) {
+            console.warn('VM layer error:', id, error);
+          }
+        }
+
+        if (map.getLayer(id)) {
+          map.setLayoutProperty(
+            id,
+            'visibility',
+            visible ? 'visible' : 'none'
+          );
+        }
+      }
+    }
+  }
+}
+
+function aemVMRenderControls() {
+  const entries = [];
+
+  for (const [code, state] of aemVMRegistry) {
+    for (const item of state.autoLayers) {
+      entries.push([code, item]);
+    }
+  }
+
+  if (!entries.length) {
+    if (aemVMControls) {
+      aemVMControls.replaceChildren();
+    }
+    return;
+  }
+
+  if (!aemVMControls) {
+    const wrapper = document.createElement('div');
+
+    wrapper.className = 'maplibregl-ctrl';
+    wrapper.style.cssText =
+      'background:#fff;color:#222;padding:8px;' +
+      'max-height:260px;max-width:230px;' +
+      'overflow:auto;border-radius:4px;' +
+      'box-shadow:0 1px 5px #0003;' +
+      'font:12px sans-serif';
+
+    const details = document.createElement('details');
+    const summary = document.createElement('summary');
+    const content = document.createElement('div');
+
+    summary.textContent = 'VM data layers';
+
+    details.append(summary, content);
+    wrapper.appendChild(details);
+
+    document.querySelector('#aemDynamicLayers').appendChild(wrapper);
+
+    aemVMControls = content;
+  }
+
+  aemVMControls.replaceChildren();
+
+  for (const [code, item] of entries) {
+    const key = code + '/' + item.id;
+    const label = document.createElement('label');
+    const checkbox = document.createElement('input');
+
+    label.style.cssText = 'display:block;padding:3px 0';
+    checkbox.type = 'checkbox';
+    checkbox.checked = !aemVMHidden.has(key);
+
+    checkbox.addEventListener('change', () => {
+      if (checkbox.checked) {
+        aemVMHidden.delete(key);
+      } else {
+        aemVMHidden.add(key);
+      }
+      syncDynamicVMMapLayers();
+    });
+
+    label.append(
+      checkbox,
+      document.createTextNode(
+        ` ${code.toUpperCase()} · ${item.name || item.sourceLayer}`
+      )
+    );
+
+    aemVMControls.appendChild(label);
+  }
+}
+
+async function refreshDynamicVMMapLayers(refresh = false) {
+  try {
+    const data = await loadStateDiscovery(refresh);
+
+    const next = new Map();
+
+    for (const [code, state] of Object.entries(data.states)) {
+      if (
+        !/^[a-z]{2}$/.test(code) ||
+        !Array.isArray(state.bounds) ||
+        state.bounds.length !== 4 ||
+        !state.bounds.every(Number.isFinite)
+      ) continue;
+
+      next.set(code, {
+        bounds: state.bounds,
+        autoLayers: discoverGenericVmLayers(state).filter(
+          item =>
+            isGenericVmLayerId(item.id) &&
+            typeof item.sourceLayer === 'string' &&
+            aemVMSourceDefinition(item)
+        )
+      });
+    }
+
+    for (const [code, state] of aemVMRegistry) {
+      const incoming = new Map(
+        (next.get(code)?.autoLayers || [])
+          .map(item => [item.id, item])
+      );
+
+      for (const item of state.autoLayers) {
+        const replacement = incoming.get(item.id);
+
+        if (
+          !replacement ||
+          JSON.stringify(replacement) !== JSON.stringify(item)
+        ) {
+          aemVMRemove(code, item);
+        }
+      }
+    }
+
+    aemVMRegistry.clear();
+
+    for (const [code, state] of next) {
+      aemVMRegistry.set(code, state);
+    }
+
+    syncDynamicVMMapLayers();
+    aemVMRenderControls();
+
+  } catch (error) {
+    console.warn('Automatic VM discovery:', error);
+  }
+}
+
+if (map.loaded()) {
+  refreshDynamicVMMapLayers();
+} else {
+  map.once('style.load', () => refreshDynamicVMMapLayers());
+}
+
+// Refresh published automatic layers periodically while the page is visible.
+// A longer interval also discovers newly published layers when none exist yet.
+window.setInterval(() => {
+  if (!document.hidden) void refreshDynamicVMMapLayers(true);
+}, 300000);
+
+
+
+
+// AEM CO NV PARCEL PIN DETAILS
+function aemParcelPinDetails(properties = {}) {
+  const state = typeof aemParcelState !== 'undefined'
+    ? aemParcelState : 'az';
+
+  const parcelId = state === 'co'
+    ? properties.parcel_id
+    : state === 'nv'
+      ? (properties.APN || properties.parcel_id)
+      : properties.AZ_APN;
+
+  const link = state === 'co'
+    ? properties.URL
+    : state === 'nv'
+      ? properties.Website
+      : null;
+
+  let recordUrl = null;
+  try {
+    const url = new URL(link);
+    if (['https:', 'http:'].includes(url.protocol)) {
+      recordUrl = url.href;
+    }
+  } catch (_) {}
+
+  return {
+    parcelId: parcelId || '',
+    address: properties.situsAdd || properties.SiteAddress ||
+      properties.AZ_Address || '',
+    county: properties.countyName || properties.County || '',
+    acreage: properties.landAcres ?? properties.Acres ?? '',
+    owner: properties.owner || '',
+    propertyRecordsUrl: recordUrl
+  };
+}
+
+
+// AEM CO NV PARCEL LONG PRESS
+function aemParcelAtPoint(point) {
+  const pixel = map.project(point);
+  const features = map.queryRenderedFeatures(pixel, {
+    layers: ['property-parcels-fill']
+  });
+
+  const feature = features.find(f => f.properties);
+  if (!feature) return Promise.resolve(null);
+
+  const details = aemParcelPinDetails(feature.properties);
+
+  return Promise.resolve({
+    type: 'Feature',
+    geometry: feature.geometry,
+    properties: {
+      ...feature.properties,
+      AZ_APN: details.parcelId,
+      AZ_Address: details.address,
+      AZ_PlaceName: details.county,
+      propertyRecordsUrl: details.propertyRecordsUrl
+    }
+  });
+}
+
+// AEM_LAYOUT_PIN_V13
+(function () {
+  let selectedPin = null;
+  const originalResearch = openResearchLocation;
+
+  openResearchLocation = function (lngLat) {
+    const lng = Number(lngLat?.lng);
+    const lat = Number(lngLat?.lat);
+
+    if (Number.isFinite(lng) && Number.isFinite(lat)) {
+      if (!selectedPin) {
+        const element = document.createElement('div');
+        element.className = 'aem-selected-pin-v13';
+
+        selectedPin = new maplibregl.Marker({
+          element,
+          anchor: 'bottom'
+        }).setLngLat([lng, lat]).addTo(map);
+      } else {
+        selectedPin.setLngLat([lng, lat]);
+      }
+    }
+
+    return originalResearch(lngLat);
+  };
+
+  document.getElementById('researchLocationClose')
+    ?.addEventListener('click', () => {
+      selectedPin?.remove();
+      selectedPin = null;
+    });
+
+  function alignZoom() {
+    const attribution = document.querySelector(
+      '.maplibregl-ctrl-attrib'
+    );
+    const bottom = attribution
+      ? attribution.getBoundingClientRect().bottom
+      : 42;
+
+    document.documentElement.style.setProperty(
+      '--aem-credit-bottom',
+      Math.ceil(Math.max(32, bottom) + 8) + 'px'
+    );
+  }
+
+  map.on('load', alignZoom);
+  window.addEventListener('resize', alignZoom);
+
+  if ('ResizeObserver' in window) {
+    const attribution = document.querySelector(
+      '.maplibregl-ctrl-attrib'
+    );
+    if (attribution) {
+      new ResizeObserver(alignZoom).observe(attribution);
+    }
+  }
+
+  requestAnimationFrame(alignZoom);
+})();
