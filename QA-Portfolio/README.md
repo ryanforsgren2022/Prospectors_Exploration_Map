@@ -13,7 +13,9 @@ This portfolio documents practical software quality assurance and data-validatio
 
 ## Selected case studies
 
-See [Selected QA case studies](Hiccups-Log.md) for anonymized, employer-facing examples based on the project's internal incident records.
+See [Selected QA case studies](Hiccups-Log.md) for employer-facing examples based on the project's internal incident records.
+
+Read [Raw Hiccups Log Excerpts](Raw-Hiccups-Excerpts.md) for five verbatim selections from the original incident documentation, with source context and QA relevance.
 
 ## What this demonstrates
 
