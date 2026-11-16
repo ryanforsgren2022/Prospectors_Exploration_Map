@@ -767,7 +767,7 @@ function ensureHistoricMineImages() {
     ['historic-mine-pin', 2], ['historic-mine-visited-flag', 1]
   ].map(async ([name, pixelRatio]) => {
     if (map.hasImage(name)) return;
-    const result = await map.loadImage(`./images/${name}.png`);
+    const result = await map.loadImage(`./images/${name}.png?v=2`);
     if (!map.hasImage(name)) map.addImage(name, result.data, { pixelRatio });
   })).then(() => true).catch(error => {
     console.warn('Historic mine artwork:', error);

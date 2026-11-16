@@ -181,6 +181,7 @@ export default async function middleware(request) {
     (
       pathname.startsWith('/data/') ||
       pathname.startsWith('/vendor/') ||
+      pathname.startsWith('/images/') ||
       /^\/map\.[a-f0-9]+\.js$/.test(pathname) ||
       /^\/map\.[a-f0-9]+\.css$/.test(pathname) ||
       /^\/styles\.[a-f0-9]+\.css$/.test(pathname)
@@ -291,6 +292,7 @@ export const config = {
     '/',
     '/data/:path*',
     '/vendor/:path*',
+    '/images/:path*',
     '/map.:path*.js',
     '/map.:path*.css',
     '/styles.:path*.css',
