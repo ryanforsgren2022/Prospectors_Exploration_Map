@@ -13,7 +13,6 @@ mkdirSync(betaDirectory, { recursive: true });
 const sourceDist = join(process.cwd(), 'source-dist');
 const copies = [
   ['vendor', 'vendor'],
-  ['data/geology', 'data/geology'],
   ['images', 'images'],
 ];
 

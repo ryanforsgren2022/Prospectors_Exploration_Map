@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=yes">
   <meta name="theme-color" content="#111814">
   <title>Prospectors Exploration Map (BETA)</title>
-  <meta name="description" content="Arizona prospecting map with roads, geology, historic mines, land status, and saved research locations.">
+  <meta name="description" content="Arizona prospecting map with roads, historic mines, land status, and saved research locations.">
   <link rel="stylesheet" href="./vendor/maplibre-gl.css">
   <link rel="stylesheet" href="./styles.css">
   <!-- AEM_EARLY_DEFERRED_SCRIPTS_V1 -->
@@ -26,12 +26,12 @@
       <summary>Citations</summary>
       <div class="toolbar-menu__content site-information">
         <h2>Prospectors Exploration Map <span>(BETA)</span></h2>
-        <p>An exploration and land-research map across 11 western states, combining mining claims, historic mines, PLSS surveys, public-land information, roads, geology, and geographic reference data.</p>
-        <h3>Data Sources &amp; Attribution</h3><p>Source attribution varies by dataset and state. Consult original publisher records before relying on data.</p><p><a href="https://mlrs.blm.gov/s/" target="_blank" rel="noopener noreferrer">BLM MLRS</a> · <a href="https://ngmdb.usgs.gov/nationalgeology/" target="_blank" rel="noopener noreferrer">USGS Geologic Maps</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap attribution</a></p><h3>Beta testing</h3>
+        <p>An exploration and land-research map across 11 western states, combining mining claims, historic mines, PLSS surveys, public-land information, roads, and geographic reference data.</p>
+        <h3>Data Sources &amp; Attribution</h3><p>Source attribution varies by dataset and state. Consult original publisher records before relying on data.</p><p><a href="https://mlrs.blm.gov/s/" target="_blank" rel="noopener noreferrer">BLM MLRS</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap attribution</a></p><h3>Beta testing</h3>
         <p>This map is still being tested. Layers can be incomplete, delayed, or unavailable. Use it to screen and plan research—not as a legal determination of land status, ownership, claim validity, or access.</p>
         <h3>Your research</h3>
         <p>Saved locations and notes stay in this browser on this device. Clearing website data can remove them.</p>
-        <p class="site-information__links"><a href="https://mlrs.blm.gov/s/" target="_blank" rel="noopener noreferrer">BLM MLRS</a><a href="https://ngmdb.usgs.gov/nationalgeology/" target="_blank" rel="noopener noreferrer">USGS National Geologic Map</a></p>
+        <p class="site-information__links"><a href="https://mlrs.blm.gov/s/" target="_blank" rel="noopener noreferrer">BLM MLRS</a></p>
       </div>
     </details>
 </div>
@@ -43,13 +43,6 @@
     <details class="toolbar-menu">
       <summary>Mining History</summary>
       <div class="toolbar-menu__content">
-        <div class="switch-row">
-          <label for="geologyLayer">Geology</label>
-          <div class="geology-controls">
-            <button id="geologyKeyButton" class="geology-key-button" type="button" aria-label="Open geology color key" aria-haspopup="dialog" aria-controls="geologyKey"><span class="geology-key-button__icon" aria-hidden="true">?</span></button>
-            <input id="geologyLayer" type="checkbox" aria-label="Show geology layer">
-          </div>
-        </div>
         <label class="switch-row mine-control-row"><span><img class="mine-control-icon" src="./images/historic-mine-pin.svg?v=2" alt="">Historic Mines &amp; Occurrences</span><input id="historicMines" type="checkbox"></label>
         <p class="hint">Historic mine and occurrence records load for states in view. Tap a pin for source details.</p>
         <label class="switch-row mine-control-row"><span><img class="mine-control-icon" src="./images/historic-mine-visited-flag.svg?v=2" alt="">Visited Mines</span><input id="historicMineVisitedFlags" type="checkbox" checked aria-label="Show visited mine flags"></label>
@@ -180,34 +173,6 @@
     </details>
 </div>
   </div>
-  <dialog id="geologyKey" class="geology-key" aria-labelledby="geologyKeyTitle">
-    <div class="geology-key__heading">
-      <h2 id="geologyKeyTitle">Geologic age guide</h2>
-      <button id="geologyKeyClose" class="geology-key__close" type="button" aria-label="Close geology color key">×</button>
-    </div>
-    <p>These colors commonly represent the age of mapped rock or sediment.</p>
-    <dl class="geology-key__swatches" aria-label="Examples from the geologic time color palette">
-      <div><dt><i style="--unit-color:#fefd21" aria-hidden="true"></i>Quaternary</dt><dd>Young surface sediment and deposits</dd></div>
-      <div><dt><i style="--unit-color:#ffb563" aria-hidden="true"></i>Cenozoic</dt><dd>Neogene and Paleogene rock units</dd></div>
-      <div><dt><i style="--unit-color:#9fd353" aria-hidden="true"></i>Cretaceous</dt><dd>Younger Mesozoic rock units</dd></div>
-      <div><dt><i style="--unit-color:#258bac" aria-hidden="true"></i>Jurassic</dt><dd>Middle Mesozoic rock units</dd></div>
-      <div><dt><i style="--unit-color:#8426a0" aria-hidden="true"></i>Triassic</dt><dd>Older Mesozoic rock units</dd></div>
-      <div><dt><i style="--unit-color:#fa443a" aria-hidden="true"></i>Permian</dt><dd>Late Paleozoic rock units</dd></div>
-      <div><dt><i style="--unit-color:#ed4fbb" aria-hidden="true"></i>Precambrian</dt><dd>Ancient rock units</dd></div>
-    </dl>
-    <h3>Common minerals by material</h3>
-    <dl class="geology-key__materials" aria-label="Examples of minerals commonly found in sediment and sedimentary rock">
-      <div><dt>Stream sand and gravel</dt><dd>Quartz, feldspar, mica</dd></div>
-      <div><dt>Fine silt and mud</dt><dd>Clay minerals, quartz, mica</dd></div>
-      <div><dt>Carbonate rock</dt><dd>Calcite; dolomite in dolostone</dd></div>
-      <div><dt>Salt or gypsum deposits</dt><dd>Halite or gypsum, depending on the deposit</dd></div>
-    </dl>
-    <p class="geology-key__note">Approximate age guide, not an exact key for every source map. Color alone cannot identify minerals at a location.</p>
-    <a href="https://timescalefoundation.org/charts/rgb.html" target="_blank" rel="noopener noreferrer">Geologic time color chart</a><br>
-    <a href="https://tiles.macrostrat.org/" target="_blank" rel="noopener noreferrer">About this geology map</a><br>
-    <a href="https://ngmdb.usgs.gov/nationalgeology/" target="_blank" rel="noopener noreferrer">USGS map: look up local rock units</a><br>
-    <a href="https://pubs.usgs.gov/sir/2013/5242/" target="_blank" rel="noopener noreferrer">USGS sediment mineral examples</a>
-  </dialog>
   <aside id="researchLocation" class="research-location" aria-live="polite" hidden>
     <button id="researchLocationClose" class="research-location__close" type="button" aria-label="Close location research">×</button>
     <strong>Location research</strong>

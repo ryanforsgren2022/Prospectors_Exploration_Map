@@ -313,8 +313,6 @@ const MLRS_GEOGRAPHIC_REPORT_URL = 'https://reports.blm.gov/report/MLRS/105/Mini
 const NOT_CLOSED_CLAIMS_SOURCE = 'notClosedClaims';
 const NOT_CLOSED_CLAIMS_LAYER_IDS = ['not-closed-claims-fill', 'not-closed-claims-outline'];
 const NOT_CLOSED_CLAIMS_MIN_ZOOM = 5;
-const GEOLOGY_SOURCE = 'macrostratGeology';
-const GEOLOGY_LAYER_ID = 'macrostrat-geology';
 const HISTORIC_MINES_ARCHIVE_SOURCE = 'historicMinesArchive';
 const HISTORIC_MINES_ARCHIVE_SOURCE_LAYER = 'historic_mines';
 const HISTORIC_MINES_ARCHIVE_LAYER_ID = 'historic-mines-archive-points';
@@ -548,14 +546,6 @@ roads: {
         maxzoom: 15,
         attribution: '© OpenStreetMap contributors'
       },
-      [GEOLOGY_SOURCE]: {
-        type: 'raster',
-        tiles: ['./data/geology/{z}/{x}/{y}.png'],
-        tileSize: 256,
-        minzoom: 0,
-        maxzoom: 6,
-        attribution: 'Geology © Macrostrat, CC BY 4.0; original map sources available from Macrostrat'
-      },
       terrain: {
         type: 'raster-dem',
         tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
@@ -582,7 +572,6 @@ roads: {
       { id: 'property-parcels-outline', type: 'line', source: PROPERTY_PARCELS_SOURCE, 'source-layer': 'parcels', minzoom: PROPERTY_PARCELS_MIN_ZOOM, layout: { visibility:'none' }, paint: { 'line-color':'rgba(255,150,20,.98)', 'line-width':['interpolate',['linear'],['zoom'],12,1.05,15,1.5,18,2] } },
       { id: 'not-closed-claims-fill', type: 'fill', source: NOT_CLOSED_CLAIMS_SOURCE, 'source-layer': 'claims', minzoom: NOT_CLOSED_CLAIMS_MIN_ZOOM, layout: { visibility:'none' }, paint: { 'fill-color':'rgba(128,70,190,.22)' } },
       { id: 'not-closed-claims-outline', type: 'line', source: NOT_CLOSED_CLAIMS_SOURCE, 'source-layer': 'claims', minzoom: NOT_CLOSED_CLAIMS_MIN_ZOOM, layout: { visibility:'none' }, paint: { 'line-color':'rgba(94,40,155,.95)', 'line-width':['interpolate',['linear'],['zoom'],7.5,.7,12,1.1,16,1.5] } },
-      { id: GEOLOGY_LAYER_ID, type: 'raster', source: GEOLOGY_SOURCE, layout: { visibility: 'none' }, paint: { 'raster-opacity': .82, 'raster-fade-duration': 0, 'raster-resampling': 'nearest' } },
 
       { id: HISTORIC_MINES_ARCHIVE_LAYER_ID, type: 'symbol', source: HISTORIC_MINES_ARCHIVE_SOURCE, 'source-layer': HISTORIC_MINES_ARCHIVE_SOURCE_LAYER, minzoom: 4, layout: { visibility: 'none', 'icon-image': 'historic-mine-pin', 'icon-size': ['interpolate', ['linear'], ['zoom'], 6.5, .65, 10, .8, 14, 1], 'icon-anchor': 'bottom', 'icon-allow-overlap': true, 'icon-ignore-placement': true }, paint: { 'icon-opacity': 1 } },
       { id: 'plss-townships-fill', type: 'fill', source: PLSS_TOWNSHIPS_SOURCE, 'source-layer': 'plss_townships', minzoom: PLSS_TOWNSHIPS_MIN_ZOOM, layout: { visibility:'none' }, paint: { 'fill-color':'rgba(255,215,0,.01)' } },
@@ -636,7 +625,6 @@ let surfaceManagementEnabled = document.querySelector('#surfaceManagement').chec
 let propertyParcelsEnabled = document.querySelector('#propertyParcels').checked;
 let miningWithdrawalsEnabled = document.querySelector('#miningWithdrawals').checked;
 let notClosedClaimsEnabled = document.querySelector('#notClosedClaims').checked;
-let geologyLayerEnabled = document.querySelector('#geologyLayer').checked;
 let historicMinesEnabled = document.querySelector('#historicMines').checked;
 
 
@@ -724,11 +712,6 @@ function setLayerVisibility(layerIds, visible) {
       }
     }
   });
-}
-
-function setGeologyLayerVisible(visible) {
-  geologyLayerEnabled = visible;
-  if (map.isStyleLoaded()) map.setLayoutProperty(GEOLOGY_LAYER_ID, 'visibility', visible ? 'visible' : 'none');
 }
 
 const historicMineVisitedControl = document.querySelector('#historicMineVisitedFlags');
@@ -3710,7 +3693,6 @@ const layerToggleHandlers = Object.freeze({
   propertyParcels: setPropertyParcelsVisible,
   miningWithdrawals: setMiningWithdrawalsVisible,
   notClosedClaims: setNotClosedClaimsVisible,
-  geologyLayer: setGeologyLayerVisible,
   historicMines: setHistoricMinesVisible,
   plssTownships: (visible) => setPlssVisible('townships', visible),
   plssSections: (visible) => setPlssVisible('sections', visible)
@@ -3746,13 +3728,6 @@ Object.entries(layerToggleHandlers).forEach(([id, handler]) => {
       );
     }
   });
-});
-
-const geologyKey = document.querySelector('#geologyKey');
-document.querySelector('#geologyKeyButton').addEventListener('click', () => geologyKey.showModal());
-document.querySelector('#geologyKeyClose').addEventListener('click', () => geologyKey.close());
-geologyKey.addEventListener('click', (event) => {
-  if (event.target === geologyKey) geologyKey.close();
 });
 
 map.on('error', (event) => console.warn('Map resource warning:', event.error?.message || event));
