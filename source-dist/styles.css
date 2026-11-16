@@ -1957,5 +1957,3 @@ html body #zoomReadout {
 /* Historic mine artwork and independent clustering controller. */
 .mine-control-row > span { display:flex; align-items:center; gap:8px; }
 .mine-control-icon { width:28px; height:30px; object-fit:contain; flex:0 0 auto; color:#fff; }
-.mine-cluster-control { margin:10px 0; padding:10px 12px; border:1px solid #118b83; border-radius:9px; background:rgba(5,42,40,.3); }
-.mine-cluster-control .switch-row { margin-top:0; }

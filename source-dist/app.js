@@ -731,7 +731,6 @@ function setGeologyLayerVisible(visible) {
   if (map.isStyleLoaded()) map.setLayoutProperty(GEOLOGY_LAYER_ID, 'visibility', visible ? 'visible' : 'none');
 }
 
-const historicMineClusteringControl = document.querySelector('#historicMineClustering');
 const historicMineVisitedControl = document.querySelector('#historicMineVisitedFlags');
 const HISTORIC_MINE_CLUSTER_SOURCE = 'historic-mine-cluster-view';
 const HISTORIC_MINE_CLUSTER_LAYERS = ['historic-mine-clusters', 'historic-mine-cluster-counts', 'historic-mine-unclustered'];
@@ -774,7 +773,7 @@ function ensureHistoricMineImages() {
 }
 
 function shouldClusterHistoricMines() {
-  return historicMinesEnabled && historicMineClusteringControl.checked && map.getZoom() < HISTORIC_MINE_CLUSTER_MAX_ZOOM;
+  return historicMinesEnabled && map.getZoom() < HISTORIC_MINE_CLUSTER_MAX_ZOOM;
 }
 
 function setHistoricMineClusterActive(active) {
@@ -905,7 +904,6 @@ function setHistoricMinesVisible(visible) {
   scheduleProspectorStateSync();
 }
 
-historicMineClusteringControl.addEventListener('change', scheduleHistoricMineClustering);
 historicMineVisitedControl.addEventListener('change', applyHistoricMineVisitedStates);
 map.on('sourcedata', event => {
   if (event.sourceId === HISTORIC_MINE_CLUSTER_SOURCE) {
