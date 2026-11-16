@@ -732,8 +732,6 @@ function setGeologyLayerVisible(visible) {
 }
 
 const historicMineClusteringControl = document.querySelector('#historicMineClustering');
-const historicMineRadiusControl = document.querySelector('#historicMineClusterRadius');
-const historicMineRadiusValue = document.querySelector('#historicMineClusterRadiusValue');
 const historicMineVisitedControl = document.querySelector('#historicMineVisitedFlags');
 const HISTORIC_MINE_CLUSTER_SOURCE = 'historic-mine-cluster-view';
 const HISTORIC_MINE_CLUSTER_LAYERS = ['historic-mine-clusters', 'historic-mine-cluster-counts', 'historic-mine-unclustered'];
@@ -743,8 +741,7 @@ let historicMineClusterTimer = null;
 let historicMineClusterActive = false;
 let historicMineClusterPending = false;
 let historicMineClusterSignature = '';
-let historicMineClusterRadius = Number(historicMineRadiusControl.value);
-let historicMineClusterAppliedRadius = historicMineClusterRadius;
+const historicMineClusterRadius = 60;
 
 function historicMineIconExpression() {
   if (!historicMineVisitedControl.checked || !visitedHistoricMineIds.size) return 'historic-mine-pin';
@@ -820,7 +817,6 @@ function ensureHistoricMineClusterLayers() {
     type: 'geojson', data: { type: 'FeatureCollection', features: [] },
     cluster: true, clusterRadius: historicMineClusterRadius, clusterMaxZoom: HISTORIC_MINE_CLUSTER_MAX_ZOOM - 1
   });
-  historicMineClusterAppliedRadius = historicMineClusterRadius;
   const source = HISTORIC_MINE_CLUSTER_SOURCE;
   map.addLayer({ id: HISTORIC_MINE_CLUSTER_LAYERS[0], type: 'circle', source, maxzoom: HISTORIC_MINE_CLUSTER_MAX_ZOOM,
     filter: ['has', 'point_count'], layout: { visibility: 'none' }, paint: {
@@ -869,12 +865,6 @@ function syncHistoricMineClustering() {
   ensureHistoricMineClusterLayers();
   const signature = `${[...points.keys()].sort().join('|')}`;
   const source = map.getSource(HISTORIC_MINE_CLUSTER_SOURCE);
-  const radiusChanged = historicMineClusterAppliedRadius !== historicMineClusterRadius;
-  if (radiusChanged) {
-    historicMineClusterAppliedRadius = historicMineClusterRadius;
-    historicMineClusterPending = true;
-    source.setClusterOptions({ cluster: true, clusterRadius: historicMineClusterRadius, clusterMaxZoom: HISTORIC_MINE_CLUSTER_MAX_ZOOM - 1 });
-  }
   if (signature !== historicMineClusterSignature || (!historicMineClusterActive && !historicMineClusterPending)) {
     historicMineClusterSignature = signature;
     historicMineClusterPending = true;
@@ -882,8 +872,6 @@ function syncHistoricMineClustering() {
     // Keep the original pins visible until the cluster source is ready.
     setLayerVisibility(HISTORIC_MINE_CLUSTER_LAYERS, true);
     source.setData({ type: 'FeatureCollection', features: [...points.values()] });
-  } else if (radiusChanged) {
-    setLayerVisibility(HISTORIC_MINE_CLUSTER_LAYERS, true);
   }
   if (historicMineClusterPending && map.isSourceLoaded(HISTORIC_MINE_CLUSTER_SOURCE)) {
     historicMineClusterPending = false;
@@ -918,11 +906,6 @@ function setHistoricMinesVisible(visible) {
 }
 
 historicMineClusteringControl.addEventListener('change', scheduleHistoricMineClustering);
-historicMineRadiusControl.addEventListener('input', () => {
-  historicMineClusterRadius = Number(historicMineRadiusControl.value);
-  historicMineRadiusValue.textContent = `${historicMineClusterRadius} px`;
-});
-historicMineRadiusControl.addEventListener('change', scheduleHistoricMineClustering);
 historicMineVisitedControl.addEventListener('change', applyHistoricMineVisitedStates);
 map.on('sourcedata', event => {
   if (event.sourceId === HISTORIC_MINE_CLUSTER_SOURCE) {
