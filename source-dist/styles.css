@@ -1935,3 +1935,118 @@ html body #zoomReadout {
 /* Historic mine artwork and independent clustering controller. */
 .mine-control-row > span { display:flex; align-items:center; gap:8px; }
 .mine-control-icon { width:28px; height:30px; object-fit:contain; flex:0 0 auto; color:#fff; }
+
+/* AEM_ORIGINAL_TOOLBAR_ARTWORK_V1 */
+.aem-edge-ui summary.aem-original-icon-summary {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-direction: row !important;
+  gap: 8px;
+  padding: 7px 9px;
+  text-align: center;
+  list-style: none !important;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed;
+  font-size: 13px !important;
+  line-height: 1.25;
+  color: #f6f1e7;
+  box-sizing: border-box;
+}
+
+.aem-edge-ui summary.aem-original-icon-summary > .aem-original-menu-image {
+  display: block !important;
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
+}
+
+.aem-original-menu-label {
+  min-width: 0;
+  white-space: normal;
+  text-align: center;
+  overflow-wrap: normal;
+}
+
+/* Suppress only the previous toolbar glyphs and main-tile chevrons. */
+.aem-edge-ui #aemLayersPanel > summary.aem-original-icon-summary::before,
+.aem-edge-ui #aemLayersPanel > summary.aem-original-icon-summary::after,
+.aem-edge-ui .aem-search > details > summary.aem-original-icon-summary::before,
+.aem-edge-ui .aem-search > details > summary.aem-original-icon-summary::after,
+.aem-edge-ui .aem-saved > details > summary.aem-original-icon-summary::before,
+.aem-edge-ui .aem-saved > details > summary.aem-original-icon-summary::after,
+.aem-edge-ui .aem-citations summary.aem-original-icon-summary::before,
+.aem-edge-ui .aem-citations summary.aem-original-icon-summary::after {
+  display: none !important;
+  content: none !important;
+  background-image: none !important;
+}
+
+.aem-edge-ui summary.aem-original-icon-summary::-webkit-details-marker {
+  display: none !important;
+}
+
+.aem-edge-ui summary.aem-original-icon-summary::marker {
+  content: "" !important;
+}
+
+/* The taller existing tiles use the original icon-above-label arrangement. */
+.aem-edge-ui .aem-search > details:not([open]) > summary.aem-original-icon-summary,
+.aem-edge-ui .aem-saved > details:last-child:not([open]) > summary.aem-original-icon-summary {
+  flex-direction: column !important;
+  gap: 6px;
+}
+
+.aem-edge-ui .aem-search > details:not([open]) > summary.aem-original-icon-summary > .aem-original-menu-image,
+.aem-edge-ui .aem-saved > details:last-child:not([open]) > summary.aem-original-icon-summary > .aem-original-menu-image {
+  width: 46px;
+  height: 46px;
+}
+
+/* Preserve the original wide truck artwork's aspect ratio. */
+.aem-edge-ui .aem-saved > details:first-child > summary.aem-original-icon-summary > .aem-original-menu-image {
+  width: 61px;
+  height: 38px;
+}
+
+/* Roads and Account stay in their existing Layers submenu. */
+.aem-edge-ui #aemLayersPanel .aem-layers-body > details > summary.aem-original-icon-summary {
+  justify-content: flex-start !important;
+  gap: 9px;
+}
+
+.aem-edge-ui #aemLayersPanel .aem-layers-body > details > summary.aem-original-icon-summary > .aem-original-menu-image {
+  width: 27px;
+  height: 27px;
+}
+
+.aem-edge-ui #aemLayersPanel .aem-layers-body > details > summary.aem-original-icon-summary > .aem-original-menu-label {
+  text-align: left;
+}
+
+/* Keep Citations as its existing compact, icon-only top-right button. */
+.aem-edge-ui .aem-citations summary.aem-original-icon-summary {
+  padding: 5px !important;
+  gap: 0;
+}
+
+.aem-edge-ui .aem-citations summary.aem-original-icon-summary > .aem-original-menu-image {
+  width: 38px;
+  height: 38px;
+}
+
+@media (max-width: 600px) {
+  .aem-edge-ui summary.aem-original-icon-summary {
+    gap: 7px;
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 350px) {
+  .aem-edge-ui .aem-saved > details:first-child > summary.aem-original-icon-summary > .aem-original-menu-image {
+    width: 49px;
+  }
+}

@@ -23,7 +23,10 @@
   <div class="aem-edge-ui">
     <div class="aem-brand">© American Exploration Maps</div>
     <div class="aem-citations">    <details class="toolbar-menu">
-      <summary>Citations</summary>
+      <summary class="aem-original-icon-summary aem-citations-icon-button" title="Citations" aria-label="Citations">
+          <img class="aem-original-menu-image" src="./images/aem-original-citations-v1.png" alt="" aria-hidden="true" decoding="async">
+          <span class="sr-only">Citations</span>
+        </summary>
       <div class="toolbar-menu__content site-information">
         <h2>Prospectors Exploration Map <span>(BETA)</span></h2>
         <p>An exploration and land-research map across 11 western states, combining mining claims, historic mines, PLSS surveys, public-land information, roads, and geographic reference data.</p>
@@ -38,7 +41,10 @@
 
     <div class="aem-layers">
       <details id="aemLayersPanel" class="toolbar-menu">
-        <summary>Layers</summary>
+        <summary class="aem-original-icon-summary" title="Layers" aria-label="Layers">
+          <img class="aem-original-menu-image" src="./images/aem-original-layers-v1.png" alt="" aria-hidden="true" decoding="async">
+          <span class="aem-original-menu-label">Layers</span>
+        </summary>
         <div class="aem-layers-body">
     <details class="toolbar-menu">
       <summary>Mining History</summary>
@@ -70,7 +76,10 @@
     </details>
 
           <details class="toolbar-menu">
-            <summary>Roads</summary>
+            <summary class="aem-original-icon-summary" title="Roads" aria-label="Roads">
+          <img class="aem-original-menu-image" src="./images/aem-original-roads-v1.png" alt="" aria-hidden="true" decoding="async">
+          <span class="aem-original-menu-label">Roads</span>
+        </summary>
             <div class="toolbar-menu__content">
               <label for="aemRoadDensity">Road Density:
                 <output id="aemRoadDensityValue">50%</output>
@@ -82,7 +91,10 @@
           </details>
           <div id="aemDynamicLayers"></div>
     <details id="accountGroup" class="toolbar-menu">
-      <summary>Account</summary>
+      <summary class="aem-original-icon-summary" title="Account" aria-label="Account">
+          <img class="aem-original-menu-image" src="./images/aem-original-account-v1.png" alt="" aria-hidden="true" decoding="async">
+          <span class="aem-original-menu-label">Account</span>
+        </summary>
       <div class="toolbar-menu__content account-panel">
         <span class="account-panel__label">Signed in as</span>
         <strong id="accountEmail" class="account-panel__email">Loading account…</strong>
@@ -97,7 +109,10 @@
 
     <div class="aem-search">
       <details class="aem-edge-panel">
-        <summary>Search &amp; Routing</summary>
+        <summary class="aem-original-icon-summary" title="Search &amp; Routing" aria-label="Search &amp; Routing">
+          <img class="aem-original-menu-image" src="./images/aem-original-search-routing-v1.png" alt="" aria-hidden="true" decoding="async">
+          <span class="aem-original-menu-label">Search &amp; Routing</span>
+        </summary>
         <div class="aem-edge-panel-body">
         <form id="mapSearchForm" class="map-search" role="search">
           <label for="mapSearch">Find a location</label>
@@ -115,7 +130,10 @@
 
     <div class="aem-saved">
       <details class="aem-edge-panel">
-        <summary>Track &amp; Save</summary>
+        <summary class="aem-original-icon-summary" title="Track &amp; Save" aria-label="Track &amp; Save">
+          <img class="aem-original-menu-image" src="./images/aem-original-track-save-v1.png" alt="" aria-hidden="true" decoding="async">
+          <span class="aem-original-menu-label">Track &amp; Save</span>
+        </summary>
         <div class="aem-edge-panel-body">
         <div class="gps-tool" aria-live="polite">
           <button id="gpsTrackingButton" type="button" aria-pressed="false">Start GPS tracking</button>
@@ -130,7 +148,10 @@
         </div>
       </details>
       <details class="aem-edge-panel">
-        <summary>Saved Pins / Visited Mines</summary>
+        <summary class="aem-original-icon-summary" title="Saved Pins / Visited Mines" aria-label="Saved Pins / Visited Mines">
+          <img class="aem-original-menu-image" src="./images/aem-original-saved-pins-v1.png" alt="" aria-hidden="true" decoding="async">
+          <span class="aem-original-menu-label">Saved Pins / Visited Mines</span>
+        </summary>
         <div class="aem-edge-panel-body">
         <details id="savedLocationsGroup" class="saved-locations-dock">
           <summary>Saved locations</summary>
@@ -210,47 +231,7 @@
   
   
 
-<script>
-// AEM_CITATIONS_ICON_ONLY_V1
-document.addEventListener('DOMContentLoaded', () => {
-  const summary = [...document.querySelectorAll('summary')]
-    .find(el => {
-      const label = el.textContent.trim().toLowerCase();
-      return label === 'citations' ||
-             label === 'about & data' ||
-             label === 'about &amp; data';
-    });
 
-  if (!summary) {
-    console.error('STOP AND REPORT: Citations control not found.');
-    return;
-  }
-
-  summary.replaceChildren();
-
-  const icon = document.createElement('span');
-  icon.className = 'aem-citations-icon-only';
-  icon.setAttribute('aria-hidden', 'true');
-
-  icon.innerHTML = `
-    <svg viewBox="0 0 48 48" fill="none"
-         stroke="currentColor" stroke-width="2.8"
-         stroke-linecap="round" stroke-linejoin="round">
-      <path d="M24 10 C17 5 10 6 5 8 V36
-               C12 34 18 34 24 39 Z"/>
-      <path d="M24 10 C31 5 38 6 43 8 V36
-               C36 34 30 34 24 39 Z"/>
-      <path d="M10 15 H19 M10 21 H19 M10 27 H19"/>
-      <circle cx="34" cy="17" r="2"/>
-      <path d="M34 23 V32"/>
-    </svg>`;
-
-  summary.appendChild(icon);
-  summary.setAttribute('aria-label', 'Citations');
-  summary.setAttribute('title', 'Citations');
-  summary.classList.add('aem-citations-icon-button');
-});
-</script>
 
 </body>
 </html>
