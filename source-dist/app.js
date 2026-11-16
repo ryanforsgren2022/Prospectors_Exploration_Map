@@ -675,42 +675,13 @@ let plssSectionsEnabled = false;
 document.querySelector('#terrainButton').classList.toggle('active', terrainEnabled);
 
 function setLayerVisibility(layerIds, visible) {
+  const requested = visible ? 'visible' : 'none';
+
   layerIds.forEach((id) => {
-    const exists = Boolean(map.getLayer(id));
-
-    if (TRACE_LAYERS) {
-      console.log('[LAYER TRACE] setLayerVisibility', {
-        id,
-        exists,
-        requested: visible ? 'visible' : 'none',
-        current: exists
-          ? map.getLayoutProperty(id, 'visibility')
-          : 'LAYER MISSING'
-      });
-    }
-
-    if (!exists && TRACE_LAYERS) {
-      console.error(
-        '[LAYER TRACE] LAYER MISSING',
-        id
-      );
-    }
-
-    if (exists) {
-      map.setLayoutProperty(
-        id,
-        'visibility',
-        visible ? 'visible' : 'none'
-      );
-
-      if (TRACE_LAYERS) {
-        console.log(
-          '[LAYER TRACE] visibility after',
-          id,
-          map.getLayoutProperty(id, 'visibility')
-        );
-      }
-    }
+    if (!map.getLayer(id)) return;
+    const current = map.getLayoutProperty(id, 'visibility');
+    if ((current || 'visible') === requested) return;
+    map.setLayoutProperty(id, 'visibility', requested);
   });
 }
 
@@ -1569,10 +1540,6 @@ function setPlssVisible(kind, visible) {
   scheduleProspectorStateSync();
 }
 
-function syncAccessPresentation() {
-  if (!map.getStyle()?.layers) return;
-  setLayerVisibility(WESTERN_ROAD_ACCESS, startupRoadsReady && roadRenderingEnabled);
-}
 
 
 
@@ -1622,16 +1589,9 @@ function syncRoadView() {
   setLayerVisibility(WESTERN_ROAD_PRIMARY, enabled && !offRoadTrailsOnly);
   setLayerVisibility(WESTERN_ROAD_ACCESS, enabled && !offRoadTrailsOnly);
   setLayerVisibility(WESTERN_ROAD_TRAILS, enabled && offRoadTrailsOnly);
-  // City labels stay visible independently of all road controls.
-  if (map.getLayer('place-labels')) {
-    map.setLayoutProperty('place-labels', 'visibility', 'visible');
-  }
+  setLayerVisibility(['place-labels'], true);
 }
 
-function showLayers(layerIds) {
-  setLayerVisibility(layerIds, true);
-  syncRoadView();
-}
 
 function syncTwoDHillshade() {
   const showOption = !terrainEnabled;
@@ -1640,9 +1600,6 @@ function syncTwoDHillshade() {
   map.setLayoutProperty('terrain-shade', 'visibility', showOption && twoDHillshadeEnabled ? 'visible' : 'none');
 }
 
-function showCoreRoadLayers() {
-  if (startupRoadsReady && map.isStyleLoaded() && map.getZoom() >= ROAD_ZOOM.accessLine) showLayers(coreRoadLayers);
-}
 
 function afterSourceSettles(sourceId, callback, fallbackDelay = 8000) {
   let completed = false;
@@ -1716,10 +1673,9 @@ map.once('style.load', () => {
   syncZoomPresentation();
 
 
-  // Start tile-backed research overlays immediately.
-  // PMTiles/PBF requests can load in parallel with the base imagery.
-  setMiningWithdrawalsVisible(miningWithdrawalsEnabled);
-  setHistoricMinesVisible(historicMinesEnabled);
+  // Initialize both registries from the shared startup event.
+  void initializeProspectorStateLoader();
+  void refreshDynamicVMMapLayers();
 
   let roadsStarted = false;
   const startRoads = () => {
@@ -1744,15 +1700,16 @@ map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-rig
 
 const zoomReadout = document.querySelector('#zoomReadout');
 function syncZoomPresentation() {
-  zoomReadout.textContent = `Z ${map.getZoom().toFixed(1)}`;
-  showCoreRoadLayers();
-  syncAccessPresentation();
+  const zoomText = `Z ${map.getZoom().toFixed(1)}`;
+
+  if (zoomReadout.textContent !== zoomText) {
+    zoomReadout.textContent = zoomText;
+  }
+
+  syncRoadView();
   syncSurfaceManagementPresentation();
   syncPropertyParcelsPresentation();
-  syncNotClosedClaimsPresentation();
   syncHistoricMinesPresentation();
-  syncPlssPresentation('townships');
-  syncPlssPresentation('sections');
 }
 
 // All on-demand sources share the same settled-viewport path. This keeps
@@ -1780,14 +1737,12 @@ function scheduleUnifiedMapSettledUpdates() {
   window.requestAnimationFrame(() => {
     unifiedMapSettledUpdateScheduled = false;
     syncDynamicVMMapLayers();
-    syncAccessPresentation();
 
     if (unifiedProspectorEventsEnabled) scheduleProspectorStateSync();
   });
 }
 
 map.on('moveend', scheduleUnifiedMapSettledUpdates);
-map.on('zoomend', scheduleUnifiedMapSettledUpdates);
 map.on('click', (event) => {
   if (!dropPinMode) return;
 
@@ -2925,18 +2880,25 @@ async function prepareProspectorDatasets(stateCode, incoming) {
 }
 
 function requestHistoricMineDataset(stateCode, state) {
-  if (state.historicMinesRequest || !WESTERN_PROSPECTOR_STATES.has(stateCode)) return;
+  if (!WESTERN_PROSPECTOR_STATES.has(stateCode)) return;
+  if (state.datasets?.historicMines) return;
+  if (state.historicMinesRequest) return;
+
   state.historicMinesRequest = prepareProspectorDatasets(stateCode, {
     datasets: { historicMines: state.discoveredHistoricMines }
-  }).then((datasets) => {
-    if (datasets.historicMines) {
-      state.datasets.historicMines = datasets.historicMines;
-      scheduleProspectorStateSync();
-    } else {
-      // Retry on the next map update after a transient metadata failure.
+  })
+    .then((datasets) => {
+      if (datasets.historicMines) {
+        state.datasets.historicMines = datasets.historicMines;
+        scheduleProspectorStateSync();
+      }
+    })
+    .catch((error) => {
+      console.warn(`Historic mines request failed for ${stateCode}:`, error.message);
+    })
+    .finally(() => {
       state.historicMinesRequest = null;
-    }
-  });
+    });
 }
 
 function addProspectorSource(
@@ -3482,13 +3444,10 @@ function prospectorGroupToggleEnabled(group) {
 
 function prospectorGroupShouldRender(
   state,
-  group
+  group,
+  inView
 ) {
-  if (
-    !prospectorsStateIntersectsView(
-      state?.bounds
-    )
-  ) {
+  if (!inView) {
     return false;
   }
 
@@ -3548,10 +3507,8 @@ function syncProspectorStates() {
       continue;
     }
 
-    if (inView) {
-      initializeProspectorState(
-        stateCode
-      );
+    if (inView && !initializedProspectorStates.has(stateCode)) {
+      initializeProspectorState(stateCode);
     }
 
     const groups =
@@ -3573,7 +3530,8 @@ function syncProspectorStates() {
       const visible =
         prospectorGroupShouldRender(
           state,
-          group
+          group,
+          inView
         );
 
       /*
@@ -3583,9 +3541,15 @@ function syncProspectorStates() {
        * the group is actually capable of rendering.
        */
       if (visible) {
+        const groupKey = `${stateCode}:${group}`;
+
         if (group === 'historicMines' && !state.datasets?.historicMines) {
           requestHistoricMineDataset(stateCode, state);
-        } else {
+        } else if (
+          !readyProspectorGroups.has(groupKey) ||
+          group === 'plssTownships' ||
+          group === 'plssSections'
+        ) {
           ensureProspectorGroup(stateCode, state, group);
         }
       }
@@ -3675,23 +3639,6 @@ async function initializeProspectorStateLoader() {
 
     unifiedProspectorEventsEnabled = true;
 
-    document.addEventListener(
-      'change',
-      (event) => {
-        if ([
-          'roadRendering',
-          'surfaceManagement',
-          'propertyParcels',
-          'miningWithdrawals',
-          'notClosedClaims',
-          'historicMines',
-          'plssTownships',
-          'plssSections'
-        ].includes(event.target?.id)) {
-          scheduleProspectorStateSync();
-        }
-      }
-    );
 
   } catch (error) {
     console.warn(
@@ -3701,20 +3648,11 @@ async function initializeProspectorStateLoader() {
   }
 }
 
-if (map.loaded()) {
-  initializeProspectorStateLoader();
-} else {
-  map.once(
-    'style.load',
-    initializeProspectorStateLoader
-  );
-}
 
 const layerToggleHandlers = Object.freeze({
   roadRendering: (visible) => {
     roadRenderingEnabled = visible;
     syncRoadView();
-    syncAccessPresentation();
   },
   offRoadTrailsOnly: (visible) => {
     offRoadTrailsOnly = false;
@@ -3946,13 +3884,7 @@ function syncDynamicVMMapLayers() {
           }
         }
 
-        if (map.getLayer(id)) {
-          map.setLayoutProperty(
-            id,
-            'visibility',
-            visible ? 'visible' : 'none'
-          );
-        }
+        setLayerVisibility([id], visible);
       }
     }
   }
@@ -4087,11 +4019,6 @@ async function refreshDynamicVMMapLayers(refresh = false) {
   }
 }
 
-if (map.loaded()) {
-  refreshDynamicVMMapLayers();
-} else {
-  map.once('style.load', () => refreshDynamicVMMapLayers());
-}
 
 // Refresh published automatic layers periodically while the page is visible.
 // A longer interval also discovers newly published layers when none exist yet.
