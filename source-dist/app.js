@@ -723,6 +723,7 @@ let historicMineClusterTimer = null;
 let historicMineClusterActive = false;
 let historicMineClusterPending = false;
 let historicMineClusterSignature = '';
+const HISTORIC_MINE_CLUSTER_SETTLE_MS = 250;
 const historicMineClusterRadius = 60;
 
 function historicMineIconExpression() {
@@ -761,20 +762,27 @@ function shouldClusterHistoricMines() {
 
 function setHistoricMineClusterActive(active) {
   historicMineClusterActive = Boolean(active);
-  setLayerVisibility(HISTORIC_MINE_CLUSTER_LAYERS, historicMineClusterActive);
+  const visibility = historicMineClusterActive ? 'visible' : 'none';
+  for (const id of HISTORIC_MINE_CLUSTER_LAYERS) {
+    if (map.getLayer(id) && map.getLayoutProperty(id, 'visibility') !== visibility) {
+      map.setLayoutProperty(id, 'visibility', visibility);
+    }
+  }
   // Keep vector sources attached and visible to MapLibre so they continue loading tiles.
   // Only their marker opacity changes; this avoids a source-loading feedback loop.
   for (const [stateCode] of prospectorStateRegistry) {
     const id = `prospector-${stateCode}-${HISTORIC_MINES_ARCHIVE_LAYER_ID}`;
-    if (map.getLayer(id)) map.setPaintProperty(id, 'icon-opacity', historicMineClusterActive ? 0 : 1);
+    const opacity = historicMineClusterActive ? 0 : 1;
+    if (map.getLayer(id) && map.getPaintProperty(id, 'icon-opacity') !== opacity) {
+      map.setPaintProperty(id, 'icon-opacity', opacity);
+    }
   }
 }
 
 function collectHistoricMineClusterPoints() {
   const points = new Map();
-  const bounds = map.getBounds();
-  const west = bounds.getWest(), east = bounds.getEast(), south = bounds.getSouth(), north = bounds.getNorth();
-  const padX = Math.max(.001, (east - west) * .15), padY = Math.max(.001, (north - south) * .15);
+  // Use the loaded tile footprint, not a moving viewport-edge cutoff. This
+  // keeps nearby cluster membership stable as the camera shifts.
   for (const [stateCode, state] of prospectorStateRegistry) {
     if (!prospectorsStateIntersectsView(state.bounds)) continue;
     const source = `prospector-${stateCode}-historic-mines`;
@@ -784,7 +792,7 @@ function collectHistoricMineClusterPoints() {
     for (const feature of map.querySourceFeatures(source, { sourceLayer })) {
       if (feature.geometry?.type !== 'Point') continue;
       const [lng, lat] = feature.geometry.coordinates;
-      if (!Number.isFinite(lng) || !Number.isFinite(lat) || lng < west - padX || lng > east + padX || lat < south - padY || lat > north + padY) continue;
+      if (!Number.isFinite(lng) || !Number.isFinite(lat)) continue;
       const properties = feature.properties || {};
       const key = `${stateCode}:${properties.dep_id ?? properties.record_id ?? ''}:${lng.toFixed(5)}:${lat.toFixed(5)}`;
       if (!points.has(key)) points.set(key, { type: 'Feature', geometry: { type: 'Point', coordinates: [lng, lat] }, properties: { ...properties } });
@@ -831,29 +839,45 @@ function ensureHistoricMineClusterLayers() {
   }
 }
 
+function historicMineTilesSettled() {
+  for (const [stateCode, state] of prospectorStateRegistry) {
+    if (!prospectorsStateIntersectsView(state.bounds)) continue;
+    const id = `prospector-${stateCode}-historic-mines`;
+    if (map.getSource(id) && !map.isSourceLoaded(id)) return false;
+  }
+  return true;
+}
+
 function syncHistoricMineClustering() {
   if (!shouldClusterHistoricMines()) {
     historicMineClusterPending = false;
     setHistoricMineClusterActive(false);
     return;
   }
-  // Query only already-loaded visible-state vector tiles; never download another dataset.
+  // Do not replace a working cluster snapshot with partially loaded tiles.
+  if (map.isMoving() || !historicMineTilesSettled()) return;
   const points = collectHistoricMineClusterPoints();
   if (!points.size) {
     historicMineClusterPending = false;
     setHistoricMineClusterActive(false);
+    historicMineClusterSignature = '';
     return;
   }
   ensureHistoricMineClusterLayers();
-  const signature = `${[...points.keys()].sort().join('|')}`;
+  const keys = [...points.keys()].sort();
+  const signature = keys.join('|');
   const source = map.getSource(HISTORIC_MINE_CLUSTER_SOURCE);
-  if (signature !== historicMineClusterSignature || (!historicMineClusterActive && !historicMineClusterPending)) {
+  if (signature !== historicMineClusterSignature) {
     historicMineClusterSignature = signature;
     historicMineClusterPending = true;
     // The GeoJSON source must be visible before MapLibre can finish loading its tiles.
     // Keep the original pins visible until the cluster source is ready.
     setLayerVisibility(HISTORIC_MINE_CLUSTER_LAYERS, true);
-    source.setData({ type: 'FeatureCollection', features: [...points.values()] });
+    source.setData({ type: 'FeatureCollection', features: keys.map(key => points.get(key)) });
+  } else if (!historicMineClusterActive && !historicMineClusterPending) {
+    // Reuse the existing snapshot after returning from individual-pin zoom.
+    historicMineClusterPending = true;
+    setLayerVisibility(HISTORIC_MINE_CLUSTER_LAYERS, true);
   }
   if (historicMineClusterPending && map.isSourceLoaded(HISTORIC_MINE_CLUSTER_SOURCE)) {
     historicMineClusterPending = false;
@@ -867,13 +891,15 @@ function scheduleHistoricMineClustering() {
     if (historicMineClusterActive || historicMineClusterPending) syncHistoricMineClustering();
     return;
   }
+  if (map.isMoving()) return;
   historicMineClusterTimer = window.setTimeout(() => {
+    historicMineClusterTimer = null;
     try { syncHistoricMineClustering(); } catch (error) {
       historicMineClusterPending = false;
       setHistoricMineClusterActive(false);
       console.warn('Historic mine clustering:', error);
     }
-  }, 100);
+  }, HISTORIC_MINE_CLUSTER_SETTLE_MS);
 }
 
 function syncHistoricMinesPresentation() {
@@ -888,15 +914,20 @@ function setHistoricMinesVisible(visible) {
 }
 
 historicMineVisitedControl.addEventListener('change', applyHistoricMineVisitedStates);
+map.on('movestart', () => {
+  window.clearTimeout(historicMineClusterTimer);
+  historicMineClusterTimer = null;
+});
+map.on('moveend', scheduleHistoricMineClustering);
 map.on('sourcedata', event => {
   if (event.sourceId === HISTORIC_MINE_CLUSTER_SOURCE) {
-    if (historicMineClusterPending && event.isSourceLoaded && shouldClusterHistoricMines()) {
+    if (historicMineClusterPending && event.isSourceLoaded && shouldClusterHistoricMines() && !map.isMoving()) {
       historicMineClusterPending = false;
       setHistoricMineClusterActive(true);
     }
     return;
   }
-  if (shouldClusterHistoricMines() && /^prospector-[a-z]{2}-historic-mines$/.test(event.sourceId || '') && event.sourceDataType === 'content') scheduleHistoricMineClustering();
+  if (shouldClusterHistoricMines() && /^prospector-[a-z]{2}-historic-mines$/.test(event.sourceId || '') && (event.sourceDataType === 'content' || event.isSourceLoaded)) scheduleHistoricMineClustering();
 });
 
 function makeHistoricMinePopup(properties = {}) {
