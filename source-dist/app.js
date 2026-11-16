@@ -1538,8 +1538,10 @@ map.once('style.load', () => {
 
   // Start tile-backed research overlays immediately.
   // PMTiles/PBF requests can load in parallel with the base imagery.
-  setMiningWithdrawalsVisible(miningWithdrawalsEnabled);
-  setHistoricMinesVisible(historicMinesEnabled);
+  if (!isMibile) { 
+    setMiningWithdrawalsVisible(miningWithdrawalsEnabled); 
+    setHistoricMinesVisible(historicMinesEnabled);
+  }
 
   let roadsStarted = false;
   const startRoads = () => {
@@ -1549,6 +1551,11 @@ map.once('style.load', () => {
     window.clearTimeout(roadStartTimer);
     startupRoadsReady = true;
     syncRoadView();
+    if (isMobile) {
+    setMiningWithdrawalsVisible(miningWithdrawalsEnabled);
+    setHistoricMinesVisible(historicMinesEnabled);
+    refreshDynamicVMMapLayers();
+    } 
     if (!roadRenderingEnabled) {
       enableTerrain();
       return;
@@ -3898,29 +3905,34 @@ async function refreshDynamicVMMapLayers(refresh = false) {
 
     aemVMRegistry.clear();
 
-    for (const [code, state] of next) {
-      aemVMRegistry.set(code, state);
+    for (const [code, state] of next) { aemVMRegistry.set(code, state);
     }
-
+    if (!isMobile) {
+    if (map.loaded()) {
+      refreshDynamicVMMapLayers();
+    } else {
+    map.once('style.load', () => refreshDynamicVMMapLayers());
+    }
+  }
     syncDynamicVMMapLayers();
     aemVMRenderControls();
 
   } catch (error) {
     console.warn('Automatic VM discovery:', error);
+    }
   }
-}
 
-if (map.loaded()) {
-  refreshDynamicVMMapLayers();
-} else {
+  if (map.loaded()) {
+   refreshDynamicVMMapLayers();
+  } else {
   map.once('style.load', () => refreshDynamicVMMapLayers());
-}
+  }
 
 // Refresh published automatic layers periodically while the page is visible.
 // A longer interval also discovers newly published layers when none exist yet.
 window.setInterval(() => {
   if (!document.hidden) void refreshDynamicVMMapLayers(true);
-}, 300000);
+  }, 300000);
 
 
 
