@@ -1953,3 +1953,13 @@ html body #zoomReadout {
 .search-marker > span {
   display: none !important;
 }
+
+/* Historic mine artwork and independent clustering controller. */
+.mine-control-row > span { display:flex; align-items:center; gap:8px; }
+.mine-control-icon { width:28px; height:30px; object-fit:contain; flex:0 0 auto; color:#fff; }
+.mine-cluster-control { margin:10px 0; padding:10px 12px; border:1px solid #118b83; border-radius:9px; background:rgba(5,42,40,.3); }
+.mine-cluster-control .switch-row { margin-top:0; }
+.mine-cluster-control label[for="historicMineClusterRadius"] { display:block; margin:8px 0; font-size:13px; font-weight:700; }
+.mine-cluster-control output { color:#5eead4; }
+.mine-cluster-control input[type="range"] { width:100%; accent-color:#118b83; }
+.mine-cluster-range { display:flex; justify-content:space-between; font-size:12px; color:#d7e5df; }

@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { minify } from 'terser';
+import sharp from 'sharp';
 
 const BETA_PATH = 'beta-404b87eaa6a7b90cc88f57111d565a25';
 const publicDirectory = join(process.cwd(), 'public');
@@ -13,6 +14,7 @@ const sourceDist = join(process.cwd(), 'source-dist');
 const copies = [
   ['vendor', 'vendor'],
   ['data/geology', 'data/geology'],
+  ['images', 'images'],
 ];
 
 for (const [source, destination] of copies) {
@@ -22,6 +24,12 @@ for (const [source, destination] of copies) {
     force: false,
     errorOnExist: false
   });
+}
+
+// Restore the original mine artwork as MapLibre-compatible raster images.
+for (const name of ['historic-mine-pin', 'historic-mine-visited-flag']) {
+  const artwork = join(sourceDist, 'images', `${name}.svg`);
+  await sharp(artwork).png().toFile(join(betaDirectory, 'images', `${name}.png`));
 }
 
 const applicationSource = readFileSync(join(sourceDist, 'app.js'), 'utf8')
