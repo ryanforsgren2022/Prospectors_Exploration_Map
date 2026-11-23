@@ -143,7 +143,7 @@ function aemInstallRouteTracker(map) {
   function render() {
     const current = trip || shownSaved;
     stats.textContent = current
-      ? \`\${(current.distanceMeters / 1609.344).toFixed(2)} mi · \${aemRouteFormatDuration(trip ? elapsed() : current.elapsedMs)} · ↑ \${Math.round(current.elevationGainMeters * 3.28084)} ft · ↓ \${Math.round(current.elevationLossMeters * 3.28084)} ft\`
+      ? `${(current.distanceMeters / 1609.344).toFixed(2)} mi · ${aemRouteFormatDuration(trip ? elapsed() : current.elapsedMs)} · ↑ ${Math.round(current.elevationGainMeters * 3.28084)} ft · ↓ ${Math.round(current.elevationLossMeters * 3.28084)} ft`
       : '0.00 mi · 00:00:00 · ↑ 0 ft · ↓ 0 ft';
     startButton.disabled = Boolean(trip);
     pauseButton.disabled = !trip;
@@ -181,11 +181,11 @@ function aemInstallRouteTracker(map) {
         }
       }
       if (aemRouteAddPoint(trip, point)) {
-        status.textContent = \`Recording \${trip.segments.at(-1).mode} · GPS ±\${Math.round(coords.accuracy)} m\`;
+        status.textContent = `Recording ${trip.segments.at(-1).mode} · GPS ±${Math.round(coords.accuracy)} m`;
         render();
       }
     }, (error) => {
-      status.textContent = \`GPS unavailable: \${error.message}\`;
+      status.textContent = `GPS unavailable: ${error.message}`;
       // Keep the trip and controls available if location service fails.
     }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
   }
