@@ -1,0 +1,10 @@
+.aem-route-panel { position: absolute; z-index: 6; right: max(12px, env(safe-area-inset-right)); bottom: max(55px, calc(env(safe-area-inset-bottom) + 35px)); width: min(330px, calc(100vw - 24px)); color: #f7faf7; background: rgba(17,24,20,.96); border: 1px solid rgba(255,255,255,.2); border-radius: 13px; box-shadow: 0 10px 30px rgba(0,0,0,.35); font: 14px system-ui, sans-serif; }
+.aem-route-panel summary { padding: 12px 15px; cursor: pointer; font-weight: 750; }
+.aem-route-panel__body { display: grid; gap: 10px; padding: 0 14px 14px; }
+.aem-route-panel__body p { margin: 0; color: #c9d7cc; }
+.aem-route-panel__body label { display: grid; gap: 5px; }
+.aem-route-panel__body select { min-height: 40px; padding: 6px; border: 1px solid #64756a; border-radius: 8px; color: #fff; background: #18211b; }
+.aem-route-actions { display: flex; gap: 5px; }
+.aem-route-actions button { flex: 1; min-width: 0; font-size: 12px; }
+#aem-route-stats { color: #aee8b9; font-weight: 700; }
+@media (max-width: 650px) { .aem-route-panel { right: 12px; bottom: 62px; } }
