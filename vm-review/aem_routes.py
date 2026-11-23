@@ -3,9 +3,9 @@
 This router reads a derived routing graph and the existing search indexes. It
 never changes production indexes, MapLibre layer visibility, or PLSS state.
 """
-import json
 import os
 import sqlite3
+from threading import BoundedSemaphore
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
@@ -16,11 +16,36 @@ from shapely.ops import transform
 
 from aem_route_graph import DRIVE, HIKE, find_path
 from aem_route_parcels import parcel_corridor
+from aem_route_config import STATES, INDEX_ROOT
 
 router = APIRouter(prefix='/api/routes', tags=['AEM Routes'])
 GRAPH = Path(os.environ.get('AEM_ROUTE_GRAPH', '/mnt/volume_sfo3_1794422503599/aem-routing/routes.sqlite'))
-INDEXES = Path(os.environ.get('AEM_SEARCH_INDEXES', '/mnt/volume_sfo3_1794422503599/updater/data/search-v2'))
-STATES = ('az', 'ca', 'co', 'id', 'mt', 'nm', 'nv', 'or', 'ut', 'wa', 'wy')
+INDEXES = Path(os.environ.get('AEM_SEARCH_INDEXES', str(INDEX_ROOT)))
+PLAN_SLOT = BoundedSemaphore(1)
+PARCEL_SLOT = BoundedSemaphore(1)
+
+
+def _limited(slot, operation, request):
+    if not slot.acquire(blocking=False):
+        raise HTTPException(429, 'Route service is busy; retry shortly',
+                            headers={'Retry-After': '5'})
+    try:
+        return operation(request)
+    finally:
+        slot.release()
+
+
+@router.get('/health')
+def routes_health():
+    imported = set()
+    if GRAPH.is_file():
+        try:
+            with sqlite3.connect(f'file:{GRAPH}?mode=ro', uri=True, timeout=2) as db:
+                imported = {row[0] for row in db.execute('SELECT state FROM route_sources')}
+        except sqlite3.Error:
+            pass
+    return {'ready': imported == set(STATES), 'states': sorted(imported),
+            'missing_states': sorted(set(STATES) - imported)}
 
 
 class PlanRequest(BaseModel):
@@ -43,6 +68,10 @@ def _validated_points(points):
 
 @router.post('/plan')
 def plan_route(request: PlanRequest):
+    return _limited(PLAN_SLOT, _plan_route, request)
+
+
+def _plan_route(request: PlanRequest):
     points = _validated_points(request.points)
     mode = {'driving': DRIVE, 'hiking': HIKE}.get(request.mode)
     if mode is None:
@@ -51,17 +80,28 @@ def plan_route(request: PlanRequest):
         raise HTTPException(503, 'Routing graph is not available')
     coordinates = []
     distance = 0
+    snapped_points = []
     try:
         with sqlite3.connect(f'file:{GRAPH}?mode=ro', uri=True, timeout=5) as db:
+            try:
+                imported = {row[0] for row in db.execute('SELECT state FROM route_sources')}
+            except sqlite3.Error as error:
+                raise HTTPException(503, 'Routing graph has not passed the all-state build') from error
+            if imported != set(STATES):
+                raise HTTPException(503, 'Routing graph is incomplete')
             for start, finish in zip(points, points[1:]):
                 part = find_path(db, start, finish, mode)
                 coordinates.extend(part['geometry']['coordinates'][1:] if coordinates else
                                    part['geometry']['coordinates'])
                 distance += part['distance_meters']
+                if not snapped_points:
+                    snapped_points.append(part['snapped_start_meters'])
+                snapped_points.append(part['snapped_end_meters'])
     except (sqlite3.Error, ValueError) as error:
         raise HTTPException(422, str(error)) from error
     return {'geometry': {'type': 'LineString', 'coordinates': coordinates},
             'distance_meters': distance, 'mode': request.mode,
+            'snapped_points_meters': snapped_points,
             'access_notice': 'Verify road and trail access, closures, and conditions before travel.'}
 
 
@@ -102,6 +142,12 @@ def _nearby_index(kind, coordinates, radius_miles):
 
 @router.post('/discover')
 def discover_route(request: DiscoverRequest):
+    if request.kind == 'Private parcels within 0.5 mile':
+        return _limited(PARCEL_SLOT, _discover_route, request)
+    return _discover_route(request)
+
+
+def _discover_route(request: DiscoverRequest):
     coordinates = _validated_points(request.path)
     if request.kind == 'Private parcels within 0.5 mile':
         if request.radius_miles != 0.5:

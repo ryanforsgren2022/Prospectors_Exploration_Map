@@ -81,6 +81,7 @@ function aemRouteAddPoint(trip, point) {
     trip.lowElevationMeters = Math.min(trip.lowElevationMeters ?? point.elevation, point.elevation);
     trip.highElevationMeters = Math.max(trip.highElevationMeters ?? point.elevation, point.elevation);
   }
+  point.distanceMeters = trip.distanceMeters;
   segment.points.push(point);
   return true;
 }
@@ -107,6 +108,7 @@ function aemInstallRouteTracker(map) {
     '<label>Travel mode <select id="aem-route-mode"><option value="auto">Auto</option>' +
     '<option value="driving">Driving</option><option value="hiking">Hiking</option></select></label>' +
     '<div id="aem-route-stats" aria-live="polite">0.00 mi · 00:00:00 · ↑ 0 ft · ↓ 0 ft</div>' +
+    '<canvas id="aem-route-elevation" width="300" height="80" hidden aria-label="Elevation by distance"></canvas>' +
     '<label>Saved trips <select id="aem-route-saved"><option value="">Select a trip</option></select></label>' +
     '</div>';
   document.body.append(panel);
@@ -117,6 +119,7 @@ function aemInstallRouteTracker(map) {
   const savedSelect = panel.querySelector('#aem-route-saved');
   const status = panel.querySelector('#aem-route-status');
   const stats = panel.querySelector('#aem-route-stats');
+  const profile = panel.querySelector('#aem-route-elevation');
   let trip = null;
   let watchId = null;
   let recordingStarted = 0;
@@ -151,6 +154,34 @@ function aemInstallRouteTracker(map) {
     pauseButton.disabled = !trip;
     stopButton.disabled = !trip;
     pauseButton.textContent = paused ? 'Resume' : 'Pause';
+    const elevations = (current?.segments || []).flatMap((segment) => segment.points)
+      .filter((point) => Number.isFinite(point.elevation));
+    profile.hidden = elevations.length < 2;
+    if (!profile.hidden) {
+      const context = profile.getContext('2d');
+      if (context) {
+        let low = Infinity, high = -Infinity;
+        for (const point of elevations) {
+          low = Math.min(low, point.elevation);
+          high = Math.max(high, point.elevation);
+        }
+        const distance = Math.max(current.distanceMeters, 1);
+        context.clearRect(0, 0, profile.width, profile.height);
+        context.strokeStyle = '#8fd39c';
+        context.lineWidth = 2;
+        context.beginPath();
+        const stride = Math.max(1, Math.floor(elevations.length / 300));
+        for (let index = 0; index < elevations.length; index += stride) {
+          const point = elevations[index];
+          const x = 5 + point.distanceMeters / distance * (profile.width - 10);
+          const y = profile.height - 5 - (point.elevation - low) /
+            Math.max(high - low, 1) * (profile.height - 10);
+          if (index) context.lineTo(x, y);
+          else context.moveTo(x, y);
+        }
+        context.stroke();
+      }
+    }
     draw();
   }
   function refreshSaved() {
@@ -194,6 +225,9 @@ function aemInstallRouteTracker(map) {
   startButton.addEventListener('click', () => {
     if (!navigator.geolocation) { status.textContent = 'This browser does not support GPS.'; return; }
     trip = aemRouteCreateTrip(modeSelect.value === 'hiking' ? 'hiking' : 'driving');
+    if (window.aemPlannedRoute) {
+      trip.plannedRoute = JSON.parse(JSON.stringify(window.aemPlannedRoute));
+    }
     shownSaved = null;
     recordingStarted = Date.now();
     paused = false;

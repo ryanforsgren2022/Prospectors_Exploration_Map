@@ -80,7 +80,10 @@ def import_extract(db, path):
             modes = allowed_modes(tags)
             if not modes:
                 return
-            points = [(node.ref, node.lon, node.lat) for node in way.nodes if node.location.valid()]
+            nodes = list(way.nodes)
+            if any(not node.location.valid() for node in nodes):
+                return
+            points = [(node.ref, node.lon, node.lat) for node in nodes]
             if len(points) < 2:
                 return
             self.nodes.extend(points)
@@ -102,12 +105,13 @@ def import_extract(db, path):
                 self.flush()
 
     handler = Handler()
-    handler.apply_file(str(path), locations=True)
+    # A disk-backed node-location index keeps large state extracts within VM RAM.
+    handler.apply_file(str(path), locations=True, idx='sparse_file_array')
     handler.flush()
     return handler.seen
 
 
-def nearest_node(db, point, mode, max_meters=150, arrival=False):
+def nearest_node(db, point, mode, max_meters=200, arrival=False):
     lng, lat = point
     degree = max_meters / 80000
     rows = db.execute('''
@@ -127,14 +131,16 @@ def nearest_node(db, point, mode, max_meters=150, arrival=False):
     return None
 
 
-def find_path(db, start, finish, mode, max_visits=300000):
+def find_path(db, start, finish, mode, max_visits=1500000):
     if mode not in (DRIVE, HIKE):
         raise ValueError('Invalid route mode')
-    snap_limit = 50 if mode == DRIVE else 150
+    snap_limit = 150 if mode == DRIVE else 200
     source = nearest_node(db, start, mode, snap_limit)
     target = nearest_node(db, finish, mode, snap_limit, arrival=True)
     if not source or not target:
         raise ValueError('No connected road or trail near a route point')
+    if source[0] == target[0]:
+        raise ValueError('Route points resolve to the same road or trail node')
     goal = target[0]
     best = {source[0]: 0.0}
     prior = {}
@@ -159,7 +165,9 @@ def find_path(db, start, finish, mode, max_visits=300000):
             prior[dst] = node
             heapq.heappush(queue, (next_cost + distance_m((lng, lat), target[1:]), next_cost, dst))
     if goal not in best:
-        raise ValueError('No connected route found within the search limit')
+        if visits >= max_visits:
+            raise ValueError('Route is too long for the current routing search limit')
+        raise ValueError('No connected route found in the available network')
     ids = [goal]
     while ids[-1] != source[0]:
         ids.append(prior[ids[-1]])

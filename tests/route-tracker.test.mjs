@@ -19,6 +19,7 @@ test('one trip keeps driving and hiking segments and distance', () => {
   assert.equal(add(trip, { lng: -110.998, lat: 33, time: 21000, accuracy: 5, elevation: 103 }), true);
   assert.equal(trip.segments.map((part) => part.mode).join(','), 'driving,hiking');
   assert.ok(trip.distanceMeters > 150);
+  assert.equal(trip.segments.at(-1).points.at(-1).distanceMeters, trip.distanceMeters);
   assert.equal(trip.elevationGainMeters, 10);
   assert.equal(trip.elevationLossMeters, 7);
   assert.equal(trip.lowElevationMeters, 100);
@@ -35,6 +36,11 @@ test('auto mode requires sustained motion and ignores stopped traffic', () => {
     candidate = result.candidate;
   }
   assert.equal(mode, 'hiking');
+  let slow = null;
+  for (let sample = 0; sample < 7; sample++) {
+    slow = auto(1.2, 'driving', slow?.candidate || null, sample * 10000);
+  }
+  assert.equal(auto(0, 'driving', slow.candidate, 70000).mode, 'driving');
 });
 
 test('rejects poor GPS fixes and impossible jumps', () => {

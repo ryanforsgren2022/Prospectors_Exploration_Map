@@ -31,12 +31,17 @@ class RouteGraphTests(unittest.TestCase):
         self.assertEqual(route['distance_meters'], 186)
 
     def test_driving_does_not_use_trail(self):
-        with self.assertRaisesRegex(ValueError, 'No connected road or trail'):
-            find_path(self.db, (-112.0, 33.0), (-111.998, 33.0), DRIVE)
+        route = find_path(self.db, (-112.0, 33.0), (-111.998, 33.0), DRIVE)
+        self.assertEqual(route['geometry']['coordinates'][-1], [-111.999, 33.0])
+        self.assertGreater(route['snapped_end_meters'], 90)
 
     def test_private_access_is_excluded(self):
         self.assertEqual(allowed_modes({'highway': 'track', 'access': 'private'}), 0)
         self.assertEqual(allowed_modes({'highway': 'path', 'foot': 'yes'}), HIKE)
+
+    def test_same_snapped_node_is_not_reported_as_a_route(self):
+        with self.assertRaisesRegex(ValueError, 'same road or trail node'):
+            find_path(self.db, (-112.0, 33.0), (-112.0, 33.0), DRIVE)
 
 
 if __name__ == '__main__':

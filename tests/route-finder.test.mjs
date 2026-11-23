@@ -33,8 +33,9 @@ test('planned route renders before parcel and feature discovery, without PLSS ch
     isSourceLoaded: () => sourceLoaded,
     queryRenderedFeatures: () => [{ id: 1 }],
   };
+  const browserWindow = {};
   const context = vm.createContext({
-    map, document: { createElement: (tag) => tag === 'details' ? panel : { textContent: '' },
+    map, window: browserWindow, document: { createElement: (tag) => tag === 'details' ? panel : { textContent: '' },
       body: { append() {} } },
     maplibregl: { LngLatBounds: class { constructor() {} extend() {} } },
     AbortController,
@@ -53,6 +54,7 @@ test('planned route renders before parcel and feature discovery, without PLSS ch
   await control('aem-route-plan').listeners.click();
   assert.equal(requests.length, 1);
   assert.ok(source.data);
+  assert.equal(browserWindow.aemPlannedRoute.mode, 'driving');
   assert.equal(typeof render, 'function');
   render();
   assert.equal(requests.length, 1);

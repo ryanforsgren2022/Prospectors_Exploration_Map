@@ -35,6 +35,7 @@ function aemInstallRouteFinder(map) {
     '<label id="aem-route-custom-wrap" hidden>Custom miles<input id="aem-route-custom" type="number" min="10" max="100" step="1" value="15"></label>' +
     '<button id="aem-route-plan" type="button">Plan route</button>' +
     '<p id="aem-route-plan-status" role="status">Choose a start and destination.</p>' +
+    '<p>Routes are advisory. Check legal access, closures, and passability before travel.</p>' +
     '<div id="aem-route-discovery" aria-live="polite"></div></div>';
   document.body.append(panel);
   const byId = (id) => panel.querySelector(`#${id}`);
@@ -86,9 +87,15 @@ function aemInstallRouteFinder(map) {
       const data = await post('discover', { kind, path, radius_miles: miles }, signal);
       if (id !== requestId) return;
       const features = Array.isArray(data.features) ? data.features : [];
-      const qualifier = kind === 'Private parcels within 0.5 mile' ? '' : 'possible nearby ';
-      row.textContent = `${kind}: ${features.length} ${qualifier}${features.length === 1 ? 'feature' : 'features'}` +
-        (data.complete === false ? ' (partial coverage)' : '');
+      if (kind === 'Private parcels within 0.5 mile') {
+        const crossed = features.filter((item) => item.relation === 'crossed').length;
+        row.textContent = `${kind}: ${crossed} crossed, ${features.length - crossed} nearby` +
+          (data.complete === false ? ' (partial coverage)' : '');
+      } else {
+        row.textContent = `${kind}: ${features.length} possible nearby ` +
+          `${features.length === 1 ? 'feature' : 'features'}` +
+          (data.complete === false ? ' (partial coverage)' : '');
+      }
     } catch (error) {
       if (id !== requestId || error.name === 'AbortError') return;
       row.textContent = `${kind}: check unavailable — ${error.message}`;
@@ -124,6 +131,11 @@ function aemInstallRouteFinder(map) {
       const feature = aemValidatePlannedRoute(data);
       feature.properties.mode = mode.value;
       route = feature;
+      window.aemPlannedRoute = {
+        geometry: feature.geometry, mode: mode.value,
+        distanceMeters: Number.isFinite(data.distance_meters) ? data.distance_meters : null,
+        createdAt: Date.now()
+      };
       ensureLayer();
       const source = map.getSource('aem-planned-route');
       if (!source) throw new Error('Map is not ready to display the route.');
@@ -133,11 +145,15 @@ function aemInstallRouteFinder(map) {
       status.textContent = Number.isFinite(data.distance_meters)
         ? `Route displayed · ${(data.distance_meters / 1609.344).toFixed(1)} mi`
         : 'Route displayed';
+      const farthestSnap = Math.max(0, ...(data.snapped_points_meters || []));
+      if (farthestSnap > 25) {
+        status.textContent += ` · nearest road/trail is up to ${Math.round(farthestSnap)} m from a chosen point`;
+      }
       // Wait until the GeoJSON source has loaded and its line is actually on screen.
       const afterRouteRender = () => {
         if (id !== requestId) { map.off('render', afterRouteRender); return; }
         if (!map.isSourceLoaded('aem-planned-route') ||
-            !map.queryRenderedFeatures({ layers: ['aem-planned-driving', 'aem-planned-hiking'] }).length) {
+            !map.queryRenderedFeatures(undefined, { layers: ['aem-planned-driving', 'aem-planned-hiking'] }).length) {
           return;
         }
         map.off('render', afterRouteRender);

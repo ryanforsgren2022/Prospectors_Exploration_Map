@@ -8,16 +8,14 @@ import json
 import math
 import sqlite3
 import sys
-from pathlib import Path
 from contextlib import contextmanager
 
 import mapbox_vector_tile
 from pyproj import CRS, Transformer
 from shapely.geometry import LineString, box, shape
 from shapely.ops import transform
+from aem_route_config import STATES, parcel_archive
 
-DATA_ROOT = Path('/root/LIVE_SITE_CASHE/live-mvt/data')
-STATES = ('az', 'ca', 'co', 'id', 'mt', 'nm', 'nv', 'or', 'ut', 'wa', 'wy')
 ZOOM = 16
 MILE = 1609.344
 MAX_TILES = 10000
@@ -29,6 +27,37 @@ def _tile_xy(lng, lat):
     x = int((lng + 180) / 360 * n)
     y = int((1 - math.asinh(math.tan(math.radians(lat))) / math.pi) / 2 * n)
     return max(0, min(n - 1, x)), max(0, min(n - 1, y))
+
+
+def _corridor_tiles(coordinates, radius_miles):
+    """Cover a route's tile-space path without scanning its whole bounding box."""
+    n = 1 << ZOOM
+
+    def fractional(lng, lat):
+        lat = max(-85.05112878, min(85.05112878, lat))
+        return ((lng + 180) / 360 * n,
+                (1 - math.asinh(math.tan(math.radians(lat))) / math.pi) / 2 * n)
+
+    tiles = set()
+    for start, end in zip(coordinates, coordinates[1:]):
+        ax, ay = fractional(*start)
+        bx, by = fractional(*end)
+        steps = max(1, math.ceil(max(abs(bx - ax), abs(by - ay)) * 2))
+        for step in range(steps + 1):
+            ratio = step / steps
+            x = math.floor(ax + (bx - ax) * ratio)
+            y = math.floor(ay + (by - ay) * ratio)
+            latitude = start[1] + (end[1] - start[1]) * ratio
+            tile_meters = 40075016.686 * math.cos(math.radians(latitude)) / n
+            padding = math.ceil(radius_miles * MILE / tile_meters) + 1
+            for dx in range(-padding, padding + 1):
+                for dy in range(-padding, padding + 1):
+                    tx, ty = x + dx, y + dy
+                    if 0 <= tx < n and 0 <= ty < n:
+                        tiles.add((tx, ty))
+            if len(tiles) > MAX_TILES:
+                raise ValueError('Route corridor exceeds one parcel query; split the trip')
+    return tiles
 
 
 def _to_geojson_geometry(tile_geometry, x, y, extent):
@@ -97,9 +126,7 @@ def _tile_bounds(x, y):
 
 
 def _archive(state):
-    folder = DATA_ROOT / state / 'parcels' / 'tiles'
-    extension = 'pmtiles' if state == 'nv' else 'mbtiles'
-    return folder / f'{state}-parcels.{extension}'
+    return parcel_archive(state)
 
 
 def _archive_coverage(state):
@@ -125,14 +152,12 @@ def parcel_corridor(coordinates, radius_miles=0.5):
     metric = CRS.from_proj4(f'+proj=aeqd +lat_0={mid.y} +lon_0={mid.x} +datum=WGS84 +units=m')
     forward = Transformer.from_crs('EPSG:4326', metric, always_xy=True).transform
     reverse = Transformer.from_crs(metric, 'EPSG:4326', always_xy=True).transform
-    corridor = transform(forward, route).buffer(radius_miles * MILE)
+    route_metric = transform(forward, route)
+    corridor = route_metric.buffer(radius_miles * MILE)
     west, south, east, north = transform(reverse, corridor).bounds
     west, east = max(-180, west), min(180, east)
     south, north = max(-85, south), min(85, north)
-    min_x, min_y = _tile_xy(west, north)
-    max_x, max_y = _tile_xy(east, south)
-    if (max_x - min_x + 1) * (max_y - min_y + 1) > MAX_TILES:
-        raise ValueError('Route corridor exceeds one parcel query; split the trip')
+    tiles = _corridor_tiles(coordinates, radius_miles)
     found = {}
     coverage = {}
     for state in STATES:
@@ -145,32 +170,39 @@ def parcel_corridor(coordinates, radius_miles=0.5):
             continue
         coverage[state] = _archive_coverage(state)
         with _tile_reader(archive) as read_tile:
-            for x in range(min_x, max_x + 1):
-                for y in range(min_y, max_y + 1):
-                    if not transform(forward, _tile_bounds(x, y)).intersects(corridor):
+            for x, y in sorted(tiles):
+                if not transform(forward, _tile_bounds(x, y)).intersects(corridor):
+                    continue
+                blob = read_tile(x, y)
+                if not blob:
+                    continue
+                raw = gzip.decompress(blob) if blob[:2] == b'\x1f\x8b' else blob
+                layer = mapbox_vector_tile.decode(raw, default_options={'y_coord_down': True}).get('parcels')
+                if not layer:
+                    continue
+                extent = layer.get('extent', 4096)
+                for feature in layer['features']:
+                    geometry = _to_geojson_geometry(feature['geometry'], x, y, extent)
+                    if geometry.is_empty:
                         continue
-                    blob = read_tile(x, y)
-                    if not blob:
+                    parcel_metric = transform(forward, geometry)
+                    if not parcel_metric.intersects(corridor):
                         continue
-                    raw = gzip.decompress(blob) if blob[:2] == b'\x1f\x8b' else blob
-                    layer = mapbox_vector_tile.decode(raw, default_options={'y_coord_down': True}).get('parcels')
-                    if not layer:
-                        continue
-                    extent = layer.get('extent', 4096)
-                    for feature in layer['features']:
-                        geometry = _to_geojson_geometry(feature['geometry'], x, y, extent)
-                        if geometry.is_empty or not transform(forward, geometry).intersects(corridor):
-                            continue
-                        props = feature.get('properties', {})
-                        identity = str(props.get('source_uid') or props.get('parcel_id') or
-                                       props.get('OBJECTID') or props.get('APN') or feature.get('id') or '')
-                        key = (state, identity) if identity else (state, x, y, len(found))
-                        found.setdefault(key, {
-                            'state': state,
-                            'identity': identity or None,
-                            'label': str(props.get('APN') or props.get('PARCEL_APN') or
-                                         props.get('parcel_id') or props.get('ACCOUNTNO') or 'Parcel'),
-                        })
+                    props = feature.get('properties', {})
+                    identity = str(props.get('source_uid') or props.get('parcel_id') or
+                                   props.get('OBJECTID') or props.get('APN') or feature.get('id') or '')
+                    key = (state, identity) if identity else (state, x, y, len(found))
+                    relation = 'crossed' if parcel_metric.intersects(route_metric) else 'within_0_5_mile'
+                    previous = found.get(key)
+                    if previous and relation == 'crossed':
+                        previous['relation'] = 'crossed'
+                    found.setdefault(key, {
+                        'state': state,
+                        'identity': identity or None,
+                        'label': str(props.get('APN') or props.get('PARCEL_APN') or
+                                     props.get('parcel_id') or props.get('ACCOUNTNO') or 'Parcel'),
+                        'relation': relation,
+                    })
     return {
         'features': list(found.values()),
         'complete': bool(coverage) and all(value == 'complete' for value in coverage.values()),
