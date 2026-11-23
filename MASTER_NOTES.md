@@ -9,7 +9,7 @@ Current behavior:
 Future change:
 - Move saved pins/locations from browser localStorage to the user's cloud account.
 - Saved pins should follow the user across phones, tablets, and computers.
-- Preserve pin name, description, coordinates, and associated research data where practical.
+- Preserve pin name, description, coordinates, and creation time. Fetch location research when opened; do not persist research snapshots (user instruction, 2026-11-21).
 - Migrate existing locally saved pins when possible instead of silently discarding them.
 - Keep local storage only as an offline/cache fallback if useful.
 

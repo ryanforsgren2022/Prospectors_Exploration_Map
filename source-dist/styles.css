@@ -45,6 +45,11 @@ body { background: #0b100d; }
 .map-search__status { min-height:16px; margin:5px 1px 0; color:#b7c2ba; font-size:11px; line-height:1.3; }
 .map-search__status.error { color:#ffc5be; }
 .map-search__status.success { color:#aee8b9; }
+.map-search__choices { display:grid; gap:5px; max-height:240px; overflow:auto; }
+.map-search__choices button { width:100%; text-align:left; white-space:normal; padding:9px; }
+.map-search__filters { display:flex; gap:6px; margin-top:6px; }
+.map-search__filters label { flex:1; min-width:0; font-size:11px; }
+.map-search__filters select,.map-search__filters input { width:100%; min-height:36px; border:1px solid #647168; border-radius:6px; background:#18211b; color:#f7faf7; font:inherit; }
 .gps-tool { display:flex; align-items:center; gap:9px; margin-top:9px; }
 .gps-tool button { flex:1; }
 .gps-tool button.is-tracking { color:#0d1811; background:#8fd39c; border-color:#a6e5b1; }

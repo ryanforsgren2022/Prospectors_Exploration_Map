@@ -117,10 +117,14 @@
         <form id="mapSearchForm" class="map-search" role="search">
           <label for="mapSearch">Find a location</label>
           <div class="map-search__row">
-            <input id="mapSearch" type="search" autocomplete="off" placeholder="Address, coordinates, PLSS, APN, or claim">
+            <input id="mapSearch" type="search" autocomplete="off" placeholder="APN, claim, PLSS, road, mine, address, or coordinates">
             <button type="submit">Find</button>
           </div>
-          <p id="mapSearchStatus" class="map-search__status">Examples: 33.0650, -110.8139 · T1S R14E S6 · AMC 123456</p>
+          <div class="map-search__filters">
+            <label>Search area<select id="aemSearchScope"><option value="">All 11 states</option><option value="az">Arizona</option><option value="ca">California</option><option value="co">Colorado</option><option value="id">Idaho</option><option value="mt">Montana</option><option value="nm">New Mexico</option><option value="nv">Nevada</option><option value="or">Oregon</option><option value="ut">Utah</option><option value="wa">Washington</option><option value="wy">Wyoming</option></select></label>
+            <label>County (optional)<input id="aemSearchCounty" type="text" autocomplete="off" placeholder="County name"></label>
+          </div>
+          <p id="mapSearchStatus" class="map-search__status">Examples: APN 001-020-003 · T1S R14E S6 · ROAD Main Street · MINE Gold King</p>
         </form>
 
           <p class="hint">Routing: coming later.</p>

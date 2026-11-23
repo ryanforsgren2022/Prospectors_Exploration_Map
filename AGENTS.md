@@ -22,8 +22,8 @@
 - Add regression coverage that fails when supported states diverge from the shared implementation.
 
 
-## VM builds and downloads
+## Automatic updater resources
 
-- Run VM builds sequentially, not concurrently.
-- Run downloads in parallel.
-- Limit all VM work, including concurrent processes and downloads, to a combined three CPU cores and 7 GiB of memory. Treat remaining VM resources as unavailable.
+- Automatic updater jobs share a total limit of one CPU core and 2 GiB of RAM, including their child processes and downloads.
+- These limits apply to the automatic updater, not to the live site or other repository/VM work.
+- Let the validation already running on November 21, 2026 finish before applying the changed updater limits.

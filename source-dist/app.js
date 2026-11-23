@@ -1092,6 +1092,7 @@ function renderSavedLocations() {
     flyTo.addEventListener('click', () => {
       map.easeTo({ center: [location.lng, location.lat], zoom: Math.max(map.getZoom(), 14), duration: 650, essential: false });
       savedLocationMarkers.get(location.id)?.togglePopup();
+      openResearchLocation({ lng: location.lng, lat: location.lat });
     });
     const remove = document.createElement('button');
     remove.type = 'button';
@@ -1250,270 +1251,9 @@ function appendWithdrawalResults(nodes, label, features) {
   });
 }
 
-async function openResearchLocation(lngLat) {
-  const request = ++researchLocationRequest;
-  const researchState = aemSearchStateAtPoint(lngLat);
-
-  activeResearchLocation = {
-    lng: lngLat.lng,
-    lat: lngLat.lat,
-    name: 'Location research'
-  };
-
-  researchLocationCard.hidden = false;
-  researchCoordinates.textContent =
-    `${lngLat.lat.toFixed(5)}, ${lngLat.lng.toFixed(5)}`;
-  researchResults.textContent = 'Researching location…';
-
-  const checks = await Promise.allSettled([
-    queryResearchLocation(
-      NOT_CLOSED_CLAIMS_QUERY,
-      lngLat,
-      'CSE_NAME,CSE_NR,CSE_DISP,RCRD_ACRS'
-    ),
-
-    queryResearchLocation(
-      SURFACE_MANAGEMENT_QUERY,
-      lngLat,
-      'CATEGORY,DESC_,ACRES'
-    ),
-
-    queryResearchLocation(
-      WITHDRAWAL_AUTHORIZED_QUERY,
-      lngLat,
-      'CSE_NAME,CSE_NR,CSE_DISP,SEG_MIN'
-    ),
-
-    queryResearchLocation(
-      WITHDRAWAL_PENDING_QUERY,
-      lngLat,
-      'CSE_NAME,CSE_NR,CSE_DISP,SEG_MIN'
-    ),
-
-    Promise.resolve().then(() => aemParcelAtPoint(lngLat)),
-    countyAtPoint(lngLat),
-
-    queryResearchLocation(
-      PLSS_TOWNSHIPS_QUERY,
-      lngLat,
-      '*'
-    ),
-
-    queryResearchLocation(
-      PLSS_SECTIONS_QUERY,
-      lngLat,
-      '*'
-    ),
-
-    queryResearchLocation(
-      PLSS_ALIQUOT_QUERY,
-      lngLat,
-      '*'
-    )
-  ]);
-
-  if (request !== researchLocationRequest) return;
-
-  const claims = checks[0].status === 'fulfilled' ? checks[0].value : [];
-  const surface = checks[1].status === 'fulfilled' ? checks[1].value : [];
-  const authorized = checks[2].status === 'fulfilled' ? checks[2].value : [];
-  const pending = checks[3].status === 'fulfilled' ? checks[3].value : [];
-  const parcel = checks[4].status === 'fulfilled' ? checks[4].value : null;
-  const county = checks[5].status === 'fulfilled' ? checks[5].value : null;
-  const townships = checks[6].status === 'fulfilled' ? checks[6].value : [];
-  const sections = checks[7].status === 'fulfilled' ? checks[7].value : [];
-  const aliquots = checks[8].status === 'fulfilled' ? checks[8].value : [];
-
-  const parcelProps = parcel?.properties || {};
-  const townshipAttrs = townships[0]?.attributes || {};
-  const sectionAttrs = sections[0]?.attributes || {};
-  const aliquotAttrs = aliquots[0]?.attributes || {};
-  const surfaceAttrs = surface[0]?.attributes || {};
-
-  const township = formatTownship(townshipAttrs);
-  const range = formatRange(townshipAttrs);
-  const section = formatSection(sectionAttrs);
-
-  const meridian =
-    formatMeridian(townshipAttrs) ||
-    formatMeridian(sectionAttrs) ||
-    formatMeridian(aliquotAttrs);
-
-  const aliquot = formatAliquot(aliquotAttrs);
-
-  const locationNodes = [];
-
-  locationNodes.push(
-    researchTextResult(
-      'Coordinates',
-      `${lngLat.lat.toFixed(5)}, ${lngLat.lng.toFixed(5)}`
-    )
-  );
-
-  locationNodes.push(
-    researchTextResult(
-      'City / Place',
-      parcelProps.AZ_PlaceName || 'not available'
-    )
-  );
-
-  locationNodes.push(
-    researchTextResult(
-      'County',
-      county || 'not available'
-    )
-  );
-
-  locationNodes.push(
-    researchTextResult(
-      'Principal Meridian',
-      meridian || 'not available'
-    )
-  );
-
-  locationNodes.push(
-    researchTextResult(
-      'Township',
-      township || 'not available'
-    )
-  );
-
-  locationNodes.push(
-    researchTextResult(
-      'Range',
-      range || 'not available'
-    )
-  );
-
-  locationNodes.push(
-    researchTextResult(
-      'Section',
-      section || 'not available'
-    )
-  );
-
-  locationNodes.push(
-    researchTextResult(
-      'Aliquot / Government Lot',
-      aliquot || 'not available for this location'
-    )
-  );
-
-  const mlrsNodes = [];
-
-  appendClaimResults(mlrsNodes, claims);
-
-  const legalDescription = [
-    meridian && `Meridian ${meridian}`,
-    township,
-    range,
-    section && `Section ${section}`,
-    aliquot && `Aliquot ${aliquot}`
-  ].filter(Boolean).join(' · ');
-
-  mlrsNodes.push(
-    researchTextResult(
-      'Search location',
-      legalDescription || 'PLSS information unavailable'
-    )
-  );
-
-  mlrsNodes.push(
-    researchLinkResult(
-      'BLM records',
-      'Open MLRS Mining Claims Geographic Report',
-      MLRS_GEOGRAPHIC_REPORT_URL
-    ) );
-
-  const landStatusNodes = [];
-
-  landStatusNodes.push(
-    researchTextResult(
-      'Surface management',
-      surface.length
-        ? `${surfaceAttrs.CATEGORY || 'Not listed'} · ${surfaceAttrs.DESC_ || 'No description'}`
-        : 'none found'
-    )
-  );
-
-  appendWithdrawalResults(
-    landStatusNodes,
-    'Authorized / Interim withdrawals',
-    authorized
-  );
-
-  appendWithdrawalResults(
-    landStatusNodes,
-    'Pending withdrawals',
-    pending
-  );
-
-  const propertyNodes = [];
-
-  if (parcel) {
-    propertyNodes.push(
-      researchTextResult(
-        'Parcel APN',
-        parcelProps.parcelId || 'not listed'
-      )
-    );
-
-    propertyNodes.push(
-      researchTextResult(
-        'Parcel address',
-        parcelProps.address ||
-          parcelProps.county ||
-          'not listed'
-      )
-    );
-
-    const recordsUrl = parcelProps.propertyRecordsUrl ||
-      (researchState === 'az' && county ? COUNTY_ASSESSORS[county] : null);
-
-if (recordsUrl) {
-  propertyNodes.push(
-    researchLinkResult(
-      'Parcel records',
-      'Open parcel records',
-      recordsUrl
-    )
-  );
+async function openResearchLocation(lngLat, selectedFeature = null) {
+  return aemOpenResearchV2(lngLat, selectedFeature);
 }
-  } else {
-    propertyNodes.push(
-      researchTextResult(
-        'Private parcel',
-        'none found at pin'
-      )
-    );
-  }
-
-  researchPages = [
-    {
-      title: 'Location / PLSS',
-      nodes: locationNodes
-    },
-    {
-      title: 'MLRS / BLM',
-      nodes: mlrsNodes
-    },
-    {
-      title: 'Land Status',
-      nodes: landStatusNodes
-    },
-    {
-      title: 'Property',
-      nodes: propertyNodes
-    }
-  ];
-
-  researchPageIndex = 0;
-  renderResearchPage();
-}
-
-
-
-
 
 function syncNotClosedClaimsPresentation() {
   return notClosedClaimsEnabled && map.getZoom() >= NOT_CLOSED_CLAIMS_MIN_ZOOM;
@@ -1610,7 +1350,7 @@ function afterSourceSettles(sourceId, callback, fallbackDelay = 8000) {
     completed = true;
     map.off('sourcedata', onSourceData);
     window.clearTimeout(fallbackTimer);
-    callback();
+    window.requestAnimationFrame(callback);
   };
 
   const onSourceData = (event) => {
@@ -2412,11 +2152,12 @@ function aemParseStateSearch(raw) {
   );
 
   if (!match) {
-    return { state: aemSearchState(), value: raw };
+    return { state: aemSearchState(), value: raw, explicitState: false };
   }
 
   return {
     state: names[match[1].toUpperCase()],
+    explicitState: true,
     value: match[2].trim()
   };
 }
@@ -2514,95 +2255,33 @@ function aemNavigateToSearchResult(lngLat, zoom = 13) {
 }
 
 
-mapSearchForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const requestId = ++aemSearchRequestId;
-  const isCurrent = () => requestId === aemSearchRequestId;
-  const raw = mapSearchInput.value.trim();
-  if (!raw) return setSearchStatus('Enter an address, coordinates, or PLSS reference.', 'error');
-  mapSearchInput.disabled = true;
-  setSearchStatus('Searching…');
-  try {
+installAemUnifiedSearch({
+  form: mapSearchForm, input: mapSearchInput, status: setSearchStatus, map,
+  stateSelect: document.querySelector('#aemSearchScope'), countyInput: document.querySelector('#aemSearchCounty'),
+  prepare: prepareAemSearchStateBounds, parseState: aemParseStateSearch,
+  parseCoordinates, parsePlss, geocode: searchAddress, fetch: window.fetch.bind(window),
+  navigate: async (feature, isCurrent) => {
+    if (!isCurrent()) return;
+    const point = feature.geometry?.coordinates;
+    if (!Array.isArray(point) || point.length !== 2 || !point.every(Number.isFinite)) throw new Error('Search returned invalid coordinates.');
+    aemSearchNavigating = true;
+    aemSearchLastMapState = undefined;
     try {
-      await prepareAemSearchStateBounds();
-    } catch (error) {
-      console.warn('AEM search state discovery unavailable:', error.message);
-    }
+      await new Promise((resolve, reject) => {
+        let timer;
+        const done = () => { clearTimeout(timer); map.off('moveend', done); resolve(); };
+        map.once('moveend', done);
+        timer = setTimeout(done, 2000);
+        try {
+          if (Array.isArray(feature.bbox) && feature.bbox.length === 4) map.fitBounds([[feature.bbox[0], feature.bbox[1]], [feature.bbox[2], feature.bbox[3]]], { padding: 72, maxZoom: 16, duration: 650 });
+          else map.flyTo({ center: point, zoom: Math.max(map.getZoom(), 15), duration: 650 });
+        } catch (error) { clearTimeout(timer); map.off('moveend', done); reject(error); }
+      });
+    } finally { aemSearchNavigating = false; }
     if (!isCurrent()) return;
-    aemSearchLastMapState = aemSearchState();
-    const searchContext = aemParseStateSearch(raw);
-    const state = searchContext.state;
-    const searchValue = searchContext.value;
-    const coordinates = parseCoordinates(searchValue);
-    if (coordinates) {
-      await showPointSearchResult([coordinates.longitude, coordinates.latitude], `${coordinates.latitude.toFixed(5)}, ${coordinates.longitude.toFixed(5)}`, null, isCurrent);
-      if (!isCurrent()) return;
-      setSearchStatus('Result ready. Choose Navigate to Result.', 'success');
-      return;
-    }
-    const plss = parsePlss(searchValue);
-    if (plss) {
-      const result = await aemSearchPlss(state, plss);
-      if (!isCurrent()) return;
-      const bounds = featureBounds(result.feature);
-      if (!bounds) throw new Error('PLSS search returned no usable map boundary.');
-      const center = bounds.getCenter();
-      await showPointSearchResult([center.lng, center.lat], result.label, bounds, isCurrent);
-      if (!isCurrent()) return;
-      setSearchStatus('Result ready. Choose Navigate to Result.', 'success');
-      return;
-    }
-    const apnPrefix = searchValue.match(/^(?:APN|PARCEL)\s*[:#-]?\s*(.+)$/i);
-    if (apnPrefix) {
-      const value = apnPrefix[1].trim();
-      if (state) {
-        const feature = await aemSearchApi(state, 'parcels', { value });
-        if (!isCurrent()) return;
-        const bounds = featureBounds(feature);
-        if (!bounds) throw new Error('Parcel geometry unavailable.');
-        const details = aemParcelPinDetails(feature.properties || {});
-        const parcelId = details.parcelId || value;
-        showSearchPin(
-          bounds.getCenter(),
-          `${state.toUpperCase()} Parcel ${parcelId}`,
-          bounds,
-          {
-            apn: parcelId,
-            address: details.address,
-            countyName: details.county,
-            assessorUrl: details.propertyRecordsUrl
-    }
-  );
-      if (!isCurrent()) return;
-    }
-      setSearchStatus('Result ready. Choose Navigate to Result.', 'success');
-      return;
-    }
-    const claimPrefix = searchValue.match(/^(?:CLAIM|BLM|CASE)\s*[:#-]?\s*(.+)$/i);
-    const looksLikeClaimNumber = /^[A-Z]{2,6}[\s-]*\d{3,}$/i.test(searchValue);
-    if (claimPrefix || looksLikeClaimNumber) {
-      const value = claimPrefix?.[1] || searchValue;
-      const feature = await aemSearchClaim(state, value);
-      if (!isCurrent()) return;
-      if (!feature) throw new Error('That BLM not-closed claim or case was not found.');
-      showFeatureSearchResult(feature, `Claim ${feature.properties?.CSE_NAME || value}`);
-      if (!isCurrent()) return;
-      setSearchStatus('Result ready. Choose Navigate to Result.', 'success');
-      return;
-    }
-    const address = await searchAddress(searchValue);
-    if (!isCurrent()) return;
-    if (!address?.location) throw new Error('No matching US address was found.');
-    await showPointSearchResult([address.location.x, address.location.y], address.attributes?.LongLabel || address.address || raw, null, isCurrent);
-    if (!isCurrent()) return;
-    setSearchStatus('Result ready. Choose Navigate to Result.', 'success');
-  } catch (error) {
-    if (!isCurrent()) return;
-    setSearchStatus(error.message || 'Search is temporarily unavailable.', 'error');
-  } finally {
-    if (isCurrent()) {
-      mapSearchInput.disabled = false;
-    }
+    setSearchStatus('Loading current location details…');
+    await openResearchLocation({ lng: point[0], lat: point[1] }, feature);
+    if (isCurrent()) setSearchStatus('Location selected. Use the pin panel to review its details.', 'success');
   }
 });
 
@@ -4152,7 +3831,7 @@ function aemParcelAtPoint(point) {
   let selectedPin = null;
   const originalResearch = openResearchLocation;
 
-  openResearchLocation = function (lngLat) {
+  openResearchLocation = function (lngLat, selectedFeature = null) {
     const lng = Number(lngLat?.lng);
     const lat = Number(lngLat?.lat);
 
@@ -4170,7 +3849,7 @@ function aemParcelAtPoint(point) {
       }
     }
 
-    return originalResearch(lngLat);
+    return originalResearch(lngLat, selectedFeature);
   };
 
   document.getElementById('researchLocationClose')
