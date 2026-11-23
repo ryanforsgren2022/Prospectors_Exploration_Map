@@ -63,7 +63,8 @@ function aemRouteAddPoint(trip, point) {
   if (!Number.isFinite(point.lng) || !Number.isFinite(point.lat) ||
       !Number.isFinite(point.time) || point.accuracy > 100) return false;
   const segment = trip.segments.at(-1);
-  const prior = [...trip.segments].reverse().find((part) => part.points.length)?.points.at(-1);
+  const prior = segment.break && !segment.points.length ? null :
+    [...trip.segments].reverse().find((part) => part.points.length)?.points.at(-1);
   if (prior) {
     const meters = aemRouteDistanceMeters(prior, point);
     const seconds = (point.time - prior.time) / 1000;
@@ -204,7 +205,7 @@ function aemInstallRouteTracker(map) {
     if (!trip) return;
     if (paused) {
       // A resumed track starts a new visible segment so no straight line spans the pause.
-      trip.segments.push({ mode: trip.segments.at(-1).mode, points: [] });
+      trip.segments.push({ mode: trip.segments.at(-1).mode, points: [], break: true });
       paused = false;
       recordingStarted = Date.now();
       beginWatch();
