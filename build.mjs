@@ -31,7 +31,7 @@ for (const name of ['historic-mine-pin', 'historic-mine-visited-flag']) {
   await sharp(artwork).png().toFile(join(betaDirectory, 'images', `${name}.png`));
 }
 
-const applicationSource = readFileSync(join(sourceDist, 'search-v2.js'), 'utf8') + '\n' + readFileSync(join(sourceDist, 'research-v2.js'), 'utf8') + '\n' + readFileSync(join(sourceDist, 'app.js'), 'utf8')
+const applicationSource = readFileSync(join(sourceDist, 'search-v2.js'), 'utf8') + '\n' + readFileSync(join(sourceDist, 'research-v2.js'), 'utf8') + '\n' + readFileSync(join(sourceDist, 'app.js'), 'utf8') + '\n' + readFileSync(join(sourceDist, 'route-tracker.js'), 'utf8')
 ;
 const minified = await minify(applicationSource, {
   compress: { passes: 2 },
@@ -43,7 +43,7 @@ const minified = await minify(applicationSource, {
 if (!minified.code) throw new Error('The protected browser build was empty.');
 
 const applicationHash = createHash('sha256').update(minified.code).digest('hex').slice(0, 12);
-const stylesheet = readFileSync(join(sourceDist, 'styles.css'), 'utf8');
+const stylesheet = readFileSync(join(sourceDist, 'styles.css'), 'utf8') + '\n' + readFileSync(join(sourceDist, 'route.css'), 'utf8');
 const stylesheetHash = createHash('sha256').update(stylesheet).digest('hex').slice(0, 12);
 const applicationName = `map.${applicationHash}.js`;
 const stylesheetName = `map.${stylesheetHash}.css`;
