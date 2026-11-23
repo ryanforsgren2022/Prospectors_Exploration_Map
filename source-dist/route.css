@@ -8,3 +8,9 @@
 .aem-route-actions button { flex: 1; min-width: 0; font-size: 12px; }
 #aem-route-stats { color: #aee8b9; font-weight: 700; }
 @media (max-width: 650px) { .aem-route-panel { right: 12px; bottom: 62px; } }
+.aem-route-finder { bottom: max(110px, calc(env(safe-area-inset-bottom) + 90px)); }
+.aem-route-finder[open] { max-height: min(72dvh, 660px); overflow-y: auto; }
+.aem-route-finder .aem-route-panel__body input, .aem-route-finder .aem-route-panel__body textarea { min-height: 40px; padding: 7px 9px; border: 1px solid #64756a; border-radius: 8px; color: #fff; background: #18211b; font: inherit; }
+.aem-route-finder #aem-route-discovery { display: grid; gap: 5px; }
+.aem-route-finder #aem-route-discovery p { margin: 0; font-size: 12px; }
+@media (max-width: 650px) { .aem-route-finder { bottom: 116px; } }

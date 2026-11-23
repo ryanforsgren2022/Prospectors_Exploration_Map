@@ -91,7 +91,7 @@ app.include_router(historic_mines_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["GET", "OPTIONS"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -2677,3 +2677,6 @@ install_utah_layers(app)
 # AEM VM-only dynamic non-road discovery
 from aem_vm_discovery_v2 import install_aem_vm_discovery_v2
 install_aem_vm_discovery_v2(app)
+
+from aem_routes import router as aem_routes_router
+app.include_router(aem_routes_router)

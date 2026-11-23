@@ -84,15 +84,16 @@ function aemRouteAddPoint(trip, point) {
   segment.points.push(point);
   return true;
 }
-function aemRouteAutoMode(speedMetersPerSecond, currentMode, candidate) {
+function aemRouteAutoMode(speedMetersPerSecond, currentMode, candidate, now = Date.now()) {
   // Require sustained motion; a traffic stop never switches to hiking.
   const proposed = speedMetersPerSecond >= 3.2 ? 'driving' :
     speedMetersPerSecond >= 0.4 && speedMetersPerSecond <= 2.3 ? 'hiking' : null;
   if (!proposed || proposed === currentMode) return { mode: currentMode, candidate: null };
   const next = candidate?.mode === proposed
-    ? { mode: proposed, samples: candidate.samples + 1 }
-    : { mode: proposed, samples: 1 };
-  return { mode: next.samples >= 4 ? proposed : currentMode, candidate: next.samples >= 4 ? null : next };
+    ? { mode: proposed, samples: candidate.samples + 1, firstAt: candidate.firstAt }
+    : { mode: proposed, samples: 1, firstAt: now };
+  const sustained = next.samples >= 8 && now - next.firstAt >= 45000;
+  return { mode: sustained ? proposed : currentMode, candidate: sustained ? null : next };
 }
 function aemInstallRouteTracker(map) {
   const panel = document.createElement('details');
@@ -176,7 +177,7 @@ function aemInstallRouteTracker(map) {
         const computed = prior ? aemRouteDistanceMeters(prior, point) / ((point.time - prior.time) / 1000) : null;
         const speed = Number.isFinite(coords.speed) ? coords.speed : computed;
         if (Number.isFinite(speed)) {
-          const result = aemRouteAutoMode(speed, trip.segments.at(-1).mode, candidate);
+          const result = aemRouteAutoMode(speed, trip.segments.at(-1).mode, candidate, point.time);
           candidate = result.candidate;
           aemRouteSetMode(trip, result.mode);
         }

@@ -29,8 +29,8 @@ test('auto mode requires sustained motion and ignores stopped traffic', () => {
   const auto = get('aemRouteAutoMode');
   assert.equal(auto(0, 'driving', null).mode, 'driving');
   let candidate = null, mode = 'driving';
-  for (let sample = 0; sample < 4; sample++) {
-    const result = auto(1.2, mode, candidate);
+  for (let sample = 0; sample < 8; sample++) {
+    const result = auto(1.2, mode, candidate, sample * 10000);
     mode = result.mode;
     candidate = result.candidate;
   }

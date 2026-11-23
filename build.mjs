@@ -31,7 +31,7 @@ for (const name of ['historic-mine-pin', 'historic-mine-visited-flag']) {
   await sharp(artwork).png().toFile(join(betaDirectory, 'images', `${name}.png`));
 }
 
-const applicationSource = readFileSync(join(sourceDist, 'search-v2.js'), 'utf8') + '\n' + readFileSync(join(sourceDist, 'research-v2.js'), 'utf8') + '\n' + readFileSync(join(sourceDist, 'app.js'), 'utf8') + '\n' + readFileSync(join(sourceDist, 'route-tracker.js'), 'utf8')
+const applicationSource = readFileSync(join(sourceDist, 'search-v2.js'), 'utf8') + '\n' + readFileSync(join(sourceDist, 'research-v2.js'), 'utf8') + '\n' + readFileSync(join(sourceDist, 'app.js'), 'utf8') + '\n' + readFileSync(join(sourceDist, 'route-tracker.js'), 'utf8') + '\n' + readFileSync(join(sourceDist, 'route-finder.js'), 'utf8')
 ;
 const minified = await minify(applicationSource, {
   compress: { passes: 2 },
