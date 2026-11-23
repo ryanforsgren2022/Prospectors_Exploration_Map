@@ -17,7 +17,7 @@ test('one trip keeps driving and hiking segments and distance', () => {
   assert.equal(add(trip, { lng: -110.999, lat: 33, time: 11000, accuracy: 5, elevation: 110 }), true);
   mode(trip, 'hiking');
   assert.equal(add(trip, { lng: -110.998, lat: 33, time: 21000, accuracy: 5, elevation: 103 }), true);
-  assert.deepEqual(trip.segments.map((part) => part.mode), ['driving', 'hiking']);
+  assert.equal(trip.segments.map((part) => part.mode).join(','), 'driving,hiking');
   assert.ok(trip.distanceMeters > 150);
   assert.equal(trip.elevationGainMeters, 10);
   assert.equal(trip.elevationLossMeters, 7);
