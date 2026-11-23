@@ -57,7 +57,7 @@ function aemRouteSetMode(trip, mode) {
   if (!['driving', 'hiking'].includes(mode)) return;
   const last = trip.segments.at(-1);
   if (last?.mode === mode) return;
-  trip.segments.push({ mode, points: [] });
+  trip.segments.push({ mode, points: last?.points.length ? [last.points.at(-1)] : [] });
 }
 function aemRouteAddPoint(trip, point) {
   if (!Number.isFinite(point.lng) || !Number.isFinite(point.lat) ||
@@ -203,6 +203,8 @@ function aemInstallRouteTracker(map) {
   pauseButton.addEventListener('click', () => {
     if (!trip) return;
     if (paused) {
+      // A resumed track starts a new visible segment so no straight line spans the pause.
+      trip.segments.push({ mode: trip.segments.at(-1).mode, points: [] });
       paused = false;
       recordingStarted = Date.now();
       beginWatch();
