@@ -2,6 +2,7 @@
 const AEM_ROUTE_API = 'https://tiles.americanexplorationmaps.com/api/routes';
 const AEM_ROUTE_RADII = [1, 3, 5, 10];
 const AEM_MAX_WAYPOINTS = 10;
+const AEM_ROUTE_NO_SNAP = 'No connected road or trail near a route point';
 function aemValidRoutePoint(text) {
   const values = text.split(',').map((value) => value.trim());
   if (values.length !== 2 || values.some((value) => !value)) return null;
@@ -102,8 +103,11 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
   let requestId = 0;
   let planning = false;
   const empty = { type: 'FeatureCollection', features: [] };
+  let gapData = empty;
+  let roadsArchive;
+
   function ensureLayer() {
-    if (!map.isStyleLoaded() || map.getSource('aem-planned-route')) return;
+    if (map.getSource('aem-planned-route') || !map.getStyle()) return;
     map.addSource('aem-planned-route', { type: 'geojson', data: route || empty });
     map.addLayer({ id: 'aem-planned-driving', type: 'line', source: 'aem-planned-route',
       filter: ['==', ['get', 'mode'], 'driving'],
@@ -112,6 +116,13 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
       filter: ['==', ['get', 'mode'], 'hiking'],
       paint: { 'line-color': '#a8ef80', 'line-width': 5, 'line-opacity': 0.95,
         'line-dasharray': [1.5, 1.5] } });
+    map.addSource('aem-route-access-gaps', { type: 'geojson', data: gapData });
+    map.addLayer({ id: 'aem-route-access-gap-lines', type: 'line', source: 'aem-route-access-gaps',
+      filter: ['==', ['geometry-type'], 'LineString'],
+      paint: { 'line-color': '#f5f5f5', 'line-width': 3, 'line-dasharray': [1, 2] } });
+    map.addLayer({ id: 'aem-route-off-network-points', type: 'circle', source: 'aem-route-access-gaps',
+      filter: ['==', ['geometry-type'], 'Point'],
+      paint: { 'circle-radius': 5, 'circle-color': '#233b2e', 'circle-stroke-color': '#f5f5f5', 'circle-stroke-width': 2 } });
   }
   function formatPoint([lng, lat]) {
     return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
@@ -389,6 +400,21 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
     if (!response.ok) throw new Error(data.detail || `${path} service unavailable (${response.status}).`);
     return data;
   }
+  async function planRoute(points, mode, signal) {
+    const plan = (locations) => post('plan', { points: locations, mode }, signal);
+    try {
+      return { data: await plan(points), gaps: [] };
+    } catch (error) {
+      if (error.message !== AEM_ROUTE_NO_SNAP) throw error;
+      status.textContent = 'Looking for a connected road or trail nearby…';
+      const { planViaNearbyNetwork, routeAccessGaps } = await import('./route-access.mjs');
+      roadsArchive ??= pmtilesProtocol.get(CONTINUOUS_ROADS_URL) || new pmtiles.PMTiles(CONTINUOUS_ROADS_URL);
+      const result = await planViaNearbyNetwork(roadsArchive, points, mode, plan, signal);
+      if (!result) throw error;
+      const route = aemValidatePlannedRoute(result.data);
+      return { data: result.data, gaps: routeAccessGaps(points, result, route.geometry.coordinates) };
+    }
+  }
   async function discover(kind, path, miles, id, signal) {
     const row = document.createElement('p');
     row.textContent = `${kind}: checking…`;
@@ -432,7 +458,7 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
     status.textContent = 'Calculating route…';
     discovery.replaceChildren();
     try {
-      const data = await post('plan', { points, mode: travelMode }, controller.signal);
+      const { data, gaps } = await planRoute(points, travelMode, controller.signal);
       if (id !== requestId) return;
       const feature = aemValidatePlannedRoute(data);
       feature.properties.mode = travelMode;
@@ -442,17 +468,33 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
         distanceMeters: Number.isFinite(data.distance_meters) ? data.distance_meters : null,
         createdAt: Date.now()
       };
+      gapData = {
+        type: 'FeatureCollection',
+        features: gaps.flatMap(({ point, reached }) => [
+          { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: [reached, point] } },
+          { type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: point } }
+        ])
+      };
       ensureLayer();
       const source = map.getSource('aem-planned-route');
       if (!source) throw new Error('Map is not ready to display the route.');
       source.setData(feature);
-      const bounds = coordinatesBounds(feature.geometry.coordinates);
+      map.getSource('aem-route-access-gaps')?.setData(gapData);
+      const bounds = coordinatesBounds([...feature.geometry.coordinates, ...gaps.map(gap => gap.point)]);
       map.fitBounds(bounds, { padding: 60, maxZoom: 14, duration: 500 });
       status.textContent = Number.isFinite(data.distance_meters)
         ? `Route displayed · ${(data.distance_meters / 1609.344).toFixed(1)} mi`
         : 'Route displayed';
       const farthestSnap = Math.max(0, ...(data.snapped_points_meters || []));
-      if (farthestSnap > 25) {
+      if (gaps.length) {
+        const longestGap = Math.max(...gaps.map(gap => gap.meters));
+        const distance = longestGap >= 161 ? `${(longestGap / 1609.344).toFixed(2)} mi` : `${Math.round(longestGap)} m`;
+        const index = gaps[0].index;
+        const stop = index === 0 ? 'Start' : index === points.length - 1 ? 'Destination' : `Waypoint ${index}`;
+        status.textContent += gaps.length === 1
+          ? ` · ${stop} has a ${distance} off-network gap (dashed)`
+          : ` · ${gaps.length} off-network gaps up to ${distance} (dashed)`;
+      } else if (farthestSnap > 25) {
         status.textContent += ` · nearest road/trail is up to ${Math.round(farthestSnap)} m from a chosen point`;
       }
       // Wait until the GeoJSON source has loaded and its line is actually on screen.
@@ -473,7 +515,7 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
       map.triggerRepaint();
     } catch (error) {
       if (error.name !== 'AbortError' && id === requestId) {
-        status.textContent = error.message === 'No connected road or trail near a route point'
+        status.textContent = error.message === AEM_ROUTE_NO_SNAP
           ? `A route point could not be matched to a mapped ${travelMode === 'driving' ? 'drivable road' : 'road or trail'}. Choose a known access point for that stop.`
           : error.message;
       }
@@ -485,7 +527,7 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
     }
   });
   map.on('style.load', ensureLayer);
-  if (map.isStyleLoaded()) ensureLayer();
+  ensureLayer();
 }
 function coordinatesBounds(coordinates) {
   const bounds = new maplibregl.LngLatBounds(coordinates[0], coordinates[0]);

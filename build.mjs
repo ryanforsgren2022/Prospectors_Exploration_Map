@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { build } from 'esbuild';
 import { minify } from 'terser';
 import sharp from 'sharp';
 
@@ -31,8 +32,20 @@ for (const name of ['historic-mine-pin', 'historic-mine-visited-flag']) {
   await sharp(artwork).png().toFile(join(betaDirectory, 'images', `${name}.png`));
 }
 
-const applicationSource = readFileSync(join(sourceDist, 'search-v2.js'), 'utf8') + '\n' + readFileSync(join(sourceDist, 'research-v2.js'), 'utf8') + '\n' + readFileSync(join(sourceDist, 'app.js'), 'utf8') + '\n' + readFileSync(join(sourceDist, 'route-tracker.js'), 'utf8') + '\n' + readFileSync(join(sourceDist, 'route-finder.js'), 'utf8')
-;
+const { outputFiles: [routeAccess] } = await build({
+  entryPoints: [join(sourceDist, 'route-access.mjs')],
+  bundle: true,
+  minify: true,
+  format: 'esm',
+  write: false
+});
+const routeAccessHash = createHash('sha256').update(routeAccess.contents).digest('hex').slice(0, 12);
+const routeAccessName = `map.${routeAccessHash}.js`;
+
+const applicationSource = ['search-v2.js', 'research-v2.js', 'app.js', 'route-tracker.js', 'route-finder.js']
+  .map(name => readFileSync(join(sourceDist, name), 'utf8'))
+  .join('\n')
+  .replace('./route-access.mjs', `./${routeAccessName}`);
 const minified = await minify(applicationSource, {
   compress: { passes: 2 },
   mangle: true,
@@ -48,7 +61,7 @@ const stylesheetHash = createHash('sha256').update(stylesheet).digest('hex').sli
 const applicationName = `map.${applicationHash}.js`;
 const stylesheetName = `map.${stylesheetHash}.css`;
 
-for (const [name, contents] of [[applicationName, minified.code], [stylesheetName, stylesheet]]) {
+for (const [name, contents] of [[applicationName, minified.code], [stylesheetName, stylesheet], [routeAccessName, routeAccess.text]]) {
   const output = join(betaDirectory, name);
   if (existsSync(output) && readFileSync(output, 'utf8') !== contents) {
     throw new Error(`Refusing to overwrite existing hashed asset with different content: ${name}`);

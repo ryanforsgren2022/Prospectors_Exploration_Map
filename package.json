@@ -7,14 +7,17 @@
     "build": "node build.mjs"
   },
   "dependencies": {
+    "@mapbox/vector-tile": "3.0.0",
     "@neondatabase/serverless": "^1.1.0",
     "@vercel/functions": "3.9.7",
     "geojson-vt": "4.0.2",
+    "pbf": "5.2.0",
     "pmtiles": "^4.5.0",
     "sharp": "0.34.4",
     "terser": "5.44.0"
   },
   "devDependencies": {
+    "esbuild": "0.27.0",
     "vercel": "65.2.0"
   }
 }

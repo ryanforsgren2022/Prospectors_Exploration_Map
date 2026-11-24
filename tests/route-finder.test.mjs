@@ -26,7 +26,7 @@ test('planned route renders before parcel and feature discovery, without PLSS ch
   let render;
   let sourceLoaded = false;
   const map = {
-    isStyleLoaded: () => true,
+    getStyle: () => ({ layers: [] }),
     getSource: () => layers.length ? source : null,
     addSource() { layers.push('source'); },
     addLayer(layer) { layers.push(layer.id); },
