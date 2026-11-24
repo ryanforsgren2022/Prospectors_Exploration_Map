@@ -170,38 +170,39 @@ function westernRoadStyles() {
       [10.5, 0.8, 14, 1.15, 18, 1.8], { 'line-dasharray': [2, 2] }),
 
     // Reveal road classes progressively as the map zooms in.
+    // Give road lines and their casings more weight by the Z10 imagery transition.
     line('access-roads-casing', groups.access, 8.5, '#d3d3d3',
-      [9, 1.05, 12, 1.5, 14, 1.82, 18, 2.65], { 'line-opacity': 0.77 }),
+      [9, 1.05, 10, 1.75, 12, 2.05, 14, 2.15, 18, 2.65], { 'line-opacity': 0.77 }),
     line('access-roads', groups.access, 8.5, '#050505',
-      [9, 0.72, 12, 1.10, 14, 1.45, 18, 2.2]),
+      [9, 0.72, 10, 1.2, 12, 1.45, 14, 1.55, 18, 2.2]),
 
     line('local-road-casing', groups.local, 9, '#d5d5d5',
-      [10, 0.98, 14, 1.55, 18, 2.45], { 'line-opacity': 0.75 }),
+      [9, 0.98, 10, 1.45, 12, 1.8, 14, 1.9, 18, 2.45], { 'line-opacity': 0.75 }),
     line('local-roads', groups.local, 9, '#080808',
-      [10, 0.57, 14, 1.08, 18, 1.9]),
+      [9, 0.57, 10, 0.92, 12, 1.2, 14, 1.3, 18, 1.9]),
 
     line('secondary-road-casing', groups.secondary, 7, '#e7e7e7',
-      [9, 1.22, 14, 2.0, 18, 2.95], { 'line-opacity': 0.82 }),
+      [9, 1.22, 10, 1.95, 12, 2.3, 14, 2.4, 18, 2.95], { 'line-opacity': 0.82 }),
     line('secondary-roads', groups.secondary, 7, '#030303',
-      [9, 0.75, 14, 1.47, 18, 2.35]),
+      [9, 0.75, 10, 1.35, 12, 1.63, 14, 1.75, 18, 2.35]),
 
    // Managed roads remain black across OSM highway subclasses.
     line('managed-road-casing', groups.managed, 7, '#f2f4f3',
-      [9, 1.7, 12, 2.2, 14, 2.8, 18, 3.5]),
+      [9, 1.7, 10, 2.4, 12, 2.75, 14, 2.9, 18, 3.5]),
     line('managed-roads', groups.managed, 7, '#050505',
-      [9, 1.0, 12, 1.5, 14, 2.1, 18, 2.7]),
+      [9, 1.0, 10, 1.65, 12, 1.95, 14, 2.15, 18, 2.7]),
 
     // Major numbered roads remain white and draw on top of minor roads.
     // State routes are already present in the Z5 road tiles; show them as
     // soon as that tile band is requested rather than holding them to Z6.1.
     line('state-road-casing', groups.state, 5, '#070707',
-      [8.1, 1.5, 12, 2.5, 18, 3.5]),
+      [8.1, 1.5, 9, 1.73, 10, 2.65, 12, 3.15, 18, 3.5]),
     line('state-roads', groups.state, 5, '#ffffff',
-      [8.1, 0.88, 12, 1.7, 18, 2.6]),
+      [8.1, 0.88, 9, 1.07, 10, 1.8, 12, 2.2, 18, 2.6]),
     line('primary-road-casing', groups.major, 2, '#050505',
-      [4, 1.7, 12, 3.15, 18, 4.5]),
+      [4, 1.7, 9, 2.61, 10, 3.35, 12, 3.9, 18, 4.5]),
     line('primary-roads', groups.major, 2, '#ffffff',
-      [4, 1.08, 12, 2.2, 18, 3.35]),
+      [4, 1.08, 9, 1.78, 10, 2.4, 12, 2.8, 18, 3.35]),
 
     // Numeric/ref labels take priority; don't also draw the street name.
     label('primary-route-labels', groups.major, 2, refText, hasText('ref'), 1, 13, true),
