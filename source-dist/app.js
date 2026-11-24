@@ -1445,6 +1445,10 @@ map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-rig
 document.querySelector('#resetMapBearing').addEventListener('click', () => map.resetNorthPitch());
 
 const mapZoomStatus = document.querySelector('#mapZoomStatus');
+map.addControl({
+  onAdd: () => mapZoomStatus,
+  onRemove: () => mapZoomStatus.remove()
+}, 'top-right');
 function syncZoomPresentation() {
   const zoomText = `Z ${map.getZoom().toFixed(1)}`;
 
@@ -2017,7 +2021,7 @@ async function queryFirstFeature(query, where, geometry = null) {
   );
 }
 
-async function searchAddress(value) {
+async function searchAddressCandidates(value, signal) {
   const params = new URLSearchParams({
     SingleLine: value,
     countryCode: 'USA',
@@ -2027,7 +2031,7 @@ async function searchAddress(value) {
   });
 
   const response = await fetch(
-    `${ARCGIS_GEOCODE_QUERY}?${params}`
+    `${ARCGIS_GEOCODE_QUERY}?${params}`, { signal }
   );
 
   if (!response.ok) {
@@ -2040,8 +2044,12 @@ async function searchAddress(value) {
     throw new Error(data.error.message || 'Geocoder error.');
   }
 
-  // Accept results from any US state.
-  return data.candidates?.[0] || null;
+  return Array.isArray(data.candidates) ? data.candidates : [];
+}
+
+async function searchAddress(value, signal) {
+  const matches = await searchAddressCandidates(value, signal);
+  return matches[0] || null;
 }
 
 async function countyAtPoint(lngLat) {

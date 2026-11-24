@@ -96,7 +96,7 @@ function aemRouteAutoMode(speedMetersPerSecond, currentMode, candidate, now = Da
   const sustained = next.samples >= 8 && now - next.firstAt >= 45000;
   return { mode: sustained ? proposed : currentMode, candidate: sustained ? null : next };
 }
-function aemInstallRouteTracker(map, panel) {
+function aemInstallRouteTracker(map, panel, savedPanel) {
   panel.innerHTML =
     '<p id="aem-route-status" role="status">Ready to record.</p>' +
     '<div class="aem-route-actions"><button id="aem-route-start" type="button">Start</button>' +
@@ -105,13 +105,14 @@ function aemInstallRouteTracker(map, panel) {
     '<label>Travel mode <select id="aem-route-mode"><option value="auto">Auto</option>' +
     '<option value="driving">Driving</option><option value="hiking">Hiking</option></select></label>' +
     '<div id="aem-route-stats" aria-live="polite">0.00 mi · 00:00:00 · ↑ 0 ft · ↓ 0 ft</div>' +
-    '<canvas id="aem-route-elevation" width="300" height="80" hidden aria-label="Elevation by distance"></canvas>' +
-    '<label>Saved trips <select id="aem-route-saved"><option value="">Select a trip</option></select></label>';
+    '<canvas id="aem-route-elevation" class="aem-route-elevation" width="300" height="80" hidden aria-label="Elevation by distance"></canvas>';
   const startButton = panel.querySelector('#aem-route-start');
   const pauseButton = panel.querySelector('#aem-route-pause');
   const stopButton = panel.querySelector('#aem-route-stop');
   const modeSelect = panel.querySelector('#aem-route-mode');
-  const savedSelect = panel.querySelector('#aem-route-saved');
+  const savedSelect = savedPanel.querySelector('#aem-route-saved');
+  const savedStats = savedPanel.querySelector('#aem-saved-trip-stats');
+  const savedProfile = savedPanel.querySelector('#aem-saved-trip-elevation');
   const status = panel.querySelector('#aem-route-status');
   const stats = panel.querySelector('#aem-route-stats');
   const profile = panel.querySelector('#aem-route-elevation');
@@ -140,15 +141,10 @@ function aemInstallRouteTracker(map, panel) {
   function elapsed() {
     return trip ? trip.elapsedMs + (recordingStarted ? Date.now() - recordingStarted : 0) : 0;
   }
-  function render() {
-    const current = trip || shownSaved;
+  function renderTripStats(current, elapsedMs, stats, profile) {
     stats.textContent = current
-      ? `${(current.distanceMeters / 1609.344).toFixed(2)} mi · ${aemRouteFormatDuration(trip ? elapsed() : current.elapsedMs)} · ↑ ${Math.round(current.elevationGainMeters * 3.28084)} ft · ↓ ${Math.round(current.elevationLossMeters * 3.28084)} ft`
+      ? `${(current.distanceMeters / 1609.344).toFixed(2)} mi · ${aemRouteFormatDuration(elapsedMs)} · ↑ ${Math.round(current.elevationGainMeters * 3.28084)} ft · ↓ ${Math.round(current.elevationLossMeters * 3.28084)} ft`
       : '0.00 mi · 00:00:00 · ↑ 0 ft · ↓ 0 ft';
-    startButton.disabled = Boolean(trip);
-    pauseButton.disabled = !trip;
-    stopButton.disabled = !trip;
-    pauseButton.textContent = paused ? 'Resume' : 'Pause';
     const elevations = (current?.segments || []).flatMap((segment) => segment.points)
       .filter((point) => Number.isFinite(point.elevation));
     profile.hidden = elevations.length < 2;
@@ -177,13 +173,27 @@ function aemInstallRouteTracker(map, panel) {
         context.stroke();
       }
     }
+  }
+  function render() {
+    startButton.disabled = Boolean(trip);
+    pauseButton.disabled = !trip;
+    stopButton.disabled = !trip;
+    pauseButton.textContent = paused ? 'Resume' : 'Pause';
+    renderTripStats(trip, elapsed(), stats, profile);
     draw();
   }
-  function refreshSaved() {
-    savedSelect.replaceChildren(new Option('Select a trip', ''));
-    for (const item of aemRouteReadTrips()) {
+  function showSavedStats(item) {
+    savedStats.hidden = !item;
+    renderTripStats(item, item?.elapsedMs ?? 0, savedStats, savedProfile);
+  }
+  function refreshSaved(selectedId = '') {
+    const trips = aemRouteReadTrips();
+    savedSelect.replaceChildren(new Option(trips.length ? 'Select a trip' : 'No saved trips yet', ''));
+    for (const item of trips) {
       savedSelect.add(new Option(item.name || new Date(item.startedAt).toLocaleString(), item.id));
     }
+    savedSelect.value = trips.some((item) => item.id === selectedId) ? selectedId : '';
+    savedSelect.disabled = Boolean(trip) || !trips.length;
   }
   function stopWatch() {
     if (watchId !== null) navigator.geolocation.clearWatch(watchId);
@@ -224,6 +234,8 @@ function aemInstallRouteTracker(map, panel) {
       trip.plannedRoute = JSON.parse(JSON.stringify(window.aemPlannedRoute));
     }
     shownSaved = null;
+    refreshSaved();
+    showSavedStats(null);
     recordingStarted = Date.now();
     paused = false;
     candidate = null;
@@ -266,7 +278,8 @@ function aemInstallRouteTracker(map, panel) {
     trip = null;
     recordingStarted = 0;
     paused = false;
-    refreshSaved();
+    refreshSaved(shownSaved.id);
+    showSavedStats(savedSelect.value ? shownSaved : null);
     render();
   });
   modeSelect.addEventListener('change', () => {
@@ -278,11 +291,18 @@ function aemInstallRouteTracker(map, panel) {
   savedSelect.addEventListener('change', () => {
     if (trip) return;
     shownSaved = aemRouteReadTrips().find((item) => item.id === savedSelect.value) || null;
+    showSavedStats(shownSaved);
     render();
+    const points = shownSaved?.segments.flatMap((segment) => segment.points) ?? [];
+    if (points.length) {
+      const bounds = new maplibregl.LngLatBounds();
+      for (const point of points) bounds.extend([point.lng, point.lat]);
+      map.fitBounds(bounds, { padding: 72, maxZoom: 16, duration: 500 });
+    }
   });
   map.on('style.load', ensureLayer);
   if (map.isStyleLoaded()) ensureLayer();
   refreshSaved();
   window.setInterval(() => { if (trip && !paused) render(); }, 1000);
 }
-aemInstallRouteTracker(map, document.querySelector('#routeTrackerPanel .aem-route-panel__body'));
+aemInstallRouteTracker(map, document.querySelector('#routeTrackerPanel .aem-route-panel__body'), document.querySelector('.aem-saved-trips'));

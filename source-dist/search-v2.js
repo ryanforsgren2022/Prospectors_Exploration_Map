@@ -17,6 +17,23 @@ function installAemUnifiedSearch(options) {
   let sequence = 0;
   let controller = null;
   const cancel = () => { sequence++; controller?.abort(); choices.replaceChildren(); input.disabled = false; };
+  async function choose(features, truncated, isCurrent) {
+    if (features.length === 1 && !truncated) return navigate(features[0], isCurrent);
+    for (const feature of features) {
+      const p = feature.properties || {};
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = [p.display_label, p.search_type, p.county, p.PRINMER || p.PRINMERCD, p.state_code?.toUpperCase()].filter(Boolean).join(' · ');
+      button.addEventListener('click', async () => {
+        if (!isCurrent()) return;
+        choices.replaceChildren();
+        try { await navigate(feature, isCurrent); }
+        catch (error) { if (isCurrent()) status(error.message, 'error'); }
+      });
+      choices.append(button);
+    }
+    status(truncated ? 'Choose a match; add a state or a more specific reference to narrow the results.' : 'Choose the location you mean.');
+  }
   input.addEventListener('input', cancel);
   options.map?.on('dragstart', cancel);
   form.addEventListener('submit', async (event) => {
@@ -25,12 +42,13 @@ function installAemUnifiedSearch(options) {
     const current = sequence;
     const isCurrent = () => sequence === current;
     const raw = input.value.trim();
-    if (!raw) return status('Enter a parcel/APN, claim, PLSS reference, road, mine, address, or coordinates.', 'error');
+    if (!raw) return status(options.emptyMessage || 'Enter a parcel/APN, claim, PLSS reference, road, mine, address, or coordinates.', 'error');
     controller = new AbortController();
+    const { signal } = controller;
     input.disabled = true;
     status('Searching…');
     try {
-      await options.prepare();
+      await options.prepare?.();
       if (!isCurrent()) return;
       const context = parseState(raw);
       const query = aemUnifiedQuery(context.value, parsePlss);
@@ -45,36 +63,25 @@ function installAemUnifiedSearch(options) {
       const state = context.explicitState ? context.state : options.stateSelect?.value;
       if (state) url.searchParams.set('state', state);
       if (options.countyInput?.value.trim()) url.searchParams.set('county', options.countyInput.value.trim());
-      const response = await options.fetch(url, { signal: controller.signal });
+      const response = await options.fetch(url, { signal });
       if (!response.ok) throw new Error('Search is temporarily unavailable. Please try again.');
       const result = await response.json();
       if (!isCurrent()) return;
       const features = result.features || [];
-      if (features.length === 1 && !result.truncated) {
-        await navigate(features[0], isCurrent);
-      } else if (features.length) {
-        for (const feature of features) {
-          const p = feature.properties || {};
-          const button = document.createElement('button');
-          button.type = 'button';
-          button.textContent = [p.display_label, p.search_type, p.county, p.PRINMER || p.PRINMERCD, p.state_code?.toUpperCase()].filter(Boolean).join(' · ');
-          button.addEventListener('click', async () => {
-            if (!isCurrent()) return;
-            choices.replaceChildren();
-            try { await navigate(feature, isCurrent); }
-            catch (error) { if (isCurrent()) status(error.message, 'error'); }
-          });
-          choices.append(button);
-        }
-        status(result.truncated ? 'Choose a match; add a state or a more specific reference to narrow the results.' : 'Choose the location you mean.');
-      } else {
-        // Explicit references must never silently become an unrelated address.
-        if (query.kind) throw new Error(result.pending?.length ? 'This search category is still being indexed. Please try again when it is ready.' : 'No matching record found. Check the state and reference.');
-        const address = await geocode(context.value);
-        if (!isCurrent()) return;
-        if (!address?.location) throw new Error(result.pending?.length ? 'Some datasets are still indexing; no address match was found.' : 'No matching location found.');
-        await navigate({ type: 'Feature', properties: { display_label: address.attributes?.LongLabel || address.address || raw }, geometry: { type: 'Point', coordinates: [address.location.x, address.location.y] } }, isCurrent);
-      }
+      if (features.length) return await choose(features, result.truncated, isCurrent);
+      // Explicit references must never silently become an unrelated address.
+      if (query.kind) throw new Error(result.pending?.length ? 'This search category is still being indexed. Please try again when it is ready.' : 'No matching record found. Check the state and reference.');
+      const addresses = await geocode(context.value, signal);
+      if (!isCurrent()) return;
+      const matches = (Array.isArray(addresses) ? addresses : [addresses])
+        .filter((address) => Number.isFinite(address?.location?.x) && Number.isFinite(address?.location?.y))
+        .map((address) => ({
+          type: 'Feature',
+          properties: { display_label: address.attributes?.LongLabel || address.address || raw },
+          geometry: { type: 'Point', coordinates: [address.location.x, address.location.y] }
+        }));
+      if (!matches.length) throw new Error(result.pending?.length ? 'Some datasets are still indexing; no address match was found.' : 'No matching location found.');
+      await choose(matches, false, isCurrent);
     } catch (error) {
       if (isCurrent() && error.name !== 'AbortError') status(error.message || 'Search is temporarily unavailable.', 'error');
     } finally {

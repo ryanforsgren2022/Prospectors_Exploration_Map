@@ -9,12 +9,16 @@ test('planned route renders before parcel and feature discovery, without PLSS ch
     if (!controls.has(id)) controls.set(id, {
       value: '', disabled: false, hidden: false, textContent: '',
       listeners: {}, addEventListener(name, callback) { this.listeners[name] = callback; },
-      append() {}, replaceChildren() {},
+      append() {}, replaceChildren() {}, focus() {}, setAttribute() {},
     });
     return controls.get(id);
   };
   const panel = {
-    innerHTML: '', className: '', querySelector(selector) { return control(selector.slice(1)); },
+    innerHTML: '', className: '',
+    querySelector(selector) { return control(selector.slice(1)); },
+    closest() { return control('finder-menu'); },
+    addEventListener() {},
+
   };
   const requests = [];
   const layers = [];
@@ -33,14 +37,21 @@ test('planned route renders before parcel and feature discovery, without PLSS ch
     isSourceLoaded: () => sourceLoaded,
     queryRenderedFeatures: () => [{ id: 1 }],
   };
-  const browserWindow = {};
+  const browserWindow = { fetch() {} };
+  let chooseSearchResult;
   const context = vm.createContext({
-    map, window: browserWindow, document: {
+    map, window: browserWindow,
+    aemParseStateSearch() {}, parseCoordinates() {}, parsePlss() {}, searchAddressCandidates() {},
+    installAemUnifiedSearch(options) {
+      chooseSearchResult = options.navigate;
+      return { cancel() {} };
+    },
+    document: {
       querySelector(selector) {
         assert.equal(selector, '#routeFinderPanel .aem-route-panel__body');
         return panel;
       },
-      createElement: () => ({ textContent: '' }),
+      createElement: () => ({ textContent: '', append() {}, addEventListener() {}, setAttribute() {} }),
     },
     maplibregl: { LngLatBounds: class { constructor() {} extend() {} } },
     AbortController,
@@ -54,10 +65,14 @@ test('planned route renders before parcel and feature discovery, without PLSS ch
   vm.runInContext(readFileSync(new URL('../source-dist/route-finder.js', import.meta.url), 'utf8'), context);
   control('aem-route-origin').value = '33, -112';
   control('aem-route-destination').value = '33, -111.99';
+  control('aem-route-point-target').value = 'waypoint';
+  chooseSearchResult({ properties: { display_label: 'Copper Mine' }, geometry: { coordinates: [-111.995, 33] } });
+  control('aem-route-waypoint').value = '33, -111.993';
   control('aem-route-plan-mode').value = 'driving';
   control('aem-route-radius').value = '3';
   await control('aem-route-plan').listeners.click();
   assert.equal(requests.length, 1);
+  assert.deepEqual(requests[0].body.points, [[-112, 33], [-111.995, 33], [-111.993, 33], [-111.99, 33]]);
   assert.ok(source.data);
   assert.equal(browserWindow.aemPlannedRoute.mode, 'driving');
   assert.equal(typeof render, 'function');

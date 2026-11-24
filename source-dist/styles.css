@@ -2000,7 +2000,6 @@ vercel-toolbar,
 }
 
 .aem-map-panel .map-search { margin-top: 0; }
-.aem-map-view { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .aem-settings-icon { width: 25px; height: 25px; object-fit: contain; margin-right: 7px; }
 #aemRoadDensity, #showVisitedMines { width: 100%; }
 
@@ -2016,6 +2015,23 @@ body #map .maplibregl-ctrl-top-right {
   border-radius: 12px;
   background: rgba(13, 43, 31, .91);
   box-shadow: none;
+}
+
+#map .aem-zoom-status {
+  clear: both;
+  display: grid;
+  place-items: center;
+  min-width: 46px;
+  min-height: 27px;
+  margin: 0;
+  padding: 2px 4px;
+  border: 1px solid var(--aem-panel-border);
+  border-radius: 8px;
+  background: rgba(13, 43, 31, .94);
+  color: var(--aem-control-ink);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 #map .maplibregl-ctrl-top-right button { width: 44px; height: 42px; border-radius: 0; }

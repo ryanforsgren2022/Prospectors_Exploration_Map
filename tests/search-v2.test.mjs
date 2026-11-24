@@ -44,6 +44,18 @@ test('duplicate APNs wait for the user to choose the correct county', async () =
   assert.equal(buttons.length, 2);assert.match(buttons[1].textContent, /Yavapai/);
   await buttons[1].listeners.click();assert.equal(h.navigations[0].id, 'Yavapai');
 });
+test('ambiguous place or address matches can be selected by the route point picker', async () => {
+  const h = harness([], { geocode: async () => [
+    { address: 'Center Street, Arizona', location: { x: -111, y: 32 } },
+    { address: 'Center Street, Utah', location: { x: -112, y: 38 } },
+  ] });
+  await h.submit('Center Street');
+  assert.equal(h.navigations.length, 0);
+  const buttons = h.form.children[0].children;
+  assert.deepEqual(buttons.map(button => button.textContent), ['Center Street, Arizona', 'Center Street, Utah']);
+  await buttons[1].listeners.click();
+  assert.deepEqual(Array.from(h.navigations[0].geometry.coordinates), [-112, 38]);
+});
 test('explicit APNs never fall through to address geocoding when their index is pending', async () => {
   const h = harness([], { fetch: async () => ({ ok: true, json: async () => ({ features: [], pending: [{ state: 'az' }] }) }) });
   await h.submit('APN 001-020');assert.equal(h.geocodes(), 0);assert.match(h.messages.at(-1)[0], /still being indexed/);
