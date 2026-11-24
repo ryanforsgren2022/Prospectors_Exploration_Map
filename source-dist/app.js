@@ -290,6 +290,7 @@ const ROAD_ZOOM = Object.freeze({
 const SURFACE_MANAGEMENT_QUERY = 'https://gis.blm.gov/azarcgis/rest/services/lands/BLM_AZ_SMA/FeatureServer/0/query';
 const SURFACE_MANAGEMENT_SOURCE = 'surfaceManagement';
 const SURFACE_MANAGEMENT_LAYER_IDS = ['surface-management-fill', 'surface-management-military-hatch', 'surface-management-outline'];
+const SURFACE_MANAGEMENT_MIN_ZOOM = 4;
 const SURFACE_MANAGEMENT_MAX_ZOOM = 12;
 const PROPERTY_PARCELS_SOURCE = 'propertyParcels';
 const PROPERTY_PARCELS_LAYER_IDS = ['property-parcels-fill', 'property-parcels-outline'];
@@ -479,6 +480,41 @@ if (TRACE_LAYERS) {
 const pmtilesProtocol = new pmtiles.Protocol();
 maplibregl.addProtocol('pmtiles', pmtilesProtocol.tile);
 
+const surfaceManagementSources = new Map();
+maplibregl.addProtocol('aem-surface', async ({ url }, controller) => {
+  const coordinate = new URL(url);
+  const state = coordinate.hostname;
+  const [z, x, y] = coordinate.pathname.slice(1).split('/').map(Number);
+  const { dataset, archive } = surfaceManagementSources.get(state);
+  if (z >= dataset.minzoom && archive) {
+    const tile = await archive.getZxy(z, x, y, controller.signal);
+    return { data: tile?.data ?? new ArrayBuffer(0) };
+  }
+
+  const tileUrl = z < dataset.minzoom
+    ? `/api/map/surface-overview?state=${state}&z=${z}&x=${x}&y=${y}`
+    : dataset.tiles[0].replace('{z}', z).replace('{x}', x).replace('{y}', y);
+  const response = await fetch(tileUrl, { signal: controller.signal });
+  if (response.status === 404 || response.status === 204) return { data: new ArrayBuffer(0) };
+  if (!response.ok) throw new Error(`Surface Management tile returned ${response.status}`);
+  return { data: await response.arrayBuffer() };
+});
+
+function surfaceManagementWithOverview(stateCode, state, dataset) {
+  if (dataset.minzoom <= SURFACE_MANAGEMENT_MIN_ZOOM) return dataset;
+
+  const archiveUrl = dataset.url?.startsWith('pmtiles://') ? dataset.url.slice('pmtiles://'.length) : null;
+  const archive = archiveUrl ? pmtilesProtocol.get(archiveUrl) || new pmtiles.PMTiles(archiveUrl) : null;
+  surfaceManagementSources.set(stateCode, { dataset, archive });
+  return {
+    ...dataset,
+    tiles: [`aem-surface://${stateCode}/{z}/{x}/{y}`],
+    minzoom: SURFACE_MANAGEMENT_MIN_ZOOM,
+    bounds: dataset.bounds ?? state.bounds
+  };
+}
+
+
 /* CONTINUOUS_WESTERN_ROADS_V3
  *
  * One PMTiles archive serves roads across all 11 states. Keep this source
@@ -565,9 +601,9 @@ roads: {
       } },
 
       { id: 'terrain-shade', type: 'hillshade', source: 'terrain', layout: { visibility:'none' }, paint: { 'hillshade-exaggeration': 0.22, 'hillshade-shadow-color': '#172219', 'hillshade-highlight-color': '#f4e9cd' } },
-      { id: 'surface-management-fill', type: 'fill', source: SURFACE_MANAGEMENT_SOURCE, 'source-layer': 'surface_management', maxzoom: SURFACE_MANAGEMENT_MAX_ZOOM + .01, filter: visibleSurfaceManagementFilter(), layout: { visibility:'none' }, paint: { 'fill-color': surfaceManagementColorExpression(), 'fill-opacity': ['case', ['==', surfaceManagementCategoryExpression(), 'Military'], .43, .28] } },
-      { id: 'surface-management-military-hatch', type: 'fill', source: SURFACE_MANAGEMENT_SOURCE, 'source-layer': 'surface_management', maxzoom: SURFACE_MANAGEMENT_MAX_ZOOM + .01, filter: ['==', surfaceManagementCategoryExpression(), 'Military'], layout: { visibility:'none' }, paint: { 'fill-pattern': 'surface-management-military-slashes' } },
-      { id: 'surface-management-outline', type: 'line', source: SURFACE_MANAGEMENT_SOURCE, 'source-layer': 'surface_management', maxzoom: SURFACE_MANAGEMENT_MAX_ZOOM + .01, filter: visibleSurfaceManagementFilter(), layout: { visibility:'none' }, paint: { 'line-color':'rgba(25,25,25,.55)', 'line-width':.45 } },
+      { id: 'surface-management-fill', type: 'fill', source: SURFACE_MANAGEMENT_SOURCE, 'source-layer': 'surface_management', minzoom: SURFACE_MANAGEMENT_MIN_ZOOM, maxzoom: SURFACE_MANAGEMENT_MAX_ZOOM + .01, filter: visibleSurfaceManagementFilter(), layout: { visibility:'none' }, paint: { 'fill-color': surfaceManagementColorExpression(), 'fill-opacity': ['case', ['==', surfaceManagementCategoryExpression(), 'Military'], .43, .28] } },
+      { id: 'surface-management-military-hatch', type: 'fill', source: SURFACE_MANAGEMENT_SOURCE, 'source-layer': 'surface_management', minzoom: SURFACE_MANAGEMENT_MIN_ZOOM, maxzoom: SURFACE_MANAGEMENT_MAX_ZOOM + .01, filter: ['==', surfaceManagementCategoryExpression(), 'Military'], layout: { visibility:'none' }, paint: { 'fill-pattern': 'surface-management-military-slashes' } },
+      { id: 'surface-management-outline', type: 'line', source: SURFACE_MANAGEMENT_SOURCE, 'source-layer': 'surface_management', minzoom: SURFACE_MANAGEMENT_MIN_ZOOM, maxzoom: SURFACE_MANAGEMENT_MAX_ZOOM + .01, filter: visibleSurfaceManagementFilter(), layout: { visibility:'none' }, paint: { 'line-color':'rgba(25,25,25,.55)', 'line-width':.45 } },
       { id: 'property-parcels-fill', type: 'fill', source: PROPERTY_PARCELS_SOURCE, 'source-layer': 'parcels', minzoom: PROPERTY_PARCELS_MIN_ZOOM, layout: { visibility:'none' }, paint: { 'fill-color':'rgba(255,145,0,.015)' } },
       { id: 'property-parcels-outline', type: 'line', source: PROPERTY_PARCELS_SOURCE, 'source-layer': 'parcels', minzoom: PROPERTY_PARCELS_MIN_ZOOM, layout: { visibility:'none' }, paint: { 'line-color':'rgba(255,150,20,.98)', 'line-width':['interpolate',['linear'],['zoom'],12,1.05,15,1.5,18,2] } },
       { id: 'not-closed-claims-fill', type: 'fill', source: NOT_CLOSED_CLAIMS_SOURCE, 'source-layer': 'claims', minzoom: NOT_CLOSED_CLAIMS_MIN_ZOOM, layout: { visibility:'none' }, paint: { 'fill-color':'rgba(128,70,190,.22)' } },
@@ -1289,7 +1325,8 @@ function setPlssVisible(kind, visible) {
 
 
 function surfaceManagementCanRender() {
-  return surfaceManagementEnabled && map.getZoom() <= SURFACE_MANAGEMENT_MAX_ZOOM;
+  const zoom = map.getZoom();
+  return surfaceManagementEnabled && zoom >= SURFACE_MANAGEMENT_MIN_ZOOM && zoom <= SURFACE_MANAGEMENT_MAX_ZOOM;
 }
 
 function syncSurfaceManagementPresentation() {
@@ -2881,7 +2918,7 @@ function attachProspectorStandardGroup(
   const source = addProspectorSource(
     `${prefix}-${config.suffix}`,
     state,
-    dataset,
+    group === 'surfaceManagement' ? surfaceManagementWithOverview(stateCode, state, dataset) : dataset,
     dataset.promoteId
       ? { promoteId: dataset.promoteId }
       : {}
