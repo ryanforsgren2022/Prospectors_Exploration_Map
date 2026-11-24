@@ -23,13 +23,15 @@ nice -n 15 ionice -c3 /root/LIVE_SITE_CASHE/live-mvt/.venv/bin/python \
   --staging /mnt/volume_sfo3_1794422503599/aem-routing/staging
 ```
 
-The plan endpoint refuses an incomplete graph. A route is advisory: access restrictions, closures, and passability need independent confirmation.
+All 11 verified state extracts finished importing on 2026-11-24. The resulting graph is about 26 GB. The plan endpoint refuses an incomplete graph. A route is advisory: access restrictions, closures, and passability need independent confirmation.
+
+The current live `parcels_service.py` differs from the repository snapshot. Apply `vm-review/live-route-integration.patch` to the live service version when publishing; it only enables POST in CORS and attaches the route router. Do not replace the live service with the repository snapshot. The route API passed isolated FastAPI checks for health, planning, and parcel discovery against the completed graph.
 
 Arizona benchmark on 2026-11-23: the verified extract produced 1,111,624 routable ways, 10,039,091 nodes, and 21,250,038 directed edges in a 2.47 GB SQLite graph. SQLite `quick_check` returned `ok`. A roughly 18 km Phoenix-area drive routed in 1.8 seconds; Phoenix to Tucson routed 181.9 km in 16.2 seconds with the one-million-visit benchmark cap. The production default cap is 1.5 million visits. These timings are VM measurements, not guarantees for other states.
 
 ## Parcel coverage
 
-The parcel endpoint tests route intersections and a fixed 0.5-mile corridor against tile polygons and labels each result `crossed` or `within_0_5_mile`. Its `complete` field is false when an archive manifest reports missing tile records. The current manifests report 509 missing zoom-16 parcel records across nine states, so the UI reports partial coverage there. Nevada has no comparable manifest and is reported as unknown coverage. Repairing those source gaps is required before claiming an exhaustive private parcel result.
+The parcel endpoint tests route intersections and a fixed 0.5-mile corridor against tile polygons and labels each result `crossed` or `within_0_5_mile`. Its `complete` field is false when an archive manifest reports missing tile records. The current manifests report 509 missing zoom-16 parcel records among 25,321,808 expected records across nine states (about 0.002%). These gaps were previously accepted for map display, and the route feature continues with the explicit partial-coverage indicator. Nevada has no comparable manifest and is reported as unknown coverage. The missing-record ID lists and original geometry files referenced by the manifests are no longer present at their recorded paths; exhaustive parcel coverage cannot be claimed from the present archives.
 
 ## Verification
 
