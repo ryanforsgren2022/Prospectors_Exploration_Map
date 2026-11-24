@@ -63,16 +63,23 @@ test('planned route renders before parcel and feature discovery, without PLSS ch
     },
   });
   vm.runInContext(readFileSync(new URL('../source-dist/route-finder.js', import.meta.url), 'utf8'), context);
-  control('aem-route-origin').value = '33, -112';
-  control('aem-route-destination').value = '33, -111.99';
-  control('aem-route-point-target').value = 'waypoint';
-  chooseSearchResult({ properties: { display_label: 'Copper Mine' }, geometry: { coordinates: [-111.995, 33] } });
-  control('aem-route-waypoint').value = '33, -111.993';
+  const choose = (name, lng, lat) => chooseSearchResult({
+    properties: { display_label: name }, geometry: { coordinates: [lng, lat] }
+  });
+  assert.equal(control('aem-route-point-query').placeholder, 'Search for a start');
+  choose('Start', -112, 33);
+  assert.equal(control('aem-route-point-query').placeholder, 'Search for a destination');
+  choose('Destination', -111.99, 33);
+  assert.equal(control('aem-route-plan').disabled, false);
+  choose('Copper Mine', -111.995, 33);
+  control('aem-route-point-query').listeners.paste({
+    clipboardData: { getData: () => '33, -111.993\n33, -111.991' }, preventDefault() {}
+  });
   control('aem-route-plan-mode').value = 'driving';
   control('aem-route-radius').value = '3';
   await control('aem-route-plan').listeners.click();
   assert.equal(requests.length, 1);
-  assert.deepEqual(requests[0].body.points, [[-112, 33], [-111.995, 33], [-111.993, 33], [-111.99, 33]]);
+  assert.deepEqual(requests[0].body.points, [[-112, 33], [-111.995, 33], [-111.993, 33], [-111.991, 33], [-111.99, 33]]);
   assert.ok(source.data);
   assert.equal(browserWindow.aemPlannedRoute.mode, 'driving');
   assert.equal(typeof render, 'function');

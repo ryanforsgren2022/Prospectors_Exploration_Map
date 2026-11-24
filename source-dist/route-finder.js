@@ -28,64 +28,62 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
       <button id="aem-route-cancel-pick" type="button">Cancel map pick</button>
     </div>
     <div class="aem-route-editor">
-      <label>Start coordinates<input id="aem-route-origin" placeholder="33.4484, -112.0740"></label>
-      <button id="aem-route-origin-center" type="button">Use map center as start</button>
-      <label>Destination coordinates<input id="aem-route-destination" placeholder="33.5641, -111.8869"></label>
-      <button id="aem-route-destination-center" type="button">Use map center as destination</button>
-      <fieldset class="aem-route-points">
-        <legend>Find a route point</legend>
-        <label>Use as<select id="aem-route-point-target">
-          <option value="waypoint">Waypoint</option><option value="start">Start</option><option value="destination">Destination</option>
-        </select></label>
-        <form id="aem-route-point-search" class="map-search" role="search" aria-label="Find a route point">
-          <label for="aem-route-point-query">Place, address, AEM feature, or coordinates</label>
-          <div class="map-search__row">
-            <input id="aem-route-point-query" type="search" autocomplete="off" placeholder="Kanab, UT or MINE Gold King">
-            <button type="submit">Find</button>
+      <form id="aem-route-point-search" class="map-search" role="search" aria-label="Find a route point">
+        <label id="aem-route-query-label" class="sr-only" for="aem-route-point-query">Search for a start</label>
+        <div class="map-search__row">
+          <input id="aem-route-point-query" type="search" autocomplete="off" placeholder="Search for a start">
+          <button type="submit">Find</button>
+        </div>
+        <div id="aem-route-search-suggestions" hidden>
+          <div id="aem-route-map-sources" class="aem-route-map-sources">
+            <button id="aem-route-pick-point" type="button">Pick on map</button>
+            <button id="aem-route-map-center" type="button">Use map center</button>
           </div>
-          <p id="aem-route-point-status" class="map-search__status" role="status"></p>
-        </form>
-        <button id="aem-route-pick-point" type="button">Pick on map</button>
-        <label>Use a saved pin<select id="aem-route-saved-pin"></select></label>
-      </fieldset>
-      <details class="aem-route-coordinates">
-        <summary>Add waypoint coordinates in bulk</summary>
-        <label>Latitude, longitude (one pair per line)
-          <textarea id="aem-route-waypoint" rows="2" placeholder="33.5, -112.0"></textarea>
-        </label>
-        <button id="aem-route-add-coordinates" type="button">Add waypoints</button>
-        <p id="aem-route-coordinate-status" role="status"></p>
+          <div id="aem-route-pin-matches" class="map-search__choices" aria-label="Saved pins"></div>
+        </div>
+        <p id="aem-route-point-status" class="map-search__status" role="status"></p>
+      </form>
+      <div class="aem-route-stops" role="group" aria-label="Route points">
+        <button id="aem-route-start-point" type="button" aria-pressed="true">Start</button>
+        <ol id="aem-route-waypoints" aria-label="Waypoints in route order" hidden></ol>
+        <button id="aem-route-destination-point" type="button" aria-pressed="false">Destination</button>
+        <button id="aem-route-add-waypoint" type="button" aria-pressed="false" hidden>+ Add waypoint</button>
+      </div>
+      <button id="aem-route-plan" type="button" disabled>Plan route</button>
+      <p id="aem-route-plan-status" role="status"></p>
+      <details class="aem-route-options">
+        <summary>Route options</summary>
+        <label>Route type<select id="aem-route-plan-mode"><option value="driving">Driving</option>
+          <option value="hiking">Hiking</option></select></label>
+        <label>Discovery radius<select id="aem-route-radius"><option value="1">1 mile</option>
+          <option value="3" selected>3 miles</option><option value="5">5 miles</option>
+          <option value="10">10 miles</option><option value="custom">10+ miles</option></select></label>
+        <label id="aem-route-custom-wrap" hidden>Custom miles<input id="aem-route-custom" type="number" min="11" max="100" step="1" value="15"></label>
+        <p>Routes are advisory. Check legal access, closures, and passability before travel.</p>
       </details>
-      <ol id="aem-route-waypoints" aria-label="Waypoints in route order" hidden></ol>
-      <label>Route type<select id="aem-route-plan-mode"><option value="driving">Driving</option>
-        <option value="hiking">Hiking</option></select></label>
-      <label>Discovery radius<select id="aem-route-radius"><option value="1">1 mile</option>
-        <option value="3" selected>3 miles</option><option value="5">5 miles</option>
-        <option value="10">10 miles</option><option value="custom">10+ miles</option></select></label>
-      <label id="aem-route-custom-wrap" hidden>Custom miles<input id="aem-route-custom" type="number" min="10" max="100" step="1" value="15"></label>
-      <button id="aem-route-plan" type="button">Plan route</button>
-      <p id="aem-route-plan-status" role="status">Choose a start and destination.</p>
-      <p>Routes are advisory. Check legal access, closures, and passability before travel.</p>
       <div id="aem-route-discovery" aria-live="polite"></div>
     </div>`;
   const byId = (id) => panel.querySelector(`#${id}`);
   const finderMenu = panel.closest('details');
-  const origin = byId('aem-route-origin');
-  const destination = byId('aem-route-destination');
-  const bulkWaypoints = byId('aem-route-waypoint');
-  const waypointList = byId('aem-route-waypoints');
-  const pointTarget = byId('aem-route-point-target');
+  const pointForm = byId('aem-route-point-search');
   const pointQuery = byId('aem-route-point-query');
+  const pointLabel = byId('aem-route-query-label');
   const pointStatus = byId('aem-route-point-status');
-  const coordinateStatus = byId('aem-route-coordinate-status');
-  const savedPin = byId('aem-route-saved-pin');
+  const suggestions = byId('aem-route-search-suggestions');
+  const mapSources = byId('aem-route-map-sources');
+  const pinMatches = byId('aem-route-pin-matches');
+  const startButton = byId('aem-route-start-point');
+  const destinationButton = byId('aem-route-destination-point');
+  const addWaypointButton = byId('aem-route-add-waypoint');
+  const waypointList = byId('aem-route-waypoints');
   const pickButton = byId('aem-route-pick-point');
   const cancelPickButton = byId('aem-route-cancel-pick');
   const pickBanner = panel.querySelector('.aem-route-pick');
   const editor = panel.querySelector('.aem-route-editor');
+  const endpoints = { start: null, destination: null };
   const waypoints = [];
-  let savedPins = [];
-  let pickingFor = null;
+  let target = 'start';
+  let picking = false;
   const mode = byId('aem-route-plan-mode');
   const radius = byId('aem-route-radius');
   const custom = byId('aem-route-custom');
@@ -95,6 +93,7 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
   const discovery = byId('aem-route-discovery');
   let route = null;
   let requestId = 0;
+  let planning = false;
   const empty = { type: 'FeatureCollection', features: [] };
   function ensureLayer() {
     if (!map.isStyleLoaded() || map.getSource('aem-planned-route')) return;
@@ -116,82 +115,151 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
     pointStatus.className = `map-search__status ${state}`.trim();
   }
 
-  function renderWaypoints() {
+  function renderPoints() {
+    const { start, destination } = endpoints;
+    startButton.textContent = start ? `Start: ${start.name}` : 'Start';
+    startButton.setAttribute('aria-pressed', String(target === 'start'));
+    destinationButton.textContent = destination ? `Destination: ${destination.name}` : 'Destination';
+    destinationButton.setAttribute('aria-pressed', String(target === 'destination'));
+    addWaypointButton.hidden = !start || !destination || waypoints.length >= AEM_MAX_WAYPOINTS;
+    addWaypointButton.setAttribute('aria-pressed', String(target === 'waypoint'));
+    planButton.disabled = !start || !destination || planning;
+
+    const prompt = target === 'start' ? 'Search for a start' :
+      target === 'destination' ? 'Search for a destination' :
+      target === 'waypoint' ? 'Search for a waypoint' : 'Search for a replacement waypoint';
+    pointLabel.textContent = prompt;
+    pointQuery.placeholder = prompt;
     waypointList.replaceChildren();
     waypointList.hidden = !waypoints.length;
     for (const waypoint of waypoints) {
       const row = document.createElement('li');
-      const name = document.createElement('span');
-      name.textContent = waypoint.name;
+      const change = document.createElement('button');
+      change.type = 'button';
+      change.textContent = waypoint.name;
+      change.setAttribute('aria-label', `Change waypoint ${waypoint.name}`);
+      change.setAttribute('aria-pressed', String(target === waypoint));
+      change.addEventListener('click', () => selectTarget(waypoint));
       const remove = document.createElement('button');
       remove.type = 'button';
-      remove.textContent = 'Remove';
+      remove.textContent = '×';
       remove.setAttribute('aria-label', `Remove waypoint ${waypoint.name}`);
       remove.addEventListener('click', () => {
         waypoints.splice(waypoints.indexOf(waypoint), 1);
-        renderWaypoints();
-        setPointStatus(`Removed ${waypoint.name}.`);
-        pointQuery.focus();
+        pointsChanged();
+        selectTarget(nextTarget());
       });
-      row.append(name, remove);
+      row.append(change, remove);
       waypointList.append(row);
     }
   }
 
-  function usePoint(point, name = '', target = pointTarget.value) {
+  function nextTarget() {
+    if (!endpoints.start) return 'start';
+    if (!endpoints.destination) return 'destination';
+    return 'waypoint';
+  }
+
+  function selectTarget(next) {
+    pointSearch.cancel();
+    target = next;
+    pointQuery.value = '';
+    setPointStatus('');
+    renderPoints();
+    pointQuery.focus();
+    showSuggestions();
+  }
+
+  function pointsChanged() {
+    if (route) status.textContent = 'Plan again to update the route.';
+  }
+
+  function usePoint(point, name = '') {
     if (!Array.isArray(point) || point.length !== 2 || !point.every(Number.isFinite) ||
         Math.abs(point[0]) > 180 || Math.abs(point[1]) > 90) {
       throw new Error('That location has invalid coordinates.');
     }
-    const label = name || formatPoint(point);
+    const entry = { name: name || formatPoint(point), point };
     if (target === 'waypoint') {
       if (waypoints.length >= AEM_MAX_WAYPOINTS) throw new Error('A route can have up to 10 waypoints.');
-      waypoints.push({ name: label, point });
-      renderWaypoints();
-      setPointStatus(`Added ${label}.`, 'success');
+      waypoints.push(entry);
+    } else if (typeof target === 'string') {
+      endpoints[target] = entry;
     } else {
-      const isStart = target === 'start';
-      (isStart ? origin : destination).value = formatPoint(point);
-      setPointStatus(`${isStart ? 'Start' : 'Destination'} set to ${label}.`, 'success');
+      Object.assign(target, entry);
     }
+    target = nextTarget();
+    pointQuery.value = '';
+    setPointStatus('');
+    suggestions.hidden = true;
+    pointsChanged();
+    renderPoints();
+  }
+
+  function savedPinFeature(pin) {
+    return {
+      properties: { display_label: pin.name || formatPoint([pin.lng, pin.lat]), search_type: 'Saved pin' },
+      geometry: { type: 'Point', coordinates: [pin.lng, pin.lat] }
+    };
   }
 
   const pointSearch = installAemUnifiedSearch({
     ...searchOptions,
-    form: byId('aem-route-point-search'),
+    form: pointForm,
     input: pointQuery,
     status: setPointStatus,
-    emptyMessage: 'Enter a place, address, AEM feature, or coordinates.',
-    navigate: (feature) => {
-      usePoint(feature.geometry?.coordinates, feature.properties?.display_label);
-      pointQuery.value = '';
-    }
+    emptyMessage: 'Enter a place, address, AEM feature, saved pin, or coordinates.',
+    localMatches: (value) => getSavedPins()
+      .filter((pin) => pin.name?.trim().toLowerCase() === value.toLowerCase())
+      .map(savedPinFeature),
+    navigate: (feature) => usePoint(feature.geometry?.coordinates, feature.properties?.display_label)
   });
 
-  function setFromMap(target, location) {
-    const { lng, lat } = location.wrap();
-    usePoint([lng, lat], '', target);
+  function showSuggestions() {
+    const query = pointQuery.value.trim().toLowerCase();
+    const matches = getSavedPins().filter((pin) => pin.name?.toLowerCase().includes(query));
+    mapSources.hidden = Boolean(query);
+    pinMatches.replaceChildren();
+    for (const pin of matches) {
+      const feature = savedPinFeature(pin);
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = `Saved pin · ${feature.properties.display_label}`;
+      button.addEventListener('click', () => useShortcut(feature.geometry.coordinates, feature.properties.display_label));
+      pinMatches.append(button);
+    }
+    suggestions.hidden = Boolean(query && !matches.length);
   }
 
-  byId('aem-route-origin-center').addEventListener('click', () => setFromMap('start', map.getCenter()));
-  byId('aem-route-destination-center').addEventListener('click', () => setFromMap('destination', map.getCenter()));
-  pointTarget.addEventListener('change', () => {
+  function useShortcut(point, name) {
     pointSearch.cancel();
-    setPointStatus('');
+    try { usePoint(point, name); }
+    catch (error) { setPointStatus(error.message, 'error'); }
+  }
+
+  pointQuery.addEventListener('focus', showSuggestions);
+  pointQuery.addEventListener('input', showSuggestions);
+  pointForm.addEventListener('submit', () => { suggestions.hidden = true; });
+  startButton.addEventListener('click', () => selectTarget('start'));
+  destinationButton.addEventListener('click', () => selectTarget('destination'));
+  addWaypointButton.addEventListener('click', () => selectTarget('waypoint'));
+  byId('aem-route-map-center').addEventListener('click', () => {
+    const { lng, lat } = map.getCenter().wrap();
+    useShortcut([lng, lat]);
   });
 
   function finishPick(restoreFocus) {
-    if (!pickingFor) return;
-    pickingFor = null;
+    if (!picking) return;
+    picking = false;
     map.getCanvas().classList.remove('aem-route-map-picking');
     pickBanner.hidden = true;
     editor.hidden = false;
-    if (restoreFocus) pickButton.focus();
+    if (restoreFocus) pointQuery.focus();
   }
 
   pickButton.addEventListener('click', () => {
     pointSearch.cancel();
-    pickingFor = pointTarget.value;
+    picking = true;
     pickBanner.hidden = false;
     editor.hidden = true;
     map.getCanvas().classList.add('aem-route-map-picking');
@@ -199,57 +267,47 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
   });
   cancelPickButton.addEventListener('click', () => finishPick(true));
   map.on('click', ({ lngLat }) => {
-    if (!pickingFor || !finderMenu.open) return;
-    try { setFromMap(pickingFor, lngLat); }
-    catch (error) { setPointStatus(error.message, 'error'); }
-    finishPick(true);
+    if (!picking || !finderMenu.open) return;
+    const { lng, lat } = lngLat.wrap();
+    useShortcut([lng, lat]);
+    finishPick(false);
   });
   panel.addEventListener('keydown', (event) => {
-    if (!pickingFor || event.key !== 'Escape') return;
-    event.preventDefault();
-    finishPick(true);
+    if (event.key !== 'Escape') return;
+    if (picking) {
+      event.preventDefault();
+      finishPick(true);
+    } else if (!suggestions.hidden) {
+      event.preventDefault();
+      suggestions.hidden = true;
+    }
   });
   finderMenu.addEventListener('toggle', () => {
-    if (!finderMenu.open) {
-      finishPick(false);
-      pointSearch.cancel();
+    if (finderMenu.open) return;
+    finishPick(false);
+    suggestions.hidden = true;
+    pointSearch.cancel();
+  });
+
+  pointQuery.addEventListener('paste', (event) => {
+    const lines = event.clipboardData?.getData('text').trim().split(/\r?\n/);
+    if (target !== 'waypoint' || !lines || lines.length < 2) return;
+    const points = lines.map(aemValidRoutePoint);
+    if (points.some((point) => !point)) return;
+    event.preventDefault();
+    if (waypoints.length + points.length > AEM_MAX_WAYPOINTS) {
+      setPointStatus('A route can have up to 10 waypoints.', 'error');
       return;
     }
-    savedPins = getSavedPins();
-    savedPin.replaceChildren(new Option(savedPins.length ? 'Choose a saved pin' : 'No saved pins yet', ''));
-    savedPins.forEach((pin, index) => {
-      savedPin.add(new Option(pin.name || formatPoint([pin.lng, pin.lat]), String(index)));
-    });
-    savedPin.disabled = !savedPins.length;
-  });
-  savedPin.addEventListener('change', () => {
-    if (savedPin.value === '') return;
-    const pin = savedPins[Number(savedPin.value)];
     pointSearch.cancel();
-    try { usePoint([pin.lng, pin.lat], pin.name); }
-    catch (error) { setPointStatus(error.message, 'error'); }
-    savedPin.value = '';
+    waypoints.push(...points.map((point) => ({ name: formatPoint(point), point })));
+    pointQuery.value = '';
+    suggestions.hidden = true;
+    pointsChanged();
+    renderPoints();
   });
 
-  function addBulkWaypoints() {
-    if (!bulkWaypoints.value.trim()) return true;
-    const points = bulkWaypoints.value.trim().split(/\n+/).map(aemValidRoutePoint);
-    if (points.some((point) => !point)) {
-      coordinateStatus.textContent = 'Enter one valid latitude, longitude pair per line.';
-      return false;
-    }
-    if (waypoints.length + points.length > AEM_MAX_WAYPOINTS) {
-      coordinateStatus.textContent = 'A route can have up to 10 waypoints.';
-      return false;
-    }
-    waypoints.push(...points.map((point) => ({ name: formatPoint(point), point })));
-    renderWaypoints();
-    bulkWaypoints.value = '';
-    coordinateStatus.textContent = `Added ${points.length} ${points.length === 1 ? 'waypoint' : 'waypoints'}.`;
-    return true;
-  }
-
-  byId('aem-route-add-coordinates').addEventListener('click', addBulkWaypoints);
+  renderPoints();
   radius.addEventListener('change', () => { customWrap.hidden = radius.value !== 'custom'; });
   async function post(path, payload, signal) {
     const response = await fetch(`${AEM_ROUTE_API}/${path}`, {
@@ -284,17 +342,9 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
   }
   let controller = null;
   planButton.addEventListener('click', async () => {
-    if (!addBulkWaypoints()) {
-      status.textContent = 'Check your waypoint coordinates.';
-      return;
-    }
-    const start = aemValidRoutePoint(origin.value);
-    const end = aemValidRoutePoint(destination.value);
-    if (!start || !end) {
-      status.textContent = 'Choose a valid start and destination.';
-      return;
-    }
-    const points = [start, ...waypoints.map(({ point }) => point), end];
+    if (!endpoints.start || !endpoints.destination) return;
+    suggestions.hidden = true;
+    const points = [endpoints.start.point, ...waypoints.map(({ point }) => point), endpoints.destination.point];
     const travelMode = mode.value;
     const miles = radius.value === 'custom' ? Number(custom.value) : Number(radius.value);
     if (!Number.isFinite(miles) || miles < 1 || miles > 100 ||
@@ -306,6 +356,7 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
     controller?.abort();
     controller = new AbortController();
     const id = ++requestId;
+    planning = true;
     planButton.disabled = true;
     status.textContent = 'Calculating route…';
     discovery.replaceChildren();
@@ -352,7 +403,10 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
     } catch (error) {
       if (error.name !== 'AbortError' && id === requestId) status.textContent = error.message;
     } finally {
-      if (id === requestId) planButton.disabled = false;
+      if (id === requestId) {
+        planning = false;
+        planButton.disabled = false;
+      }
     }
   });
   map.on('style.load', ensureLayer);

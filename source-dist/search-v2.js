@@ -50,6 +50,8 @@ function installAemUnifiedSearch(options) {
     try {
       await options.prepare?.();
       if (!isCurrent()) return;
+      const localMatches = options.localMatches?.(raw);
+      if (localMatches?.length) return await choose(localMatches, false, isCurrent);
       const context = parseState(raw);
       const query = aemUnifiedQuery(context.value, parsePlss);
       const coordinates = !query.kind && parseCoordinates(context.value);

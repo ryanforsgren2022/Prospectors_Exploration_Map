@@ -15,7 +15,7 @@
 .aem-route-actions button { flex: 1; min-width: 0; font-size: 12px; }
 #aem-route-stats, #aem-saved-trip-stats { color: #aee8b9; font-weight: 700; }
 .aem-route-elevation { display: block; width: 100%; height: 80px; border: 1px solid rgba(143,211,156,.25); border-radius: 7px; background: rgba(10,25,15,.45); }
-.aem-route-elevation[hidden], .aem-route-editor[hidden] { display: none; }
+.aem-route-elevation[hidden], .aem-route-editor[hidden], .aem-route-map-sources[hidden], .aem-route-options label[hidden] { display: none; }
 
 .aem-saved-trips {
   display: grid;
@@ -27,27 +27,34 @@
 .aem-saved-trips h2, .aem-saved-trips p { margin: 0; }
 .aem-saved-trips h2 { font-size: 15px; }
 
-.aem-route-points {
-  display: grid;
-  gap: 8px;
-  min-width: 0;
-  margin: 0;
-  padding: 8px;
-  border: 1px solid var(--aem-panel-border);
-  border-radius: 8px;
+.aem-route-editor .map-search__status:empty, #aem-route-plan-status:empty { display: none; }
+
+.aem-route-map-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
-.aem-route-points legend { padding: 0 4px; }
-.aem-route-points .map-search__status { margin-top: 5px; }
-.aem-route-points .map-search__status:empty { display: none; }
+
+#aem-route-search-suggestions { margin-top: 6px; }
+#aem-route-pin-matches { max-height: 128px; }
+#aem-route-pin-matches:not(:empty) { margin-top: 6px; }
+
+.aem-route-stops { display: grid; gap: 5px; }
+.aem-route-stops button { min-height: 36px; padding: 5px 9px; text-align: left; overflow-wrap: anywhere; }
+.aem-route-stops button[aria-pressed="true"] { border-color: var(--aem-control-teal); }
+#aem-route-add-waypoint { justify-self: start; }
+
+#aem-route-waypoints { display: grid; gap: 4px; margin: 0; padding-left: 18px; }
+#aem-route-waypoints[hidden] { display: none; }
+#aem-route-waypoints li { display: flex; gap: 5px; }
+#aem-route-waypoints button:first-child { flex: 1; min-width: 0; }
+#aem-route-waypoints button:last-child { min-width: 36px; text-align: center; }
+
 .aem-route-pick button { margin-top: 7px; }
 .maplibregl-canvas.aem-route-map-picking { cursor: crosshair; }
 
-.aem-route-coordinates summary { cursor: pointer; }
-.aem-route-coordinates label { margin: 6px 0; }
-#aem-route-waypoints { margin: 0; padding-left: 24px; }
-#aem-route-waypoints li { margin: 4px 0; padding-left: 2px; overflow-wrap: anywhere; }
-#aem-route-waypoints button { margin-left: 8px; padding-inline: 7px; }
-
-#routeFinderPanel input, #routeFinderPanel textarea { min-height: 40px; padding: 7px 9px; border: 1px solid #64756a; border-radius: 8px; color: #fff; background: #18211b; font: inherit; }
+.aem-route-options summary { cursor: pointer; }
+.aem-route-options label, .aem-route-options p { margin-top: 8px; }
+#aem-route-custom { min-height: 40px; padding: 7px 9px; border: 1px solid #64756a; border-radius: 8px; color: #fff; background: #18211b; font: inherit; }
 #aem-route-discovery { display: grid; gap: 5px; }
 #aem-route-discovery p { margin: 0; font-size: 12px; }

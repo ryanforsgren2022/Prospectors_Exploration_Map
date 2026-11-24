@@ -56,6 +56,13 @@ test('ambiguous place or address matches can be selected by the route point pick
   await buttons[1].listeners.click();
   assert.deepEqual(Array.from(h.navigations[0].geometry.coordinates), [-112, 38]);
 });
+test('a matching local saved pin can be found from the same search field', async () => {
+  const pin = feature('Saved pin');
+  const h = harness([], { localMatches: value => value === 'Trailhead' ? [pin] : [] });
+  await h.submit('Trailhead');
+  assert.equal(h.calls.length, 0);
+  assert.equal(h.navigations[0], pin);
+});
 test('explicit APNs never fall through to address geocoding when their index is pending', async () => {
   const h = harness([], { fetch: async () => ({ ok: true, json: async () => ({ features: [], pending: [{ state: 'az' }] }) }) });
   await h.submit('APN 001-020');assert.equal(h.geocodes(), 0);assert.match(h.messages.at(-1)[0], /still being indexed/);
