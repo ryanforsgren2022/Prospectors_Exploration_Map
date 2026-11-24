@@ -1858,14 +1858,12 @@ function showSearchPin(lngLat, label, bounds = null, details = null) {
       });
       map.fitBounds(bounds, {
         padding: 72,
-        maxZoom: 14,
+        maxZoom: AEM_SEARCH_MAX_ZOOM,
         duration: 650,
         essential: false
       });
     } else {
-      aemNavigateToSearchResult(
-        center, Math.max(map.getZoom(), 14)
-      );
+      aemNavigateToSearchResult(center);
     }
   });
 
@@ -2105,6 +2103,7 @@ async function showPointSearchResult(lngLat, label, bounds = null, isCurrent = (
 }
 
 /* AEM MULTISTATE SEARCH ROUTING V1 */
+const AEM_SEARCH_MAX_ZOOM = 14;
 const AEM_SEARCH_API =
   'https://tiles.americanexplorationmaps.com/api/search';
 const AEM_SEARCH_STATE_CODES = new Set([
@@ -2263,7 +2262,7 @@ let aemSearchRequestId = 0;
 let aemSearchLastMapState;
 let aemSearchNavigating = false;
 
-function aemNavigateToSearchResult(lngLat, zoom = 13) {
+function aemNavigateToSearchResult(lngLat) {
   if (!Array.isArray(lngLat) || lngLat.length !== 2 ||
       !lngLat.every(Number.isFinite)) {
     throw new Error('Invalid navigation coordinates.');
@@ -2276,7 +2275,7 @@ function aemNavigateToSearchResult(lngLat, zoom = 13) {
   });
 
   try {
-    map.flyTo({ center: lngLat, zoom });
+    map.flyTo({ center: lngLat, zoom: AEM_SEARCH_MAX_ZOOM });
   } catch (error) {
     aemSearchNavigating = false;
     throw error;
@@ -2302,8 +2301,8 @@ installAemUnifiedSearch({
         map.once('moveend', done);
         timer = setTimeout(done, 2000);
         try {
-          if (Array.isArray(feature.bbox) && feature.bbox.length === 4) map.fitBounds([[feature.bbox[0], feature.bbox[1]], [feature.bbox[2], feature.bbox[3]]], { padding: 72, maxZoom: 16, duration: 650 });
-          else map.flyTo({ center: point, zoom: Math.max(map.getZoom(), 15), duration: 650 });
+          if (Array.isArray(feature.bbox) && feature.bbox.length === 4) map.fitBounds([[feature.bbox[0], feature.bbox[1]], [feature.bbox[2], feature.bbox[3]]], { padding: 72, maxZoom: AEM_SEARCH_MAX_ZOOM, duration: 650 });
+          else map.flyTo({ center: point, zoom: AEM_SEARCH_MAX_ZOOM, duration: 650 });
         } catch (error) { clearTimeout(timer); map.off('moveend', done); reject(error); }
       });
     } finally { aemSearchNavigating = false; }
