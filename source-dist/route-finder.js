@@ -528,13 +528,19 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
   });
   map.on('style.load', ensureLayer);
   ensureLayer();
+  return {
+    setDestination(point, name) {
+      selectTarget('destination', false);
+      usePoint(point, name);
+    }
+  };
 }
 function coordinatesBounds(coordinates) {
   const bounds = new maplibregl.LngLatBounds(coordinates[0], coordinates[0]);
   for (const point of coordinates.slice(1)) bounds.extend(point);
   return bounds;
 }
-aemInstallRouteFinder(map, document.querySelector('#routeFinderPanel .aem-route-panel__body'), {
+const routeFinder = aemInstallRouteFinder(map, document.querySelector('#routeFinderPanel .aem-route-panel__body'), {
   parseState: aemParseStateSearch,
   parseCoordinates,
   parsePlss,

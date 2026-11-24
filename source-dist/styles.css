@@ -106,7 +106,9 @@ input[type="checkbox"] { width: 24px; height: 24px; accent-color: #8fd39c; }
 .research-location__results { display:grid; gap:7px; }
 .research-location__result { margin:0; }
 .research-location__result b { color:#fff; }
-.research-location__save { width:100%; margin-top:10px; color:#0d1811; background:#8fd39c; border-color:#a6e5b1; }
+.research-location__actions { display:flex; gap:6px; margin:0 0 10px; }
+.research-location__actions button { flex:1; }
+.research-location__save { color:#0d1811; background:#8fd39c; border-color:#a6e5b1; }
 .research-location__links { display:flex; gap:10px; margin-top:10px; }
 .research-location__links a { color:#aee8b9; font-weight:700; text-decoration:none; }
 .research-location__note { margin:9px 0 0; color:#b7c2ba; font-size:11px; }

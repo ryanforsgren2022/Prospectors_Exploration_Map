@@ -47,6 +47,9 @@ const managedAccessFilter = ['any',
 ];
 
 // AEM_UNIFIED_WESTERN_ROADS_V1: single PMTiles source across 11 contiguous states.
+const WESTERN_OVERVIEW_MIN_ZOOM = 2;
+const WESTERN_OVERVIEW_END_ZOOM = 4;
+const WESTERN_ROAD_OVERVIEW_IDS = ['primary-road-casing', 'primary-roads'];
 const WESTERN_ROAD_PRIMARY = ['primary-road-casing', 'primary-roads', 'state-road-casing', 'state-roads', 'secondary-road-casing', 'secondary-roads', 'local-road-casing', 'local-roads', 'primary-route-labels', 'state-route-labels', 'other-numbered-route-labels', 'primary-road-name-labels', 'arterial-road-name-labels', 'main-street-labels', 'local-labels'];
 const WESTERN_ROAD_ACCESS = ['access-roads-casing', 'access-roads', 'managed-road-casing', 'managed-roads', 'forest-road-labels', 'managed-road-name-labels', 'access-labels'];
 const WESTERN_ROAD_TRAILS = ['western-trails', 'western-trail-labels'];
@@ -269,7 +272,11 @@ function westernRoadStyles() {
     }
   }
 
-  return haloLayers;
+  return haloLayers.flatMap(layer => WESTERN_ROAD_OVERVIEW_IDS.includes(layer.id) ? [
+    { ...layer, minzoom: WESTERN_OVERVIEW_END_ZOOM },
+    { ...layer, id: `${layer.id}-overview`, source: 'western-overview',
+      filter: matches(groups.major), minzoom: WESTERN_OVERVIEW_MIN_ZOOM, maxzoom: WESTERN_OVERVIEW_END_ZOOM }
+  ] : [layer]);
 }
 
 // Scale thresholds translated from the verified ArcGIS road configuration.
@@ -582,6 +589,14 @@ roads: {
         maxzoom: 15,
         attribution: '© OpenStreetMap contributors'
       },
+      'western-overview': {
+        type: 'vector',
+        tiles: [new URL('./data/western-overview-v1/', document.baseURI).href + '{z}/{x}/{y}.pbf'],
+        bounds: [-125, 31, -102, 49.1],
+        minzoom: WESTERN_OVERVIEW_MIN_ZOOM,
+        maxzoom: WESTERN_OVERVIEW_END_ZOOM - 1,
+        attribution: '© OpenStreetMap contributors'
+      },
       terrain: {
         type: 'raster-dem',
         tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
@@ -636,6 +651,10 @@ roads: {
       },
 
       { id: 'state-boundary-line', type: 'line', source: 'prospector-template', 'source-layer': 'boundary', minzoom: 4, layout: { visibility:'visible', 'line-join':'round', 'line-cap':'round' }, paint: { 'line-color':'rgba(8,10,9,.96)', 'line-width':['interpolate',['linear'],['zoom'],4,1.7,8,2.35,12,3.25,16,4.1], 'line-blur':.15 } },
+      { id: 'state-boundary-overview', type: 'line', source: 'western-overview', 'source-layer': 'boundary',
+        minzoom: WESTERN_OVERVIEW_MIN_ZOOM, maxzoom: WESTERN_OVERVIEW_END_ZOOM,
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: { 'line-color': 'rgba(8,10,9,.96)', 'line-width': 1.7, 'line-blur': .15 } },
       ];
       PROSPECTOR_STYLE_TEMPLATES = layers.filter((layer) => PROSPECTOR_STYLE_TEMPLATE_IDS.has(layer.id));
       return layers.filter((layer) => !PROSPECTOR_STYLE_TEMPLATE_IDS.has(layer.id));
@@ -994,6 +1013,7 @@ async function queryResearchLocation(query, lngLat, outFields) {
 const researchLocationCard = document.querySelector('#researchLocation');
 const researchCoordinates = document.querySelector('#researchCoordinates');
 const researchResults = document.querySelector('#researchResults');
+const researchNavigateLocationButton = document.querySelector('#researchNavigateLocation');
 const researchSaveLocationButton = document.querySelector('#researchSaveLocation');
 const saveLocationCard = document.querySelector('#saveLocation');
 const saveLocationCoordinates = document.querySelector('#saveLocationCoordinates');
@@ -1289,6 +1309,7 @@ function appendWithdrawalResults(nodes, label, features) {
 }
 
 async function openResearchLocation(lngLat, selectedFeature = null) {
+  researchNavigateLocationButton.hidden = !selectedFeature;
   return aemOpenResearchV2(lngLat, selectedFeature);
 }
 
@@ -1365,6 +1386,7 @@ function syncRoadView() {
   if (!map.getStyle()?.layers) return;
   const enabled = startupRoadsReady && roadRenderingEnabled;
   setLayerVisibility(WESTERN_ROAD_PRIMARY, enabled && !offRoadTrailsOnly);
+  setLayerVisibility(WESTERN_ROAD_OVERVIEW_IDS.map(id => `${id}-overview`), enabled && !offRoadTrailsOnly);
   setLayerVisibility(WESTERN_ROAD_ACCESS, enabled && !offRoadTrailsOnly);
   setLayerVisibility(WESTERN_ROAD_TRAILS, enabled && offRoadTrailsOnly);
   setLayerVisibility(['place-labels'], true);
@@ -2346,13 +2368,26 @@ installAemUnifiedSearch({
     if (!isCurrent()) return;
     setSearchStatus('Loading current location details…');
     await openResearchLocation({ lng: point[0], lat: point[1] }, feature);
-    if (isCurrent()) setSearchStatus('Location selected. Use the pin panel to review its details.', 'success');
+    if (isCurrent()) setSearchStatus('Location found.', 'success');
   }
 });
 
 document.querySelector('#researchLocationClose').addEventListener('click', () => {
   researchLocationCard.hidden = true;
   researchLocationRequest += 1;
+});
+
+researchNavigateLocationButton.addEventListener('click', () => {
+  if (!activeResearchLocation) return;
+  const { lng, lat, name } = activeResearchLocation;
+  routeFinder.setDestination([lng, lat], name);
+  researchLocationCard.hidden = true;
+  researchLocationRequest += 1;
+  const finder = document.querySelector('#routeFinderPanel');
+  trackSaveMenu.open = true;
+  closeMapPanels(finder);
+  finder.open = true;
+  finder.querySelector('summary').focus();
 });
 
 researchSaveLocationButton.addEventListener('click', () => {
@@ -3200,7 +3235,7 @@ function prospectorGroupShouldRender(
   }
 
   if (group === 'boundary') {
-    return true;
+    return map.getZoom() >= WESTERN_OVERVIEW_END_ZOOM;
   }
 
   // Universal historic-mines overview begins at zoom 6.5.
