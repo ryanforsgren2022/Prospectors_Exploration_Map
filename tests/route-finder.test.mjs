@@ -35,8 +35,13 @@ test('planned route renders before parcel and feature discovery, without PLSS ch
   };
   const browserWindow = {};
   const context = vm.createContext({
-    map, window: browserWindow, document: { createElement: (tag) => tag === 'details' ? panel : { textContent: '' },
-      body: { append() {} } },
+    map, window: browserWindow, document: {
+      querySelector(selector) {
+        assert.equal(selector, '#routeFinderPanel .aem-route-panel__body');
+        return panel;
+      },
+      createElement: () => ({ textContent: '' }),
+    },
     maplibregl: { LngLatBounds: class { constructor() {} extend() {} } },
     AbortController,
     fetch: async (url, options) => {

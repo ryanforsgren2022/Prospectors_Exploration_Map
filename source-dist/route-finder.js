@@ -18,10 +18,8 @@ function aemValidatePlannedRoute(data) {
   }
   return { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates } };
 }
-function aemInstallRouteFinder(map) {
-  const panel = document.createElement('details');
-  panel.className = 'aem-route-panel aem-route-finder';
-  panel.innerHTML = '<summary>Route Finder</summary><div class="aem-route-panel__body">' +
+function aemInstallRouteFinder(map, panel) {
+  panel.innerHTML =
     '<label>Start latitude, longitude<input id="aem-route-origin" placeholder="33.4484, -112.0740"></label>' +
     '<button id="aem-route-origin-center" type="button">Use map center as start</button>' +
     '<label>Destination latitude, longitude<input id="aem-route-destination" placeholder="33.5641, -111.8869"></label>' +
@@ -36,8 +34,7 @@ function aemInstallRouteFinder(map) {
     '<button id="aem-route-plan" type="button">Plan route</button>' +
     '<p id="aem-route-plan-status" role="status">Choose a start and destination.</p>' +
     '<p>Routes are advisory. Check legal access, closures, and passability before travel.</p>' +
-    '<div id="aem-route-discovery" aria-live="polite"></div></div>';
-  document.body.append(panel);
+    '<div id="aem-route-discovery" aria-live="polite"></div>';
   const byId = (id) => panel.querySelector(`#${id}`);
   const origin = byId('aem-route-origin');
   const destination = byId('aem-route-destination');
@@ -179,4 +176,4 @@ function coordinatesBounds(coordinates) {
   for (const point of coordinates.slice(1)) bounds.extend(point);
   return bounds;
 }
-aemInstallRouteFinder(map);
+aemInstallRouteFinder(map, document.querySelector('#routeFinderPanel .aem-route-panel__body'));

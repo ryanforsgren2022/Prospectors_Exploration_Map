@@ -96,11 +96,8 @@ function aemRouteAutoMode(speedMetersPerSecond, currentMode, candidate, now = Da
   const sustained = next.samples >= 8 && now - next.firstAt >= 45000;
   return { mode: sustained ? proposed : currentMode, candidate: sustained ? null : next };
 }
-function aemInstallRouteTracker(map) {
-  const panel = document.createElement('details');
-  panel.className = 'aem-route-panel';
-  panel.innerHTML = '<summary>Route Tracker</summary>' +
-    '<div class="aem-route-panel__body">' +
+function aemInstallRouteTracker(map, panel) {
+  panel.innerHTML =
     '<p id="aem-route-status" role="status">Ready to record.</p>' +
     '<div class="aem-route-actions"><button id="aem-route-start" type="button">Start</button>' +
     '<button id="aem-route-pause" type="button" disabled>Pause</button>' +
@@ -109,9 +106,7 @@ function aemInstallRouteTracker(map) {
     '<option value="driving">Driving</option><option value="hiking">Hiking</option></select></label>' +
     '<div id="aem-route-stats" aria-live="polite">0.00 mi · 00:00:00 · ↑ 0 ft · ↓ 0 ft</div>' +
     '<canvas id="aem-route-elevation" width="300" height="80" hidden aria-label="Elevation by distance"></canvas>' +
-    '<label>Saved trips <select id="aem-route-saved"><option value="">Select a trip</option></select></label>' +
-    '</div>';
-  document.body.append(panel);
+    '<label>Saved trips <select id="aem-route-saved"><option value="">Select a trip</option></select></label>';
   const startButton = panel.querySelector('#aem-route-start');
   const pauseButton = panel.querySelector('#aem-route-pause');
   const stopButton = panel.querySelector('#aem-route-stop');
@@ -290,4 +285,4 @@ function aemInstallRouteTracker(map) {
   refreshSaved();
   window.setInterval(() => { if (trip && !paused) render(); }, 1000);
 }
-aemInstallRouteTracker(map);
+aemInstallRouteTracker(map, document.querySelector('#routeTrackerPanel .aem-route-panel__body'));

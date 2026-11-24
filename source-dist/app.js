@@ -665,6 +665,7 @@ function setHistoricMineVisited(depId, visited) {
 
   applyHistoricMineVisitedStates();
   scheduleHistoricMineClustering();
+  renderVisitedMinesCount();
 
   return visited;
 }
@@ -1435,15 +1436,20 @@ map.once('style.load', () => {
   map.once('load', startRoads);
 });
 
-map.addControl(new maplibregl.NavigationControl({ visualizePitch: true, showCompass: true }), 'top-right');
+map.addControl(new maplibregl.GeolocateControl({
+  positionOptions: { enableHighAccuracy: true, timeout: 15000 },
+  showAccuracyCircle: false
+}), 'top-right');
+map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+document.querySelector('#resetMapBearing').addEventListener('click', () => map.resetNorthPitch());
 
-const zoomReadout = document.querySelector('#zoomReadout');
+const mapZoomStatus = document.querySelector('#mapZoomStatus');
 function syncZoomPresentation() {
   const zoomText = `Z ${map.getZoom().toFixed(1)}`;
 
-  if (zoomReadout.textContent !== zoomText) {
-    zoomReadout.textContent = zoomText;
+  if (mapZoomStatus.textContent !== zoomText) {
+    mapZoomStatus.textContent = zoomText;
   }
 
   syncRoadView();
@@ -1574,8 +1580,8 @@ toolbarMenus.forEach((menu) => {
           otherMenu.contains(menu)) return;
 
       // Never close nested categories while using Layers.
-      if (menu.closest('#aemLayersPanel') ||
-          otherMenu.closest('#aemLayersPanel')) return;
+      if (menu.closest('#layersMenu') ||
+          otherMenu.closest('#layersMenu')) return;
 
       otherMenu.open = false;
     });
@@ -1646,67 +1652,82 @@ signOutButton.addEventListener('click', async () => {
 
 window.addEventListener('load', initializeAccountControls, { once: true });
 
-const gpsTrackingButton = document.querySelector('#gpsTrackingButton');
-const gpsTrackingStatus = document.querySelector('#gpsTrackingStatus');
 const dropPinButton = document.querySelector('#dropPinButton');
+const dropPinLabel = dropPinButton.querySelector('span');
 const dropPinStatus = document.querySelector('#dropPinStatus');
-let gpsWatchId = null;
-let gpsMarker = null;
 
 function setDropPinMode(enabled) {
   dropPinMode = enabled;
   dropPinButton.setAttribute('aria-pressed', String(enabled));
   dropPinButton.classList.toggle('is-placing', enabled);
-  dropPinButton.textContent = enabled ? 'Tap a spot on the map' : 'Drop & save pin';
-  dropPinStatus.textContent = enabled ? 'Tap the exact spot to save' : 'Tap this, then tap the map';
+  dropPinLabel.textContent = enabled ? 'Tap the map' : 'Drop & save pin';
+  dropPinStatus.textContent = enabled ? 'Tap the exact spot to save' : '';
   map.getCanvas().style.cursor = enabled ? 'crosshair' : '';
 }
 
-dropPinButton.addEventListener('click', () => setDropPinMode(!dropPinMode));
+const trackSaveMenu = document.querySelector('#trackSaveMenu');
+const mapPanels = [...document.querySelectorAll('[data-map-panel]')];
+const mapSearchPanel = document.querySelector('#mapSearchPanel');
+const headerSearchButton = document.querySelector('#headerSearchButton');
 
-function stopGpsTracking(status = 'GPS off') {
-  if (gpsWatchId !== null) navigator.geolocation?.clearWatch(gpsWatchId);
-  gpsWatchId = null;
-  gpsTrackingButton.textContent = 'Start GPS tracking';
-  gpsTrackingButton.classList.remove('is-tracking');
-  gpsTrackingButton.setAttribute('aria-pressed', 'false');
-  gpsTrackingStatus.textContent = status;
+function closeMapPanels(except) {
+  for (const panel of mapPanels) {
+    if (panel !== except) panel.open = false;
+  }
 }
 
-function updateGpsPosition(position) {
-  const { longitude, latitude, accuracy } = position.coords;
-  if (!gpsMarker) {
-    const element = document.createElement('div');
-    element.className = 'gps-marker';
-    element.setAttribute('aria-label', 'Your current location');
-    gpsMarker = new maplibregl.Marker({ element, rotationAlignment: 'map' }).setLngLat([longitude, latitude]).addTo(map);
-  } else {
-    gpsMarker.setLngLat([longitude, latitude]);
-  }
-  gpsTrackingStatus.textContent = `Tracking ±${Math.round(accuracy)} m`;
+for (const panel of mapPanels) {
+  panel.addEventListener('toggle', () => {
+    if (panel.open) {
+      closeMapPanels(panel);
+      if (dropPinMode) setDropPinMode(false);
+    }
+    if (panel === mapSearchPanel) {
+      headerSearchButton.setAttribute('aria-expanded', String(panel.open));
+    }
+  });
 }
 
-gpsTrackingButton.addEventListener('click', () => {
-  if (gpsWatchId !== null) {
-    stopGpsTracking();
-    return;
+trackSaveMenu.addEventListener('toggle', () => {
+  if (trackSaveMenu.open) return;
+  for (const panel of trackSaveMenu.querySelectorAll('[data-map-panel]')) {
+    panel.open = false;
   }
-  if (!navigator.geolocation) {
-    gpsTrackingStatus.textContent = 'GPS unavailable';
-    return;
+  if (dropPinMode) setDropPinMode(false);
+});
+
+headerSearchButton.addEventListener('click', () => {
+  mapSearchPanel.open = !mapSearchPanel.open;
+  if (mapSearchPanel.open) document.querySelector('#mapSearch').focus();
+});
+
+dropPinButton.addEventListener('click', () => {
+  closeMapPanels();
+  setDropPinMode(!dropPinMode);
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape' || event.defaultPrevented) return;
+  const openPanel = mapPanels.find((panel) => panel.open);
+  if (openPanel) {
+    openPanel.open = false;
+    openPanel.querySelector('summary').focus();
   }
-  gpsTrackingStatus.textContent = 'Locating…';
-  gpsTrackingButton.textContent = 'Stop GPS tracking';
-  gpsTrackingButton.classList.add('is-tracking');
-  gpsTrackingButton.setAttribute('aria-pressed', 'true');
-  gpsWatchId = navigator.geolocation.watchPosition(
-    updateGpsPosition,
-    (error) => {
-      const status = error.code === error.PERMISSION_DENIED ? 'GPS permission denied' : 'GPS unavailable';
-      stopGpsTracking(status);
-    },
-    { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
-  );
+  if (dropPinMode) setDropPinMode(false);
+});
+
+const visitedMinesCount = document.querySelector('#visitedMinesCount');
+function renderVisitedMinesCount() {
+  const count = visitedHistoricMineIds.size;
+  visitedMinesCount.textContent = count === 1 ? '1 mine marked as visited' : `${count} mines marked as visited`;
+}
+renderVisitedMinesCount();
+
+document.querySelector('#showVisitedMines').addEventListener('click', () => {
+  const mines = document.querySelector('#historicMines');
+  if (!historicMineVisitedControl.checked) historicMineVisitedControl.click();
+  if (!mines.checked) mines.click();
+  document.querySelector('#visitedMinesPanel').open = false;
 });
 
 const mapSearchForm = document.querySelector('#mapSearchForm');
@@ -3857,32 +3878,4 @@ function aemParcelAtPoint(point) {
       selectedPin?.remove();
       selectedPin = null;
     });
-
-  function alignZoom() {
-    const attribution = document.querySelector(
-      '.maplibregl-ctrl-attrib'
-    );
-    const bottom = attribution
-      ? attribution.getBoundingClientRect().bottom
-      : 42;
-
-    document.documentElement.style.setProperty(
-      '--aem-credit-bottom',
-      Math.ceil(Math.max(32, bottom) + 8) + 'px'
-    );
-  }
-
-  map.on('load', alignZoom);
-  window.addEventListener('resize', alignZoom);
-
-  if ('ResizeObserver' in window) {
-    const attribution = document.querySelector(
-      '.maplibregl-ctrl-attrib'
-    );
-    if (attribution) {
-      new ResizeObserver(alignZoom).observe(attribution);
-    }
-  }
-
-  requestAnimationFrame(alignZoom);
 })();

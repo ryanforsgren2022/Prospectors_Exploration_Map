@@ -1772,143 +1772,6 @@ vercel-toolbar,
   }
 }
 
-/* AEM_LAYOUT_PIN_V13 */
-
-:root {
-  --aem-large: 110px;
-  --aem-small: 65px;
-}
-
-/* Four tiles: one solid edge-to-edge rectangle */
-.aem-edge-ui .aem-search {
-  position: fixed !important;
-  left: 0 !important;
-  right: auto !important;
-  bottom: var(--aem-small) !important;
-  width: 50vw !important;
-  max-width: none !important;
-  z-index: 60 !important;
-}
-
-.aem-edge-ui .aem-layers {
-  position: fixed !important;
-  right: 0 !important;
-  left: auto !important;
-  bottom: var(--aem-large) !important;
-  width: 50vw !important;
-  max-width: none !important;
-  z-index: 60 !important;
-}
-
-.aem-edge-ui .aem-saved {
-  position: static !important;
-  width: 0 !important;
-  height: 0 !important;
-  pointer-events: none !important;
-}
-
-.aem-edge-ui .aem-saved > details:first-child {
-  position: fixed !important;
-  left: 0 !important;
-  right: auto !important;
-  bottom: 0 !important;
-  z-index: 60 !important;
-}
-
-.aem-edge-ui .aem-saved > details:last-child {
-  position: fixed !important;
-  right: 0 !important;
-  left: auto !important;
-  bottom: 0 !important;
-  z-index: 60 !important;
-}
-
-.aem-edge-ui .aem-search,
-.aem-edge-ui .aem-layers,
-.aem-edge-ui .aem-search > details,
-.aem-edge-ui .aem-layers > details,
-.aem-edge-ui .aem-saved > details {
-  box-sizing: border-box !important;
-  width: 50vw !important;
-  min-width: 50vw !important;
-  max-width: 50vw !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border-radius: 0 !important;
-  pointer-events: auto !important;
-}
-
-.aem-edge-ui .aem-search > details:not([open]),
-.aem-edge-ui .aem-saved > details:last-child:not([open]) {
-  height: var(--aem-large) !important;
-}
-
-.aem-edge-ui .aem-layers > details:not([open]),
-.aem-edge-ui .aem-saved > details:first-child:not([open]) {
-  height: var(--aem-small) !important;
-}
-
-.aem-edge-ui .aem-search > details:not([open]) > summary,
-.aem-edge-ui .aem-layers > details:not([open]) > summary,
-.aem-edge-ui .aem-saved > details:not([open]) > summary {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  height: 100% !important;
-  box-sizing: border-box !important;
-  margin: 0 !important;
-}
-
-/* Expanded controls above other map controls */
-.aem-edge-ui .aem-search:has(> details[open]) {
-  z-index: 100000 !important;
-}
-
-.aem-edge-ui .aem-layers:has(> details[open]) {
-  z-index: 90000 !important;
-}
-
-html body #researchLocation:not([hidden]),
-html body #saveLocation:not([hidden]) {
-  position: fixed !important;
-  z-index: 2147483000 !important;
-  bottom: calc(var(--aem-large) + var(--aem-small) + 8px) !important;
-  top: auto !important;
-  max-height: calc(100dvh - 210px) !important;
-  max-width: calc(100vw - 20px) !important;
-  overflow-y: auto !important;
-  pointer-events: auto !important;
-}
-
-/* Zoom directly below attribution */
-#map .maplibregl-ctrl-top-right {
-  position: absolute !important;
-  top: calc(var(--aem-credit-bottom, 50px) + 36px) !important;
-  right: 8px !important;
-  left: auto !important;
-  bottom: auto !important;
-  transform: none !important;
-  z-index: 100 !important;
-}
-
-html body .aem-edge-ui #zoomReadout,
-html body #zoomReadout {
-  position: fixed !important;
-  top: var(--aem-credit-bottom, 50px) !important;
-  right: 8px !important;
-  left: auto !important;
-  bottom: auto !important;
-  transform: none !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 48px !important;
-  height: 32px !important;
-  margin: 0 !important;
-  z-index: 101 !important;
-}
-
 /* Original indigo pin artwork */
 .aem-selected-pin-v13,
 .saved-location-marker,
@@ -1941,117 +1804,275 @@ html body #zoomReadout {
 .mine-control-row > span { display:flex; align-items:center; gap:8px; }
 .mine-control-icon { width:28px; height:30px; object-fit:contain; flex:0 0 auto; color:#fff; }
 
-/* AEM_ORIGINAL_TOOLBAR_ARTWORK_V1 */
-.aem-edge-ui summary.aem-original-icon-summary {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex-direction: row !important;
-  gap: 8px;
-  padding: 7px 9px;
-  text-align: center;
-  list-style: none !important;
-  writing-mode: horizontal-tb !important;
-  text-orientation: mixed;
-  font-size: 13px !important;
-  line-height: 1.25;
-  color: #f6f1e7;
-  box-sizing: border-box;
+/* Map header and tool dock */
+:root {
+  --aem-panel-green: #102e23;
+  --aem-panel-border: rgba(210, 237, 223, .44);
+  --aem-control-ink: #f5faf7;
+  --aem-control-teal: #39d6bf;
+  --aem-header-height: 52px;
+  --aem-header-end: calc(env(safe-area-inset-top) + var(--aem-header-height));
+  --aem-dock-bottom: max(32px, calc(env(safe-area-inset-bottom) + 22px));
+  --aem-tile-height: clamp(44px, 11.6vw, 52px);
+  --aem-dock-height: calc(var(--aem-tile-height) * 4 + 24px);
 }
 
-.aem-edge-ui summary.aem-original-icon-summary > .aem-original-menu-image {
-  display: block !important;
-  width: 38px;
-  height: 38px;
-  object-fit: contain;
+.aem-icon-library { position: absolute; }
+.aem-control-icon {
+  width: 25px;
+  height: 25px;
   flex: 0 0 auto;
-  margin: 0;
+  color: var(--aem-control-teal);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.15;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.aem-map-header {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 105;
+  display: flex;
+  align-items: center;
+  gap: clamp(5px, 4vw, 13px);
+  min-height: var(--aem-header-end);
+  padding: env(safe-area-inset-top) max(7px, env(safe-area-inset-right)) 0 max(14px, env(safe-area-inset-left));
+  background: linear-gradient(180deg, #102e24, #0e291e);
+  box-shadow: inset 0 1px rgba(57, 214, 191, .45);
+  color: var(--aem-control-ink);
+}
+
+.aem-map-brand {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: auto;
+  font-size: clamp(25px, 7.5vw, 34px);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.aem-map-brand .aem-control-icon {
+  width: clamp(32px, 11vw, 47px);
+  height: 29px;
+  stroke: none;
+}
+
+.aem-header-button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
   padding: 0;
+  border: 0;
+  border-radius: 10px;
+  color: var(--aem-control-ink);
+  background: transparent;
+  cursor: pointer;
 }
 
-.aem-original-menu-label {
-  min-width: 0;
-  white-space: normal;
-  text-align: center;
-  overflow-wrap: normal;
+.aem-header-button .aem-control-icon { color: inherit; }
+.aem-map-menu > summary, .aem-track-save > summary { list-style: none; }
+.aem-map-menu > summary::-webkit-details-marker,
+.aem-track-save > summary::-webkit-details-marker { display: none; }
+
+.aem-header-button[aria-expanded="true"],
+.aem-map-menu[open] > .aem-header-button { background: rgba(57, 214, 191, .18); }
+
+.aem-map-dock {
+  position: fixed;
+  inset: auto max(6px, env(safe-area-inset-right)) var(--aem-dock-bottom) max(6px, env(safe-area-inset-left));
+  z-index: 104;
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  align-items: end;
+  gap: 7px;
+  max-width: 560px;
+  pointer-events: none;
 }
 
-/* Suppress only the previous toolbar glyphs and main-tile chevrons. */
-.aem-edge-ui #aemLayersPanel > summary.aem-original-icon-summary::before,
-.aem-edge-ui #aemLayersPanel > summary.aem-original-icon-summary::after,
-.aem-edge-ui .aem-search > details > summary.aem-original-icon-summary::before,
-.aem-edge-ui .aem-search > details > summary.aem-original-icon-summary::after,
-.aem-edge-ui .aem-saved > details > summary.aem-original-icon-summary::before,
-.aem-edge-ui .aem-saved > details > summary.aem-original-icon-summary::after,
-.aem-edge-ui .aem-citations summary.aem-original-icon-summary::before,
-.aem-edge-ui .aem-citations summary.aem-original-icon-summary::after {
-  display: none !important;
-  content: none !important;
-  background-image: none !important;
+.aem-track-save, .aem-map-shortcuts > details { pointer-events: auto; }
+
+.aem-track-save {
+  padding: 0 10px 10px;
+  border: 1px solid var(--aem-panel-border);
+  border-radius: 17px;
+  background: rgba(13, 43, 31, .94);
 }
 
-.aem-edge-ui summary.aem-original-icon-summary::-webkit-details-marker {
-  display: none !important;
-}
+.aem-track-save:not([open]) { padding-bottom: 0; }
 
-.aem-edge-ui summary.aem-original-icon-summary::marker {
-  content: "" !important;
-}
+.aem-track-actions, .aem-map-shortcuts { display: grid; gap: 6px; }
+.aem-track-actions { margin-top: 3px; }
 
-/* The taller existing tiles use the original icon-above-label arrangement. */
-.aem-edge-ui .aem-search > details:not([open]) > summary.aem-original-icon-summary,
-.aem-edge-ui .aem-saved > details:last-child:not([open]) > summary.aem-original-icon-summary {
-  flex-direction: column !important;
-  gap: 6px;
-}
-
-.aem-edge-ui .aem-search > details:not([open]) > summary.aem-original-icon-summary > .aem-original-menu-image,
-.aem-edge-ui .aem-saved > details:last-child:not([open]) > summary.aem-original-icon-summary > .aem-original-menu-image {
-  width: 46px;
-  height: 46px;
-}
-
-/* Preserve the original wide truck artwork's aspect ratio. */
-.aem-edge-ui .aem-saved > details:first-child > summary.aem-original-icon-summary > .aem-original-menu-image {
-  width: 61px;
-  height: 38px;
-}
-
-/* Roads and Account stay in their existing Layers submenu. */
-.aem-edge-ui #aemLayersPanel .aem-layers-body > details > summary.aem-original-icon-summary {
-  justify-content: flex-start !important;
-  gap: 9px;
-}
-
-.aem-edge-ui #aemLayersPanel .aem-layers-body > details > summary.aem-original-icon-summary > .aem-original-menu-image {
-  width: 27px;
-  height: 27px;
-}
-
-.aem-edge-ui #aemLayersPanel .aem-layers-body > details > summary.aem-original-icon-summary > .aem-original-menu-label {
+.aem-map-tile {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: clamp(5px, 1.8vw, 10px);
+  width: 100%;
+  min-height: var(--aem-tile-height);
+  padding: 4px clamp(6px, 2vw, 11px);
+  border: 1px solid var(--aem-panel-border);
+  border-radius: 11px;
+  background: rgba(18, 50, 37, .92);
+  color: var(--aem-control-ink);
+  font-size: clamp(12px, 3.6vw, 16px);
+  font-weight: 700;
+  line-height: 1.14;
   text-align: left;
+  cursor: pointer;
 }
 
-/* Keep Citations as its existing compact, icon-only top-right button. */
-.aem-edge-ui .aem-citations summary.aem-original-icon-summary {
-  padding: 5px !important;
-  gap: 0;
+.aem-map-shortcuts .aem-map-tile {
+  column-gap: 7px;
+  font-size: clamp(11px, 3.2vw, 15px);
 }
 
-.aem-edge-ui .aem-citations summary.aem-original-icon-summary > .aem-original-menu-image {
-  width: 38px;
-  height: 38px;
+.aem-map-shortcuts .aem-control-icon { width: clamp(18px, 5.9vw, 25px); }
+.aem-track-actions .aem-control-icon { width: clamp(19px, 5.7vw, 25px); }
+
+.aem-track-save > .aem-map-tile {
+  min-height: calc(var(--aem-tile-height) + 2px);
+  padding-inline: 2px;
+  border: 0;
+  background: transparent;
+  font-size: clamp(14px, 4.3vw, 19px);
 }
 
-@media (max-width: 600px) {
-  .aem-edge-ui summary.aem-original-icon-summary {
-    gap: 7px;
-    font-size: 12px !important;
+.aem-track-save > .aem-map-tile .aem-control-icon {
+  width: clamp(35px, 13vw, 60px);
+  height: 30px;
+}
+
+.aem-map-tile::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border: solid currentColor;
+  border-width: 2px 2px 0 0;
+  transform: rotate(45deg);
+}
+
+.aem-map-menu[open] > .aem-map-tile::after,
+.aem-track-save[open] > .aem-map-tile::after { transform: translateY(2px) rotate(-45deg); }
+
+.aem-map-menu[open] > .aem-map-tile,
+.aem-map-tile.is-placing {
+  color: #e6fff4;
+  border-color: var(--aem-control-teal);
+  background: #205747;
+}
+
+.aem-map-panel {
+  position: absolute;
+  inset: auto 0 calc(100% + 8px);
+  max-height: min(540px, max(124px, calc(100dvh - var(--aem-header-end) - var(--aem-dock-bottom) - var(--aem-dock-height) - 28px)));
+  padding: 12px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--aem-panel-border);
+  border-radius: 13px;
+  background: var(--aem-panel-green);
+  color: var(--aem-control-ink);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+  pointer-events: auto;
+}
+
+.aem-map-menu:not([open]) > .aem-map-panel { display: none; }
+
+.aem-map-header .aem-map-panel {
+  inset: calc(100% + 6px) max(6px, env(safe-area-inset-right)) auto auto;
+  width: min(410px, calc(100% - 12px));
+  max-height: calc(100dvh - var(--aem-header-end) - 36px);
+}
+
+.aem-map-panel .toolbar-menu { margin-top: 6px; }
+.aem-map-panel .toolbar-menu > summary { white-space: normal; }
+.aem-map-panel .toolbar-menu .toolbar-menu__content {
+  position: static;
+  width: 100%;
+  max-height: none;
+  overflow: visible;
+  box-shadow: none;
+}
+
+.aem-map-panel .map-search { margin-top: 0; }
+.aem-map-view { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.aem-settings-icon { width: 25px; height: 25px; object-fit: contain; margin-right: 7px; }
+#aemRoadDensity, #showVisitedMines { width: 100%; }
+
+body #map .maplibregl-ctrl-top-right {
+  inset: calc(var(--aem-header-end) + 14px) max(8px, env(safe-area-inset-right)) auto auto !important;
+  transform: none !important;
+}
+
+#map .maplibregl-ctrl-top-right .maplibregl-ctrl-group {
+  margin: 0 0 8px;
+  overflow: hidden;
+  border: 1px solid var(--aem-panel-border);
+  border-radius: 12px;
+  background: rgba(13, 43, 31, .91);
+  box-shadow: none;
+}
+
+#map .maplibregl-ctrl-top-right button { width: 44px; height: 42px; border-radius: 0; }
+#map .maplibregl-ctrl-top-right button + button { border-top-color: var(--aem-panel-border); }
+#map .maplibregl-ctrl-top-right button .maplibregl-ctrl-icon { filter: brightness(0) invert(1); }
+#map .maplibregl-ctrl-zoom-in .maplibregl-ctrl-icon,
+#map .maplibregl-ctrl-zoom-out .maplibregl-ctrl-icon { background-size: 39px; }
+
+#map .maplibregl-ctrl-geolocate:not(:disabled) .maplibregl-ctrl-icon {
+  width: 25px;
+  height: 25px;
+  margin: auto;
+  background: var(--aem-control-ink);
+  clip-path: polygon(7% 49%, 89% 9%, 94% 14%, 58% 94%, 51% 94%, 44% 58%, 7% 55%);
+}
+
+#map .maplibregl-ctrl-top-right button:hover { background-color: #205747; }
+
+body #map .maplibregl-ctrl-bottom-right {
+  inset: auto 0 env(safe-area-inset-bottom) !important;
+}
+
+.aem-map-dock :focus-visible,
+.aem-map-header :focus-visible {
+  outline: 2px solid var(--aem-control-teal);
+  outline-offset: 2px;
+}
+
+html body #researchLocation:not([hidden]),
+html body #saveLocation:not([hidden]) {
+  position: fixed !important;
+  top: auto !important;
+  bottom: calc(var(--aem-dock-bottom) + var(--aem-dock-height) + 8px) !important;
+  z-index: 2147483000 !important;
+  max-height: max(166px, calc(100dvh - var(--aem-header-end) - var(--aem-dock-bottom) - var(--aem-dock-height) - 24px)) !important;
+  max-width: calc(100vw - 20px) !important;
+  overflow: auto !important;
+}
+
+body:has(#trackSaveMenu:not([open])) {
+  --aem-dock-height: calc(var(--aem-tile-height) * 4 + 18px);
+}
+
+@media (max-height: 510px) {
+  :root { --aem-dock-bottom: max(20px, calc(env(safe-area-inset-bottom) + 12px)); }
+
+  .aem-map-dock .aem-map-panel {
+    position: fixed;
+    inset: calc(var(--aem-header-end) + 4px) max(6px, env(safe-area-inset-right)) auto max(6px, env(safe-area-inset-left));
+    max-width: 560px;
+    max-height: calc(100dvh - var(--aem-header-end) - var(--aem-dock-height) - var(--aem-dock-bottom) - 6px);
   }
-}
 
-@media (max-width: 350px) {
-  .aem-edge-ui .aem-saved > details:first-child > summary.aem-original-icon-summary > .aem-original-menu-image {
-    width: 49px;
+  html body #researchLocation:not([hidden]),
+  html body #saveLocation:not([hidden]) {
+    top: calc(var(--aem-header-end) + 8px) !important;
+    bottom: auto !important;
+    max-height: calc(100dvh - var(--aem-header-end) - 26px) !important;
   }
 }

@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const source = readFileSync(new URL('../source-dist/route-tracker.js', import.meta.url), 'utf8')
-  .replace(/aemInstallRouteTracker\(map\);\s*$/, '');
+  .replace(/^aemInstallRouteTracker\(map, .+\);$/m, '');
 const context = vm.createContext({ Date, Math, crypto: { randomUUID: () => 'trip-1' } });
 vm.runInContext(source, context);
 const get = (expression) => vm.runInContext(expression, context);

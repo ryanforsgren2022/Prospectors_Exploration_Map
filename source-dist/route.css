@@ -1,6 +1,4 @@
-.aem-route-panel { position: absolute; z-index: 6; right: max(12px, env(safe-area-inset-right)); bottom: max(55px, calc(env(safe-area-inset-bottom) + 35px)); width: min(330px, calc(100vw - 24px)); color: #f7faf7; background: rgba(17,24,20,.96); border: 1px solid rgba(255,255,255,.2); border-radius: 13px; box-shadow: 0 10px 30px rgba(0,0,0,.35); font: 14px system-ui, sans-serif; }
-.aem-route-panel summary { padding: 12px 15px; cursor: pointer; font-weight: 750; }
-.aem-route-panel__body { display: grid; gap: 10px; padding: 0 14px 14px; }
+.aem-route-panel__body { display: grid; gap: 10px; }
 .aem-route-panel__body p { margin: 0; color: #c9d7cc; }
 .aem-route-panel__body label { display: grid; gap: 5px; }
 .aem-route-panel__body select { min-height: 40px; padding: 6px; border: 1px solid #64756a; border-radius: 8px; color: #fff; background: #18211b; }
@@ -9,10 +7,6 @@
 #aem-route-stats { color: #aee8b9; font-weight: 700; }
 #aem-route-elevation { display: block; width: 100%; height: 80px; border: 1px solid rgba(143,211,156,.25); border-radius: 7px; background: rgba(10,25,15,.45); }
 #aem-route-elevation[hidden] { display: none; }
-@media (max-width: 650px) { .aem-route-panel { right: 12px; bottom: 62px; } }
-.aem-route-finder { bottom: max(110px, calc(env(safe-area-inset-bottom) + 90px)); }
-.aem-route-finder[open] { max-height: min(72dvh, 660px); overflow-y: auto; }
-.aem-route-finder .aem-route-panel__body input, .aem-route-finder .aem-route-panel__body textarea { min-height: 40px; padding: 7px 9px; border: 1px solid #64756a; border-radius: 8px; color: #fff; background: #18211b; font: inherit; }
-.aem-route-finder #aem-route-discovery { display: grid; gap: 5px; }
-.aem-route-finder #aem-route-discovery p { margin: 0; font-size: 12px; }
-@media (max-width: 650px) { .aem-route-finder { bottom: 116px; } }
+#routeFinderPanel input, #routeFinderPanel textarea { min-height: 40px; padding: 7px 9px; border: 1px solid #64756a; border-radius: 8px; color: #fff; background: #18211b; font: inherit; }
+#aem-route-discovery { display: grid; gap: 5px; }
+#aem-route-discovery p { margin: 0; font-size: 12px; }
