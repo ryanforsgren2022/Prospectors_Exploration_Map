@@ -118,8 +118,10 @@ function westernRoadStyles() {
   };
   const hasText = (key) => ['all', ['has', key], ['!=', ['get', key], '']];
   const noRef = ['!', hasText('ref')];
-  // Evaluate the same two-level offset in the style, without resetting filters on zoom.
-  const roadVisibleAtZoom = ['<=', ['to-number', ['get', 'tippecanoe:minimumzoom'], 0], ['+', ['floor', ['zoom']], 2]];
+  // At Z9 the road tile already contains the next detail band.  Render that
+  // band there instead of withholding it until Z10, so density increases with
+  // zoom without a one-level blank step.
+  const roadVisibleAtZoom = ['<=', ['to-number', ['get', 'tippecanoe:minimumzoom'], 0], ['+', ['floor', ['zoom']], 3]];
 
   const line = (id, highways, minzoom, color, stops, extras = {}) => ({
     id, type: 'line', source: 'roads', 'source-layer': 'roads', minzoom,
@@ -173,9 +175,9 @@ function westernRoadStyles() {
     line('access-roads', groups.access, 8.5, '#050505',
       [9, 0.72, 12, 1.10, 14, 1.45, 18, 2.2]),
 
-    line('local-road-casing', groups.local, 10.5, '#d5d5d5',
+    line('local-road-casing', groups.local, 9, '#d5d5d5',
       [10, 0.98, 14, 1.55, 18, 2.45], { 'line-opacity': 0.75 }),
-    line('local-roads', groups.local, 10.5, '#080808',
+    line('local-roads', groups.local, 9, '#080808',
       [10, 0.57, 14, 1.08, 18, 1.9]),
 
     line('secondary-road-casing', groups.secondary, 7, '#e7e7e7',
@@ -289,7 +291,7 @@ const ROAD_ZOOM = Object.freeze({
   mainStreetLabel: 7,
   accessLine: 8.5,
   accessLabel: 7,
-  localLine: 10.5,
+  localLine: 9,
   localLabel: 8
 });
 // Road classes share the same thresholds throughout the western states.
