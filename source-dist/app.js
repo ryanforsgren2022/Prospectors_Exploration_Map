@@ -328,6 +328,7 @@ const NOT_CLOSED_CLAIMS_MIN_ZOOM = 5;
 const HISTORIC_MINES_ARCHIVE_SOURCE = 'historicMinesArchive';
 const HISTORIC_MINES_ARCHIVE_SOURCE_LAYER = 'historic_mines';
 const HISTORIC_MINES_ARCHIVE_LAYER_ID = 'historic-mines-archive-points';
+const HISTORIC_MINES_START_ZOOM = 4.5;
 
 
 
@@ -2731,13 +2732,13 @@ function addProspectorLayer({
   clone.id = id;
   clone.source = source;
 
-  // State historic-mine overview begins at zoom 6.5.
-  // Leave Arizona's original template unchanged.
+  // Historic mines load at the map's starting scale, consistent across every
+  // state.  Cluster rendering keeps the overview readable at that scale.
   if (
     group === 'historicMines' &&
     templateId === HISTORIC_MINES_ARCHIVE_LAYER_ID
   ) {
-    clone.minzoom = 4;
+    clone.minzoom = HISTORIC_MINES_START_ZOOM;
   }
 
   if (sourceLayer) {
@@ -3202,10 +3203,10 @@ function prospectorGroupShouldRender(
     return map.getZoom() >= WESTERN_OVERVIEW_END_ZOOM;
   }
 
-  // Universal historic-mines overview begins at zoom 6.5.
-  // Do not depend on unrelated style-layer eligibility.
+  // Show mine clusters as soon as the map starts; do not depend on unrelated
+  // style-layer eligibility or defer them until a closer zoom.
   if (group === 'historicMines') {
-    return map.getZoom() >= 6.5;
+    return map.getZoom() >= HISTORIC_MINES_START_ZOOM;
   }
 
   if (PROSPECTOR_EXTRA_PLSS[group]) {
