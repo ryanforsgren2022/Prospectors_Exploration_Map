@@ -1586,50 +1586,6 @@ map.on('touchstart', (event) => {
 }));
 
 
-// AEM_EDGE_LAYOUT_V1: road-only density control.
-const aemDensitySlider = document.getElementById('aemRoadDensity');
-const aemDensityOutput = document.getElementById('aemRoadDensityValue');
-const aemOriginalRoadFilters = new Map();
-
-function aemUpdateRoadDensity() {
-  if (!map.isStyleLoaded()) return;
-  const value = Number(aemDensitySlider.value);
-  const classes = ['motorway', 'motorway_link',
-    'trunk', 'trunk_link'];
-  if (value >= 20) classes.push('primary', 'primary_link');
-  if (value >= 40) classes.push('secondary', 'secondary_link');
-  if (value >= 55) classes.push('tertiary', 'tertiary_link');
-  if (value >= 70) classes.push('residential', 'unclassified',
-    'living_street');
-  if (value >= 85) classes.push('service', 'track',
-    'path', 'footway', 'cycleway');
-
-  for (const layer of map.getStyle().layers || []) {
-    if (layer.source !== 'roads' ||
-        layer['source-layer'] !== 'roads' ||
-        !map.getLayer(layer.id)) continue;
-
-    if (!aemOriginalRoadFilters.has(layer.id)) {
-      aemOriginalRoadFilters.set(
-        layer.id, map.getFilter(layer.id) || true);
-    }
-    const original = aemOriginalRoadFilters.get(layer.id);
-    const selected = ['in', ['get', 'highway'],
-      ['literal', classes]];
-    map.setFilter(layer.id, ['all', original, selected]);
-  }
-}
-
-aemDensitySlider.addEventListener('input', () => {
-  aemDensityOutput.textContent = aemDensitySlider.value + '%';
-  aemUpdateRoadDensity();
-});
-
-map.on('style.load', () => {
-  aemOriginalRoadFilters.clear();
-  map.once('idle', aemUpdateRoadDensity);
-});
-
 const toolbarMenus = [...document.querySelectorAll('.toolbar-menu')];
 toolbarMenus.forEach((menu) => {
   menu.addEventListener('toggle', () => {
