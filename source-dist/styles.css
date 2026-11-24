@@ -2004,6 +2004,7 @@ img.aem-control-icon { display: block; object-fit: contain; }
 }
 
 .aem-map-panel .map-search { margin-top: 0; }
+.aem-map-panel .map-search input, .aem-map-panel .map-search select { font-size: 16px; }
 .aem-settings-icon { width: 25px; height: 25px; object-fit: contain; margin-right: 7px; }
 #aemRoadDensity, #showVisitedMines { width: 100%; }
 
