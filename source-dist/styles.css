@@ -1830,6 +1830,8 @@ vercel-toolbar,
   stroke-linejoin: round;
 }
 
+img.aem-control-icon { display: block; object-fit: contain; }
+
 .aem-map-header {
   position: fixed;
   inset: 0 0 auto;
