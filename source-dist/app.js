@@ -192,9 +192,11 @@ function westernRoadStyles() {
       [9, 1.0, 12, 1.5, 14, 2.1, 18, 2.7]),
 
     // Major numbered roads remain white and draw on top of minor roads.
-    line('state-road-casing', groups.state, 6.1, '#070707',
+    // State routes are already present in the Z5 road tiles; show them as
+    // soon as that tile band is requested rather than holding them to Z6.1.
+    line('state-road-casing', groups.state, 5, '#070707',
       [8.1, 1.5, 12, 2.5, 18, 3.5]),
-    line('state-roads', groups.state, 6.1, '#ffffff',
+    line('state-roads', groups.state, 5, '#ffffff',
       [8.1, 0.88, 12, 1.7, 18, 2.6]),
     line('primary-road-casing', groups.major, 2, '#050505',
       [4, 1.7, 12, 3.15, 18, 4.5]),
@@ -203,7 +205,7 @@ function westernRoadStyles() {
 
     // Numeric/ref labels take priority; don't also draw the street name.
     label('primary-route-labels', groups.major, 2, refText, hasText('ref'), 1, 13, true),
-    label('state-route-labels', groups.state, 6.1, refText, hasText('ref'), 2, 12.5, true),
+    label('state-route-labels', groups.state, 5, refText, hasText('ref'), 2, 12.5, true),
     label('other-numbered-route-labels', groups.secondary, 6.1, refText, hasText('ref'), 3, 11.5, true),
     label('forest-road-labels', groups.managed, 7, refText, hasText('ref'), 4, 11, true),
 
@@ -285,8 +287,8 @@ function westernRoadStyles() {
 const ROAD_ZOOM = Object.freeze({
   primaryLine: 2,
   primaryLabel: 2,
-  stateLine: 6.1,
-  stateLabel: 6.1,
+  stateLine: 5,
+  stateLabel: 5,
   secondaryLine: 7,
   mainStreetLabel: 7,
   accessLine: 8.5,
