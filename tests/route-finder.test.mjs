@@ -39,8 +39,10 @@ test('planned route renders before parcel and feature discovery, without PLSS ch
   };
   const browserWindow = { fetch() {} };
   let chooseSearchResult;
+  let provideLocation;
   const context = vm.createContext({
     map, window: browserWindow,
+    navigator: { geolocation: { getCurrentPosition: success => { provideLocation = success; } } },
     aemParseStateSearch() {}, parseCoordinates() {}, parsePlss() {}, searchAddressCandidates() {},
     installAemUnifiedSearch(options) {
       chooseSearchResult = options.navigate;
@@ -67,7 +69,12 @@ test('planned route renders before parcel and feature discovery, without PLSS ch
     properties: { display_label: name }, geometry: { coordinates: [lng, lat] }
   });
   assert.equal(control('aem-route-point-query').placeholder, 'Search for a start');
-  choose('Start', -112, 33);
+  control('finder-menu').open = true;
+  control('aem-route-my-location').listeners.click();
+  assert.equal(control('aem-route-my-location').disabled, true);
+  provideLocation({ coords: { longitude: -112, latitude: 33 } });
+  assert.equal(control('aem-route-my-location').disabled, false);
+  assert.equal(control('aem-route-start-point').textContent, 'Start: My location');
   assert.equal(control('aem-route-point-query').placeholder, 'Search for a destination');
   choose('Destination', -111.99, 33);
   assert.equal(control('aem-route-plan').disabled, false);

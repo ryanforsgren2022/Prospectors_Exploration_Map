@@ -44,7 +44,10 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
         <p id="aem-route-point-status" class="map-search__status" role="status"></p>
       </form>
       <div class="aem-route-stops" role="group" aria-label="Route points">
-        <button id="aem-route-start-point" type="button" aria-pressed="true">Start</button>
+        <div class="aem-route-start-options" role="group" aria-label="Start options">
+          <button id="aem-route-my-location" type="button">My location</button>
+          <button id="aem-route-start-point" type="button" aria-pressed="true">Select start waypoint</button>
+        </div>
         <ol id="aem-route-waypoints" aria-label="Waypoints in route order" hidden></ol>
         <button id="aem-route-destination-point" type="button" aria-pressed="false">Destination</button>
         <button id="aem-route-add-waypoint" type="button" aria-pressed="false" hidden>+ Add waypoint</button>
@@ -72,11 +75,13 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
   const suggestions = byId('aem-route-search-suggestions');
   const mapSources = byId('aem-route-map-sources');
   const pinMatches = byId('aem-route-pin-matches');
+  const myLocationButton = byId('aem-route-my-location');
   const startButton = byId('aem-route-start-point');
   const destinationButton = byId('aem-route-destination-point');
   const addWaypointButton = byId('aem-route-add-waypoint');
   const waypointList = byId('aem-route-waypoints');
   const pickButton = byId('aem-route-pick-point');
+  const useMapCenterButton = byId('aem-route-map-center');
   const cancelPickButton = byId('aem-route-cancel-pick');
   const pickBanner = panel.querySelector('.aem-route-pick');
   const editor = panel.querySelector('.aem-route-editor');
@@ -84,6 +89,8 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
   const waypoints = [];
   let target = 'start';
   let picking = false;
+  let locating = false;
+  let locationRequest = 0;
   const mode = byId('aem-route-plan-mode');
   const radius = byId('aem-route-radius');
   const custom = byId('aem-route-custom');
@@ -115,15 +122,19 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
     pointStatus.className = `map-search__status ${state}`.trim();
   }
 
+  function syncPlanButton() {
+    planButton.disabled = !endpoints.start || !endpoints.destination || planning || locating;
+  }
+
   function renderPoints() {
     const { start, destination } = endpoints;
-    startButton.textContent = start ? `Start: ${start.name}` : 'Start';
+    startButton.textContent = start ? `Start: ${start.name}` : 'Select start waypoint';
     startButton.setAttribute('aria-pressed', String(target === 'start'));
     destinationButton.textContent = destination ? `Destination: ${destination.name}` : 'Destination';
     destinationButton.setAttribute('aria-pressed', String(target === 'destination'));
     addWaypointButton.hidden = !start || !destination || waypoints.length >= AEM_MAX_WAYPOINTS;
     addWaypointButton.setAttribute('aria-pressed', String(target === 'waypoint'));
-    planButton.disabled = !start || !destination || planning;
+    syncPlanButton();
 
     const prompt = target === 'start' ? 'Search for a start' :
       target === 'destination' ? 'Search for a destination' :
@@ -160,14 +171,19 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
     return 'waypoint';
   }
 
-  function selectTarget(next) {
+  function selectTarget(next, focusSearch = true) {
+    cancelLocation();
     pointSearch.cancel();
     target = next;
     pointQuery.value = '';
     setPointStatus('');
     renderPoints();
-    pointQuery.focus();
-    showSuggestions();
+    if (focusSearch) {
+      pointQuery.focus();
+      showSuggestions();
+    } else {
+      suggestions.hidden = true;
+    }
   }
 
   function pointsChanged() {
@@ -219,6 +235,7 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
     const query = pointQuery.value.trim().toLowerCase();
     const matches = getSavedPins().filter((pin) => pin.name?.toLowerCase().includes(query));
     mapSources.hidden = Boolean(query);
+    useMapCenterButton.hidden = target === 'start';
     pinMatches.replaceChildren();
     for (const pin of matches) {
       const feature = savedPinFeature(pin);
@@ -228,22 +245,74 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
       button.addEventListener('click', () => useShortcut(feature.geometry.coordinates, feature.properties.display_label));
       pinMatches.append(button);
     }
-    suggestions.hidden = Boolean(query && !matches.length);
+    if (target === 'start') {
+      for (const waypoint of waypoints) {
+        if (!waypoint.name.toLowerCase().includes(query)) continue;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = `Use waypoint · ${waypoint.name}`;
+        button.addEventListener('click', () => {
+          waypoints.splice(waypoints.indexOf(waypoint), 1);
+          useShortcut(waypoint.point, waypoint.name);
+        });
+        pinMatches.append(button);
+      }
+    }
+    suggestions.hidden = Boolean(query) && !pinMatches.childElementCount;
+  }
+
+  function setLocating(pending) {
+    locating = pending;
+    myLocationButton.disabled = pending;
+    myLocationButton.textContent = pending ? 'Locating…' : 'My location';
+    syncPlanButton();
+  }
+
+  function cancelLocation() {
+    if (!locating) return;
+    locationRequest++;
+    setLocating(false);
+    setPointStatus('');
   }
 
   function useShortcut(point, name) {
+    cancelLocation();
     pointSearch.cancel();
     try { usePoint(point, name); }
     catch (error) { setPointStatus(error.message, 'error'); }
   }
 
   pointQuery.addEventListener('focus', showSuggestions);
-  pointQuery.addEventListener('input', showSuggestions);
+  pointQuery.addEventListener('input', () => {
+    cancelLocation();
+    showSuggestions();
+  });
   pointForm.addEventListener('submit', () => { suggestions.hidden = true; });
+  myLocationButton.addEventListener('click', () => {
+    selectTarget('start', false);
+    if (!navigator.geolocation) {
+      setPointStatus('Location is unavailable. Select a start waypoint.', 'error');
+      return;
+    }
+    const id = ++locationRequest;
+    setLocating(true);
+    setPointStatus('Getting your location…');
+    navigator.geolocation.getCurrentPosition(({ coords }) => {
+      if (id !== locationRequest || !finderMenu.open) return;
+      setLocating(false);
+      useShortcut([coords.longitude, coords.latitude], 'My location');
+    }, (error) => {
+      if (id !== locationRequest || !finderMenu.open) return;
+      setLocating(false);
+      setPointStatus(error.code === 1
+        ? 'Location permission is off. Allow it in your browser or select a start waypoint.'
+        : 'Could not get your location. Try again or select a start waypoint.', 'error');
+    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+  });
   startButton.addEventListener('click', () => selectTarget('start'));
   destinationButton.addEventListener('click', () => selectTarget('destination'));
   addWaypointButton.addEventListener('click', () => selectTarget('waypoint'));
-  byId('aem-route-map-center').addEventListener('click', () => {
+  useMapCenterButton.addEventListener('click', () => {
     const { lng, lat } = map.getCenter().wrap();
     useShortcut([lng, lat]);
   });
@@ -258,6 +327,7 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
   }
 
   pickButton.addEventListener('click', () => {
+    cancelLocation();
     pointSearch.cancel();
     picking = true;
     pickBanner.hidden = false;
@@ -284,6 +354,7 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
   });
   finderMenu.addEventListener('toggle', () => {
     if (finderMenu.open) return;
+    cancelLocation();
     finishPick(false);
     suggestions.hidden = true;
     pointSearch.cancel();
@@ -342,7 +413,7 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
   }
   let controller = null;
   planButton.addEventListener('click', async () => {
-    if (!endpoints.start || !endpoints.destination) return;
+    if (planButton.disabled) return;
     suggestions.hidden = true;
     const points = [endpoints.start.point, ...waypoints.map(({ point }) => point), endpoints.destination.point];
     const travelMode = mode.value;
@@ -401,11 +472,15 @@ function aemInstallRouteFinder(map, panel, searchOptions, getSavedPins) {
       map.on('render', afterRouteRender);
       map.triggerRepaint();
     } catch (error) {
-      if (error.name !== 'AbortError' && id === requestId) status.textContent = error.message;
+      if (error.name !== 'AbortError' && id === requestId) {
+        status.textContent = error.message === 'No connected road or trail near a route point'
+          ? `A route point could not be matched to a mapped ${travelMode === 'driving' ? 'drivable road' : 'road or trail'}. Choose a known access point for that stop.`
+          : error.message;
+      }
     } finally {
       if (id === requestId) {
         planning = false;
-        planButton.disabled = false;
+        syncPlanButton();
       }
     }
   });

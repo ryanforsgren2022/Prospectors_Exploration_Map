@@ -40,6 +40,7 @@
 #aem-route-pin-matches:not(:empty) { margin-top: 6px; }
 
 .aem-route-stops { display: grid; gap: 5px; }
+.aem-route-start-options { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 5px; }
 .aem-route-stops button { min-height: 36px; padding: 5px 9px; text-align: left; overflow-wrap: anywhere; }
 .aem-route-stops button[aria-pressed="true"] { border-color: var(--aem-control-teal); }
 #aem-route-add-waypoint { justify-self: start; }
