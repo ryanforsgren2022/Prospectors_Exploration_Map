@@ -1,8 +1,46 @@
 /* Fresh point research shared by dropped, searched, and reopened saved pins. */
+function researchDetailSection(title, nodes) {
+  const section = document.createElement('details');
+  section.className = 'research-location__detail-section';
+  const heading = document.createElement('summary');
+  heading.textContent = title;
+  const results = document.createElement('div');
+  results.className = 'research-location__results';
+  results.append(...nodes);
+  section.append(heading, results);
+  return section;
+}
+
+function pinLandManager(properties = {}) {
+  for (const [field, aliases] of Object.entries(SURFACE_MANAGEMENT_ALIASES)) {
+    if (field === 'SMA_ID' && Object.keys(SURFACE_MANAGEMENT_ALIASES).some(
+      key => key !== 'SMA_ID' && Object.hasOwn(properties, key)
+    )) continue;
+    const value = String(properties[field] ?? '').toUpperCase();
+    if (Object.hasOwn(aliases, value)) return aliases[value];
+  }
+  return '';
+}
+
+function pinRecordCount(groups) {
+  const available = groups.filter(group => group.status === 'ok');
+  if (!available.length) {
+    return groups.some(group => group.status === 'unavailable') ? 'Lookup unavailable' : 'No published coverage';
+  }
+
+  const count = available.reduce((total, group) => total + group.features.length, 0);
+  if (available.length < groups.length) return count ? `${count} found · partial coverage` : 'Partial coverage';
+  return count ? `${count} found` : 'None found';
+}
+
 async function aemOpenResearchV2(lngLat, selectedFeature = null) {
   const request = ++researchLocationRequest;
   const lng = Number(lngLat.lng), lat = Number(lngLat.lat);
   activeResearchLocation = { lng, lat, name: selectedFeature?.properties?.display_label || 'Location research' };
+  researchLocationTitle.textContent = selectedFeature?.properties?.display_label || 'Pinned location';
+  researchDetails.open = false;
+  researchDetails.hidden = true;
+  researchDetailSections.replaceChildren();
   researchLocationCard.hidden = false;
   researchCoordinates.textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
   researchResults.textContent = 'Researching location…';
@@ -28,17 +66,57 @@ async function aemOpenResearchV2(lngLat, selectedFeature = null) {
   const groups = data?.groups || {};
   const county = checks[1].status === 'fulfilled' ? checks[1].value : '';
   const group = name => groups[name] || { status: 'not_published', features: [] };
+  const withdrawals = group('withdrawals').status === 'not_published'
+    ? [['withdrawalsAuthorized', 'Authorized / Interim withdrawals'], ['withdrawalsPending', 'Pending withdrawals']]
+    : [['withdrawals', 'Withdrawals']];
+  if (data?.status === 'ok') {
+    const surface = group('surfaceManagement');
+    const managers = [...new Set(surface.features.map(feature => pinLandManager(feature.properties)).filter(Boolean))];
+    const landManager = surface.status === 'ok' && surface.features.length
+      ? managers.join(' · ') || 'See land status details'
+      : pinRecordCount([surface]);
+    researchResults.replaceChildren(
+      researchTextResult('Land manager', landManager),
+      researchTextResult('Mining claims', pinRecordCount([group('claims')])),
+      researchTextResult('Withdrawals', pinRecordCount(withdrawals.map(([key]) => group(key)))),
+      researchTextResult('Parcels', pinRecordCount([group('parcels')]))
+    );
+  } else {
+    researchResults.textContent = data?.status === 'outside_supported_states'
+      ? 'Outside supported map coverage.'
+      : 'Map records could not be loaded.';
+  }
+
+  const location = [];
+  const parcel = group('parcels').features[0]?.properties || {};
+  const countyName = county || parcel.county || parcel.countyName || parcel.County;
+  const place = firstResearchValue(parcel, ['city', 'situs_city', 'AZ_PlaceName']);
+  if (countyName) location.push(researchTextResult('County', countyName));
+  if (place) location.push(researchTextResult('City / place', place));
+  const sections = [];
+  if (selectedFeature) {
+    const selected = [];
+    if (fetchRecord && checks[2].status === 'rejected') selected.push(researchTextResult('Source record', 'Live details unavailable.'));
+    const fields = checks[2].value?.properties || selectedFeature.properties || {};
+    for (const [key, value] of Object.entries(fields)) {
+      if (value == null || value === '' || ['search_rank', 'source_details', 'CSE_META'].includes(key)) continue;
+      selected.push(researchTextResult(key.replaceAll('_', ' '), String(value)));
+    }
+    if (selected.length) sections.push(researchDetailSection('Selected result', selected));
+  }
+  if (data?.status === 'ok') {
+    sections.push(...pinRecordSections(group, withdrawals, location, county));
+  } else if (location.length) {
+    sections.push(researchDetailSection('Location', location));
+  }
+  researchDetailSections.replaceChildren(...sections);
+  researchDetails.hidden = !sections.length;
+}
+
+function pinRecordSections(group, withdrawals, location, county) {
+  const claims = [], land = [], property = [];
   const props = name => group(name).features[0]?.properties || {};
   const unavailable = name => group(name).status === 'unavailable' ? 'Lookup unavailable; try again.' : 'No published coverage for this location.';
-  const nodes = [[], [], [], []];
-  const [location, claims, land, property] = nodes;
-  location.push(researchTextResult('Coordinates', `${lat.toFixed(5)}, ${lng.toFixed(5)}`));
-  if (!data || data.status !== 'ok') {
-    location.push(researchTextResult('Location research', data?.status === 'outside_supported_states' ? 'Outside supported state coverage.' : 'Lookup unavailable; this does not mean there are no records at this location.'));
-  }
-  const parcel = props('parcels');
-  location.push(researchTextResult('County', county || parcel.county || parcel.countyName || parcel.County));
-  location.push(researchTextResult('City / Place', firstResearchValue(parcel, ['city', 'situs_city', 'AZ_PlaceName'])));
   const township = props('plssTownships'), section = props('plssSections');
   location.push(researchTextResult('Principal Meridian', formatMeridian(township) || formatMeridian(section)));
   location.push(researchTextResult('Township', formatTownship(township) || unavailable('plssTownships')));
@@ -65,12 +143,7 @@ async function aemOpenResearchV2(lngLat, selectedFeature = null) {
     });
   };
   addGroup(land, 'surfaceManagement', 'Surface management');
-  const withdrawals = group('withdrawals');
-  if (withdrawals.status !== 'not_published') addGroup(land, 'withdrawals', 'Withdrawals');
-  else {
-    addGroup(land, 'withdrawalsAuthorized', 'Authorized / Interim withdrawals');
-    addGroup(land, 'withdrawalsPending', 'Pending withdrawals');
-  }
+  for (const [key, label] of withdrawals) addGroup(land, key, label);
   const parcels = group('parcels');
   property.push(researchTextResult('Parcels at pin', parcels.status === 'ok' ? String(parcels.features.length) : unavailable('parcels')));
   parcels.features.forEach((feature, index) => {
@@ -81,17 +154,10 @@ async function aemOpenResearchV2(lngLat, selectedFeature = null) {
     for (const [label, names] of [['Owner', ['owner_name', 'owner', 'OWNER', 'OWNER_NAME']], ['Acreage', ['landAcres', 'Acres', 'acres', 'acreage', 'GISACRE']]]) property.push(researchTextResult(label, firstResearchValue(p, names)));
     if (details.propertyRecordsUrl) property.push(researchLinkResult('Parcel records', 'Open property records', details.propertyRecordsUrl));
   });
-  researchPages = [{ title: 'Location / PLSS', nodes: location }, { title: 'MLRS / BLM', nodes: claims }, { title: 'Land Status', nodes: land }, { title: 'Property', nodes: property }];
-  if (selectedFeature) {
-    const selected = [];
-    if (fetchRecord && checks[2].status === 'rejected') selected.push(researchTextResult('Source record', 'Live details unavailable.'));
-    const fields = checks[2].value?.properties || selectedFeature.properties || {};
-    for (const [key, value] of Object.entries(fields)) {
-      if (value == null || value === '' || ['search_rank', 'source_details', 'CSE_META'].includes(key)) continue;
-      selected.push(researchTextResult(key.replaceAll('_', ' '), String(value)));
-    }
-    researchPages.push({ title: 'Selected result', nodes: selected });
-  }
-  researchPageIndex = 0;
-  renderResearchPage();
+  return [
+    researchDetailSection('Land status', land),
+    researchDetailSection('Mining claims', claims),
+    researchDetailSection('Property', property),
+    researchDetailSection('Location / PLSS', location)
+  ];
 }

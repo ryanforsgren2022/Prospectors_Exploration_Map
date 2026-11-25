@@ -106,7 +106,14 @@ input[type="checkbox"] { width: 24px; height: 24px; accent-color: #8fd39c; }
 .research-location__close { float:right; min-height:28px; width:28px; padding:0; border:0; background:transparent; color:#f6f8f6; font-size:23px; line-height:1; }
 .research-location__coordinates { margin:5px 0 9px; color:#c9d7cc; font:600 12px ui-monospace, SFMono-Regular, Menlo, monospace; }
 .research-location__results { display:grid; gap:7px; }
-.research-location__result { margin:0; }
+.research-location__details { margin-top:9px; border-top:1px solid rgba(255,255,255,.17); }
+.research-location__details[hidden] { display:none; }
+.research-location__details summary { padding:8px 0; cursor:pointer; font-weight:700; }
+#researchDetailSections { max-height:min(240px, 34dvh); overflow:auto; overscroll-behavior:contain; }
+.research-location__detail-section { border-top:1px solid rgba(255,255,255,.12); }
+.research-location__detail-section .research-location__results { padding:0 5px 8px 10px; }
+.research-location__detail-section a { color:#aee8b9; }
+.research-location__result { margin:0; overflow-wrap:anywhere; }
 .research-location__result b { color:#fff; }
 .research-location__actions { display:flex; gap:6px; margin:0 0 10px; }
 .research-location__actions button { flex:1; }

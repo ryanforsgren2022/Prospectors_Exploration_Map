@@ -5,7 +5,7 @@ import { test } from 'node:test';
 
 class Element {
   constructor() { this.children = []; this.listeners = {}; this.value = ''; }
-  append(child) { this.children.push(child); }
+  append(...children) { this.children.push(...children); }
   setAttribute() {}
   replaceChildren(...children) { this.children = children; }
   addEventListener(name, callback) { this.listeners[name] = callback; }
@@ -79,22 +79,51 @@ test('late search responses cannot navigate after the user changes the query', a
   const pending = h.submit('APN 001');await new Promise(resolve => setImmediate(resolve));
   h.input.listeners.input();release();await pending;assert.equal(h.navigations.length, 0);
 });
-test('opening a research pin uses current data and never writes research snapshots', async () => {
+test('a pin opens with a fresh summary and keeps full records collapsed without saving a snapshot', async () => {
   let writes = 0;
-  const groups = { parcels: { status: 'unavailable', features: [] }, claims: { status: 'ok', features: [] } };
+  const groups = {
+    parcels: { status: 'unavailable', features: [] },
+    claims: { status: 'ok', features: [] },
+    surfaceManagement: { status: 'ok', features: [{ properties: { MGMT_AGNCY: 'BLM', OBJECTID: 456 } }] },
+    withdrawalsAuthorized: { status: 'ok', features: [{ properties: { CSE_NR: 'ABC123' } }] }
+  };
   const context = vm.createContext({ URL, Number, Object, String, Promise,
-    researchLocationRequest: 0, researchLocationCard: {}, researchCoordinates: {}, researchResults: {},
+    document: { createElement: () => new Element() },
+    researchLocationRequest: 0, researchLocationCard: {}, researchCoordinates: {}, researchLocationTitle: {},
+    researchResults: new Element(), researchDetails: { open: true }, researchDetailSections: new Element(),
+    SURFACE_MANAGEMENT_ALIASES: { MGMT_AGNCY: { BLM: 'BLM' } },
     localStorage: { setItem() { writes++; } },
     fetch: async () => ({ ok: true, json: async () => ({ status: 'ok', groups }) }), countyAtPoint: async () => 'Pima',
     researchTextResult: (label, value) => ({ label, value }), researchLinkResult: (label, value) => ({ label, value }),
     firstResearchValue: (p, keys) => keys.map(k => p[k]).find(Boolean) || '',
     formatMeridian: () => '', formatTownship: () => '', formatRange: () => '', formatSection: () => '',
-    appendClaimResults: () => {}, MLRS_GEOGRAPHIC_REPORT_URL: 'https://example.com/', renderResearchPage() {}, aemParcelPinDetails: () => ({})
+    appendClaimResults: () => {}, MLRS_GEOGRAPHIC_REPORT_URL: 'https://example.com/', aemParcelPinDetails: () => ({})
   });
   vm.runInContext(readFileSync(new URL('../source-dist/research-v2.js', import.meta.url), 'utf8'), context);
   await context.aemOpenResearchV2({ lng: -111, lat: 32 });
   assert.equal(writes, 0);
   assert.deepEqual(Object.keys(context.activeResearchLocation).sort(), ['lat', 'lng', 'name']);
-  const property = context.researchPages.find(page => page.title === 'Property');
-  assert.match(property.nodes[0].value, /unavailable/);
+  assert.equal(context.researchCoordinates.textContent, '32.00000, -111.00000');
+  assert.deepEqual(context.researchResults.children, [
+    { label: 'Land manager', value: 'BLM' },
+    { label: 'Mining claims', value: 'None found' },
+    { label: 'Withdrawals', value: '1 found · partial coverage' },
+    { label: 'Parcels', value: 'Lookup unavailable' }
+  ]);
+  assert.equal(context.researchDetails.open, false);
+  assert.equal(context.researchDetails.hidden, false);
+  const sections = context.researchDetailSections.children;
+  assert.deepEqual(sections.map(section => section.children[0].textContent),
+    ['Land status', 'Mining claims', 'Property', 'Location / PLSS']);
+  assert.equal(sections[0].children[1].children.find(row => row.label.endsWith('OBJECTID')).value, '456');
+  assert.match(sections[2].children[1].children[0].value, /unavailable/);
+
+  context.researchDetails.open = true;
+  context.fetch = async () => ({ ok: true, json: async () => ({ status: 'outside_supported_states' }) });
+  await context.aemOpenResearchV2({ lng: -112, lat: 33 }, feature('Pima'));
+  assert.equal(context.researchLocationTitle.textContent, '001-020');
+  assert.equal(context.researchResults.textContent, 'Outside supported map coverage.');
+  assert.equal(context.researchDetails.open, false);
+  assert.deepEqual(context.researchDetailSections.children.map(section => section.children[0].textContent),
+    ['Selected result', 'Location']);
 });

@@ -1024,6 +1024,9 @@ async function queryResearchLocation(query, lngLat, outFields) {
 
 const researchLocationCard = document.querySelector('#researchLocation');
 const researchCoordinates = document.querySelector('#researchCoordinates');
+const researchLocationTitle = document.querySelector('#researchLocationTitle');
+const researchDetails = document.querySelector('#researchDetails');
+const researchDetailSections = document.querySelector('#researchDetailSections');
 const researchResults = document.querySelector('#researchResults');
 const researchNavigateLocationButton = document.querySelector('#researchNavigateLocation');
 const researchSaveLocationButton = document.querySelector('#researchSaveLocation');
@@ -1038,41 +1041,6 @@ const savedLocationsGroup = document.querySelector('#savedLocationsGroup');
 const savedLocationsStatus = document.querySelector('#savedLocationsStatus');
 const SAVED_LOCATIONS_STORAGE_KEY = 'az-prospecting-map.saved-locations.v1';
 let researchLocationRequest = 0;
-let researchPages = [];
-let researchPageIndex = 0;
-
-const researchPageTitle = document.querySelector('#researchPageTitle');
-const researchPrevPage = document.querySelector('#researchPrevPage');
-const researchNextPage = document.querySelector('#researchNextPage');
-const researchPageIndicator = document.querySelector('#researchPageIndicator');
-
-function renderResearchPage() {
-  if (!researchPages.length) return;
-
-  const page = researchPages[researchPageIndex];
-
-  researchPageTitle.textContent = page.title;
-  researchResults.replaceChildren(...page.nodes);
-
-  researchPageIndicator.textContent =
-    `${researchPageIndex + 1} / ${researchPages.length}`;
-
-  researchPrevPage.disabled = researchPageIndex === 0;
-  researchNextPage.disabled =
-    researchPageIndex === researchPages.length - 1;
-}
-
-researchPrevPage.addEventListener('click', () => {
-  if (researchPageIndex <= 0) return;
-  researchPageIndex -= 1;
-  renderResearchPage();
-});
-
-researchNextPage.addEventListener('click', () => {
-  if (researchPageIndex >= researchPages.length - 1) return;
-  researchPageIndex += 1;
-  renderResearchPage();
-});
 let activeResearchLocation = null;
 let pendingSavedLocation = null;
 let dropPinMode = false;

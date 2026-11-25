@@ -8,11 +8,11 @@
   <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
   <meta name="description" content="Arizona prospecting map with roads, historic mines, land status, and saved research locations.">
   <link rel="stylesheet" href="./vendor/maplibre-gl.css">
-  <link rel="stylesheet" href="./map.a61d567cd9f7.css">
+  <link rel="stylesheet" href="./map.f690781cea5e.css">
   <!-- AEM_EARLY_DEFERRED_SCRIPTS_V1 -->
   <script defer src="./vendor/maplibre-gl.js"></script>
   <script defer src="./vendor/pmtiles.js"></script>
-  <script defer src="./map.3f52229b664a.js"></script>
+  <script defer src="./map.93485a2679fa.js"></script>
 </head>
 <body>
   <main id="map" aria-label="Interactive Arizona prospecting exploration map"></main>
@@ -196,27 +196,21 @@
       </details>
     </div>
   </nav>
-  <aside id="researchLocation" class="research-location" aria-live="polite" hidden>
+  <aside id="researchLocation" class="research-location" aria-labelledby="researchLocationTitle" hidden>
     <button id="researchLocationClose" class="research-location__close" type="button" aria-label="Close location research">×</button>
-    <strong>Location research</strong>
+    <strong id="researchLocationTitle">Pinned location</strong>
     <p id="researchCoordinates" class="research-location__coordinates"></p>
     <div class="research-location__actions">
       <button id="researchNavigateLocation" type="button" hidden>Navigate</button>
       <button id="researchSaveLocation" class="research-location__save" type="button">Save location</button>
     </div>
 
-    <div class="research-location__page-shell">
-      <div id="researchPageTitle" class="research-location__page-title"></div>
-      <div id="researchResults" class="research-location__results"></div>
-
-      <div class="research-location__pager">
-        <button id="researchPrevPage" type="button">← Previous</button>
-        <span id="researchPageIndicator">1 / 4</span>
-        <button id="researchNextPage" type="button">Next →</button>
-      </div>
-    </div>
-
-    <p class="research-location__note">Screening only—confirm land status, claims, withdrawals, and legal access before acting.</p>
+    <div id="researchResults" class="research-location__results" role="status"></div>
+    <details id="researchDetails" class="research-location__details" hidden>
+      <summary>More details</summary>
+      <div id="researchDetailSections"></div>
+    </details>
+    <p class="research-location__note">Verify land status and access before relying on this map.</p>
   </aside>
   <aside id="saveLocation" class="save-location" aria-label="Save location" hidden>
     <button id="saveLocationClose" class="save-location__close" type="button" aria-label="Close save location">×</button>
