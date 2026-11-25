@@ -87,17 +87,17 @@ test('a pin opens with a fresh summary and keeps full records collapsed without 
     surfaceManagement: { status: 'ok', features: [{ properties: { MGMT_AGNCY: 'BLM', OBJECTID: 456 } }] },
     withdrawalsAuthorized: { status: 'ok', features: [{ properties: { CSE_NR: 'ABC123' } }] }
   };
-  const context = vm.createContext({ URL, Number, Object, String, Promise,
+  const context = vm.createContext({ URL, URLSearchParams, Number, Object, String, Promise,
     document: { createElement: () => new Element() },
     researchLocationRequest: 0, researchLocationCard: {}, researchCoordinates: {}, researchLocationTitle: {},
     researchResults: new Element(), researchDetails: { open: true }, researchDetailSections: new Element(),
     SURFACE_MANAGEMENT_ALIASES: { MGMT_AGNCY: { BLM: 'BLM' } },
     localStorage: { setItem() { writes++; } },
     fetch: async () => ({ ok: true, json: async () => ({ status: 'ok', groups }) }), countyAtPoint: async () => 'Pima',
-    researchTextResult: (label, value) => ({ label, value }), researchLinkResult: (label, value) => ({ label, value }),
+    researchTextResult: (label, value) => ({ label, value }), researchLinkResult: (label, value, href) => ({ label, value, href }),
     firstResearchValue: (p, keys) => keys.map(k => p[k]).find(Boolean) || '',
     formatMeridian: () => '', formatTownship: () => '', formatRange: () => '', formatSection: () => '',
-    appendClaimResults: () => {}, MLRS_GEOGRAPHIC_REPORT_URL: 'https://example.com/', aemParcelPinDetails: () => ({})
+    aemParcelPinDetails: () => ({})
   });
   vm.runInContext(readFileSync(new URL('../source-dist/research-v2.js', import.meta.url), 'utf8'), context);
   await context.aemOpenResearchV2({ lng: -111, lat: 32 });
@@ -117,6 +117,25 @@ test('a pin opens with a fresh summary and keeps full records collapsed without 
     ['Land status', 'Mining claims', 'Property', 'Location / PLSS']);
   assert.equal(sections[0].children[1].children.find(row => row.label.endsWith('OBJECTID')).value, '456');
   assert.match(sections[2].children[1].children[0].value, /unavailable/);
+
+  groups.claims.features = [
+    { id: 1, properties: { CSE_NR: 'NV105216280', CSE_NAME: 'WR 195', CSE_DISP: 'Active' } },
+    { id: 2, properties: { CSE_DISP: 'Active' } }
+  ];
+  await context.aemOpenResearchV2({ lng: -114.043913, lat: 41.745461 });
+  const claimSummary = context.researchResults.children[1];
+  assert.equal(claimSummary.value, '2 found · View BLM records');
+  const pointQuery = new URL(claimSummary.href);
+  assert.equal(pointQuery.hostname, 'nlsdbpubgis.blm.gov');
+  assert.equal(pointQuery.searchParams.get('geometry'), '-114.043913,41.745461');
+  assert.equal(pointQuery.searchParams.get('spatialRel'), 'esriSpatialRelIntersects');
+  assert.equal(pointQuery.searchParams.get('f'), 'html');
+  const claimRows = context.researchDetailSections.children[1].children[1].children;
+  assert.equal(new URL(claimRows[1].href).searchParams.get('where'), "CSE_NR='NV105216280'");
+  assert.equal(claimRows[2].href, undefined);
+  assert.equal(new URL(context.blmClaimRecordUrl({ LEG_CSE_NR: 'AMC 012345' })).searchParams.get('where'),
+    "LEG_CSE_NR='AMC 012345'");
+  assert.equal(context.blmClaimRecordUrl({ CSE_NR: "NV' OR 1=1" }), '');
 
   context.researchDetails.open = true;
   context.fetch = async () => ({ ok: true, json: async () => ({ status: 'outside_supported_states' }) });

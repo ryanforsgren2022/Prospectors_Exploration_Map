@@ -323,9 +323,7 @@ const WITHDRAWAL_TEMPLATES = [
   { id: 'withdrawals-pending-outline', type: 'line', 'source-layer': 'withdrawals_pending', minzoom: 4, paint: { 'line-color': 'rgba(220,120,10,.98)', 'line-width': 1.1 } }
 ];
 
-const NOT_CLOSED_CLAIMS_QUERY = 'https://gis.blm.gov/nlsdb/rest/services/HUB/BLM_Natl_MLRS_Mining_Claims_Not_Closed/FeatureServer/0/query';
 const PLSS_ALIQUOT_QUERY = 'https://gis.blm.gov/azarcgis/rest/services/cadastral/BLM_AZ_PLSS/FeatureServer/3/query';
-const MLRS_GEOGRAPHIC_REPORT_URL = 'https://reports.blm.gov/report/MLRS/105/Mining-Claims-Geographic-Report/';
 
 const NOT_CLOSED_CLAIMS_SOURCE = 'notClosedClaims';
 const NOT_CLOSED_CLAIMS_LAYER_IDS = ['not-closed-claims-fill', 'not-closed-claims-outline'];
@@ -870,7 +868,7 @@ function ensureHistoricMineClusterLayers() {
   map.on('click', HISTORIC_MINE_CLUSTER_LAYERS[2], event => {
     if (!historicMineClusterActive) return;
     const feature = event.features?.[0];
-    if (feature) new maplibregl.Popup({ offset: 12 }).setLngLat(feature.geometry.coordinates).setDOMContent(makeHistoricMinePopup(feature.properties)).addTo(map);
+    if (feature) new maplibregl.Popup({ offset: 12 }).setLngLat(feature.geometry.coordinates).setDOMContent(makeHistoricMinePopup(feature.properties || {}, feature.geometry.coordinates)).addTo(map);
   });
   for (const id of [HISTORIC_MINE_CLUSTER_LAYERS[0], HISTORIC_MINE_CLUSTER_LAYERS[2]]) {
     map.on('mouseenter', id, () => { if (historicMineClusterActive) map.getCanvas().style.cursor = 'pointer'; });
@@ -969,7 +967,7 @@ map.on('sourcedata', event => {
   if (shouldClusterHistoricMines() && /^prospector-[a-z]{2}-historic-mines$/.test(event.sourceId || '') && (event.sourceDataType === 'content' || event.isSourceLoaded)) scheduleHistoricMineClustering();
 });
 
-function makeHistoricMinePopup(properties = {}) {
+function makeHistoricMinePopup(properties, [lng, lat]) {
   const content = document.createElement('article');
   content.className = 'historic-mine-popup';
   const title = document.createElement('h3');
@@ -990,6 +988,13 @@ function makeHistoricMinePopup(properties = {}) {
     source.textContent = properties.source_label || 'Open source record ↗';
     content.append(source);
   }
+  const claims = document.createElement('a');
+  claims.className = 'historic-mine-popup__source';
+  claims.href = blmClaimsAtPointUrl(lng, lat);
+  claims.target = '_blank';
+  claims.rel = 'noopener noreferrer';
+  claims.textContent = 'View BLM claims at this mine';
+  content.append(claims);
   if (properties.dep_id) {
     const visitedButton = document.createElement('button');
     const updateVisitedButton = (visited) => {
@@ -1234,34 +1239,6 @@ function formatAliquot(attributes = {}) {
     attributes,
     ['SECDIVLAB', 'SECDIVTXT', 'SECDIVNO', 'SECDIVTYP']
   );
-}
-
-function appendClaimResults(nodes, claims) {
-  nodes.push(
-    researchTextResult(
-      'Claims at pin',
-      claims.length ? String(claims.length) : 'none found'
-    )
-  );
-
-  claims.forEach((feature, index) => {
-    const a = feature.attributes || {};
-
-    const parts = [
-      a.CSE_NAME || 'Unnamed claim',
-      a.CSE_NR || 'No case number',
-      a.CSE_DISP || 'Status not listed'
-    ];
-
-    if (a.RCRD_ACRS) parts.push(`${a.RCRD_ACRS} acres`);
-
-    nodes.push(
-      researchTextResult(
-        `Claim ${index + 1}`,
-        parts.join(' · ')
-      )
-    );
-  });
 }
 
 function appendWithdrawalResults(nodes, label, features) {
@@ -2844,7 +2821,7 @@ function addProspectorLayer({
       if (historicMineClusterActive) return;
       const feature = event.features?.[0];
       if (!feature) return;
-      new maplibregl.Popup({ offset: 12 }).setLngLat(feature.geometry.coordinates).setDOMContent(makeHistoricMinePopup(feature.properties)).addTo(map);
+      new maplibregl.Popup({ offset: 12 }).setLngLat(feature.geometry.coordinates).setDOMContent(makeHistoricMinePopup(feature.properties || {}, feature.geometry.coordinates)).addTo(map);
     }], ['mouseenter', () => { if (!historicMineClusterActive) map.getCanvas().style.cursor = 'pointer'; }],
     ['mouseleave', () => { map.getCanvas().style.cursor = ''; }]];
     for (const [event, listener] of listeners) map.on(event, id, listener);

@@ -1,4 +1,37 @@
 /* Fresh point research shared by dropped, searched, and reopened saved pins. */
+const BLM_MINING_CLAIMS_QUERY = 'https://nlsdbpubgis.blm.gov/arcgishub/rest/services/HUB/BLM_Natl_MLRS_Mining_Claims_Not_Closed/FeatureServer/0/query';
+
+function blmClaimQueryUrl(filters) {
+  const url = new URL(BLM_MINING_CLAIMS_QUERY);
+  url.search = new URLSearchParams({
+    ...filters,
+    outFields: 'CSE_NR,LEG_CSE_NR,CSE_NAME,CSE_DISP,BLM_PROD,RCRD_ACRS',
+    returnGeometry: 'false',
+    f: 'html'
+  });
+  return url.href;
+}
+
+function blmClaimsAtPointUrl(lng, lat) {
+  return blmClaimQueryUrl({
+    where: '1=1',
+    geometry: `${lng},${lat}`,
+    geometryType: 'esriGeometryPoint',
+    inSR: '4326',
+    spatialRel: 'esriSpatialRelIntersects'
+  });
+}
+
+function blmClaimRecordUrl(properties) {
+  for (const field of ['CSE_NR', 'LEG_CSE_NR']) {
+    const serial = String(properties[field] ?? '').trim().toUpperCase();
+    if (/^[A-Z]{2,4} *[0-9][0-9A-Z-]*$/.test(serial)) {
+      return blmClaimQueryUrl({ where: `${field}='${serial}'` });
+    }
+  }
+  return '';
+}
+
 function researchDetailSection(title, nodes) {
   const section = document.createElement('details');
   section.className = 'research-location__detail-section';
@@ -69,15 +102,21 @@ async function aemOpenResearchV2(lngLat, selectedFeature = null) {
   const withdrawals = group('withdrawals').status === 'not_published'
     ? [['withdrawalsAuthorized', 'Authorized / Interim withdrawals'], ['withdrawalsPending', 'Pending withdrawals']]
     : [['withdrawals', 'Withdrawals']];
+  const claimGroup = group('claims');
+  const claimsAtPin = blmClaimsAtPointUrl(lng, lat);
   if (data?.status === 'ok') {
     const surface = group('surfaceManagement');
     const managers = [...new Set(surface.features.map(feature => pinLandManager(feature.properties)).filter(Boolean))];
     const landManager = surface.status === 'ok' && surface.features.length
       ? managers.join(' · ') || 'See land status details'
       : pinRecordCount([surface]);
+    const claimCount = pinRecordCount([claimGroup]);
+    const claimSummary = claimGroup.status === 'ok' && claimGroup.features.length
+      ? researchLinkResult('Mining claims', `${claimCount} · View BLM records`, claimsAtPin)
+      : researchTextResult('Mining claims', claimCount);
     researchResults.replaceChildren(
       researchTextResult('Land manager', landManager),
-      researchTextResult('Mining claims', pinRecordCount([group('claims')])),
+      claimSummary,
       researchTextResult('Withdrawals', pinRecordCount(withdrawals.map(([key]) => group(key)))),
       researchTextResult('Parcels', pinRecordCount([group('parcels')]))
     );
@@ -98,6 +137,11 @@ async function aemOpenResearchV2(lngLat, selectedFeature = null) {
     const selected = [];
     if (fetchRecord && checks[2].status === 'rejected') selected.push(researchTextResult('Source record', 'Live details unavailable.'));
     const fields = checks[2].value?.properties || selectedFeature.properties || {};
+    if (kind === 'claims') {
+      const claimUrl = blmClaimRecordUrl(fields);
+      if (claimUrl) selected.push(researchLinkResult('BLM', 'View this claim', claimUrl));
+    }
+    if (kind === 'historic-mines') selected.push(researchLinkResult('BLM', 'View claims at this mine', claimsAtPin));
     for (const [key, value] of Object.entries(fields)) {
       if (value == null || value === '' || ['search_rank', 'source_details', 'CSE_META'].includes(key)) continue;
       selected.push(researchTextResult(key.replaceAll('_', ' '), String(value)));
@@ -127,11 +171,27 @@ function pinRecordSections(group, withdrawals, location, county) {
     const labels = g.features.map(f => firstResearchValue(f.properties, ['SECDIVLAB', 'SECDIVTXT', 'SECDIVNO', 'FRSTDIVLAB', 'FRSTDIVNO', 'SURVTYP', 'SURVNAME'])).filter(Boolean);
     location.push(researchTextResult(label, labels.join(' · ') || (g.status === 'ok' ? 'None found at pin.' : unavailable(key))));
   }
-  if (group('claims').status === 'ok') appendClaimResults(claims, group('claims').features.map(f => ({ attributes: f.properties })));
-  else claims.push(researchTextResult('Claims at pin', unavailable('claims')));
+  const claimGroup = group('claims');
+  if (claimGroup.status === 'ok') {
+    claims.push(researchTextResult('Claims at pin', pinRecordCount([claimGroup])));
+    claimGroup.features.forEach((feature, index) => {
+      const properties = feature.properties || {};
+      const parts = [
+        properties.CSE_NAME || 'Unnamed claim',
+        properties.CSE_NR || properties.LEG_CSE_NR || 'No case number',
+        properties.CSE_DISP || 'Status not listed'
+      ];
+      if (properties.RCRD_ACRS) parts.push(`${properties.RCRD_ACRS} acres`);
+      const label = `Claim ${index + 1}`;
+      const description = parts.join(' · ');
+      const recordUrl = blmClaimRecordUrl(properties);
+      claims.push(recordUrl ? researchLinkResult(label, description, recordUrl) : researchTextResult(label, description));
+    });
+  } else {
+    claims.push(researchTextResult('Claims at pin', unavailable('claims')));
+  }
   const legal = [formatMeridian(township) || formatMeridian(section), formatTownship(township), formatRange(township), formatSection(section)].filter(Boolean).join(' · ');
   claims.push(researchTextResult('Search location', legal));
-  claims.push(researchLinkResult('BLM records', 'Open MLRS Mining Claims Geographic Report', MLRS_GEOGRAPHIC_REPORT_URL));
   const addGroup = (target, key, label) => {
     const g = group(key);
     target.push(researchTextResult(label, g.status === 'ok' ? `${g.features.length} record${g.features.length === 1 ? '' : 's'} at pin` : unavailable(key)));
