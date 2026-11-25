@@ -49,6 +49,10 @@ const managedAccessFilter = ['any',
 // AEM_UNIFIED_WESTERN_ROADS_V1: single PMTiles source across 11 contiguous states.
 const WESTERN_OVERVIEW_MIN_ZOOM = 2;
 const WESTERN_OVERVIEW_END_ZOOM = 4;
+const HD_IMAGERY_MAP_ZOOM = 10.5;
+const SATELLITE_TILE_SIZE = 256;
+const SATELLITE_MAX_TILE_ZOOM = 19;
+const SATELLITE_TILE_URL = 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
 const WESTERN_ROAD_OVERVIEW_IDS = ['primary-road-casing', 'primary-roads'];
 const WESTERN_ROAD_PRIMARY = ['primary-road-casing', 'primary-roads', 'state-road-casing', 'state-roads', 'secondary-road-casing', 'secondary-roads', 'local-road-casing', 'local-roads', 'primary-route-labels', 'state-route-labels', 'other-numbered-route-labels', 'primary-road-name-labels', 'arterial-road-name-labels', 'main-street-labels', 'local-labels'];
 const WESTERN_ROAD_ACCESS = ['access-roads-casing', 'access-roads', 'managed-road-casing', 'managed-roads', 'forest-road-labels', 'managed-road-name-labels', 'access-labels'];
@@ -170,39 +174,39 @@ function westernRoadStyles() {
       [10.5, 0.8, 14, 1.15, 18, 1.8], { 'line-dasharray': [2, 2] }),
 
     // Reveal road classes progressively as the map zooms in.
-    // Give road lines and their casings more weight by the Z10 imagery transition.
+    // Give road lines and their casings more weight at the HD imagery transition.
     line('access-roads-casing', groups.access, 8.5, '#d3d3d3',
-      [9, 1.05, 10, 1.75, 12, 2.05, 14, 2.15, 18, 2.65], { 'line-opacity': 0.77 }),
+      [9, 1.05, 10, 1.2, HD_IMAGERY_MAP_ZOOM, 1.75, 12, 2.05, 14, 2.15, 18, 2.65], { 'line-opacity': 0.77 }),
     line('access-roads', groups.access, 8.5, '#050505',
-      [9, 0.72, 10, 1.2, 12, 1.45, 14, 1.55, 18, 2.2]),
+      [9, 0.72, 10, 0.85, HD_IMAGERY_MAP_ZOOM, 1.2, 12, 1.45, 14, 1.55, 18, 2.2]),
 
     line('local-road-casing', groups.local, 9, '#d5d5d5',
-      [9, 0.98, 10, 1.45, 12, 1.8, 14, 1.9, 18, 2.45], { 'line-opacity': 0.75 }),
+      [10, 0.98, HD_IMAGERY_MAP_ZOOM, 1.45, 12, 1.8, 14, 1.9, 18, 2.45], { 'line-opacity': 0.75 }),
     line('local-roads', groups.local, 9, '#080808',
-      [9, 0.57, 10, 0.92, 12, 1.2, 14, 1.3, 18, 1.9]),
+      [10, 0.57, HD_IMAGERY_MAP_ZOOM, 0.92, 12, 1.2, 14, 1.3, 18, 1.9]),
 
     line('secondary-road-casing', groups.secondary, 7, '#e7e7e7',
-      [9, 1.22, 10, 1.95, 12, 2.3, 14, 2.4, 18, 2.95], { 'line-opacity': 0.82 }),
+      [9, 1.22, 10, 1.38, HD_IMAGERY_MAP_ZOOM, 1.95, 12, 2.3, 14, 2.4, 18, 2.95], { 'line-opacity': 0.82 }),
     line('secondary-roads', groups.secondary, 7, '#030303',
-      [9, 0.75, 10, 1.35, 12, 1.63, 14, 1.75, 18, 2.35]),
+      [9, 0.75, 10, 0.89, HD_IMAGERY_MAP_ZOOM, 1.35, 12, 1.63, 14, 1.75, 18, 2.35]),
 
    // Managed roads remain black across OSM highway subclasses.
     line('managed-road-casing', groups.managed, 7, '#f2f4f3',
-      [9, 1.7, 10, 2.4, 12, 2.75, 14, 2.9, 18, 3.5]),
+      [9, 1.7, 10, 1.87, HD_IMAGERY_MAP_ZOOM, 2.4, 12, 2.75, 14, 2.9, 18, 3.5]),
     line('managed-roads', groups.managed, 7, '#050505',
-      [9, 1.0, 10, 1.65, 12, 1.95, 14, 2.15, 18, 2.7]),
+      [9, 1.0, 10, 1.17, HD_IMAGERY_MAP_ZOOM, 1.65, 12, 1.95, 14, 2.15, 18, 2.7]),
 
     // Major numbered roads remain white and draw on top of minor roads.
     // State routes are already present in the Z5 road tiles; show them as
     // soon as that tile band is requested rather than holding them to Z6.1.
     line('state-road-casing', groups.state, 5, '#070707',
-      [8.1, 1.5, 9, 1.73, 10, 2.65, 12, 3.15, 18, 3.5]),
+      [8.1, 1.5, 10, 1.99, HD_IMAGERY_MAP_ZOOM, 2.65, 12, 3.15, 18, 3.5]),
     line('state-roads', groups.state, 5, '#ffffff',
-      [8.1, 0.88, 9, 1.07, 10, 1.8, 12, 2.2, 18, 2.6]),
+      [8.1, 0.88, 10, 1.28, HD_IMAGERY_MAP_ZOOM, 1.8, 12, 2.2, 18, 2.6]),
     line('primary-road-casing', groups.major, 2, '#050505',
-      [4, 1.7, 9, 2.61, 10, 3.35, 12, 3.9, 18, 4.5]),
+      [4, 1.7, 10, 2.79, HD_IMAGERY_MAP_ZOOM, 3.35, 12, 3.9, 18, 4.5]),
     line('primary-roads', groups.major, 2, '#ffffff',
-      [4, 1.08, 9, 1.78, 10, 2.4, 12, 2.8, 18, 3.35]),
+      [4, 1.08, 10, 1.92, HD_IMAGERY_MAP_ZOOM, 2.4, 12, 2.8, 18, 3.35]),
 
     // Numeric/ref labels take priority; don't also draw the street name.
     label('primary-route-labels', groups.major, 2, refText, hasText('ref'), 1, 13, true),
@@ -577,11 +581,9 @@ const map = new maplibregl.Map({
     sources: {
       satellite: {
           type: 'raster',
-          tiles: [
-            'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-          ],
-          tileSize: 256,
-          maxzoom: 19,
+          tiles: [SATELLITE_TILE_URL],
+          tileSize: SATELLITE_TILE_SIZE,
+          maxzoom: SATELLITE_MAX_TILE_ZOOM,
           attribution: 'Sources: Esri and World Imagery contributors'
         },
       places: {
@@ -1558,6 +1560,94 @@ function scheduleUnifiedMapSettledUpdates() {
 }
 
 map.on('moveend', scheduleUnifiedMapSettledUpdates);
+
+function nearbySatelliteTileUrls(bounds, mapZoom) {
+  // MapLibre rounds raster zoom, with one extra level for 256px tiles.
+  const z = Math.min(SATELLITE_MAX_TILE_ZOOM,
+    Math.round(mapZoom + Math.log2(512 / SATELLITE_TILE_SIZE)));
+  const scale = 2 ** z;
+  const tileX = lng => Math.floor((lng + 180) / 360 * scale);
+  const tileY = lat => {
+    const radians = Math.max(-85.05112878, Math.min(85.05112878, lat)) * Math.PI / 180;
+    return Math.max(0, Math.min(scale - 1,
+      Math.floor((1 - Math.asinh(Math.tan(radians)) / Math.PI) / 2 * scale)));
+  };
+  const west = tileX(bounds.getWest());
+  const east = tileX(bounds.getEast());
+  const north = tileY(bounds.getNorth());
+  const south = tileY(bounds.getSouth());
+  // At extreme pitches the bounding box can extend far into the distance.
+  if (east - west > 32 || south - north > 32) return [];
+
+  const ring = [];
+  for (let x = west - 1; x <= east + 1; x++) {
+    ring.push([x, north - 1], [x, south + 1]);
+  }
+  for (let y = north; y <= south; y++) {
+    ring.push([west - 1, y], [east + 1, y]);
+  }
+  const midX = (west + east) / 2;
+  const midY = (north + south) / 2;
+  const distance = ([x, y]) => (x - midX) ** 2 + (y - midY) ** 2;
+  return ring.filter(([, y]) => y >= 0 && y < scale)
+    .sort((a, b) => distance(a) - distance(b))
+    .map(([x, y]) => SATELLITE_TILE_URL.replace('{z}', z)
+      .replace('{x}', (x % scale + scale) % scale).replace('{y}', y));
+}
+
+const satellitePrefetchInFlight = new Map();
+const satelliteRecentlyPrefetched = new Map();
+let satellitePrefetchQueue = [];
+let satellitePrefetchEnabled = false;
+
+function drainSatellitePrefetchQueue() {
+  while (satellitePrefetchInFlight.size < 3 && satellitePrefetchQueue.length) {
+    const url = satellitePrefetchQueue.shift();
+    if (satellitePrefetchInFlight.has(url) ||
+        Date.now() - (satelliteRecentlyPrefetched.get(url) ?? 0) < 300_000) continue;
+    const controller = new AbortController();
+    satellitePrefetchInFlight.set(url, controller);
+    // Warm the same HTTP cache MapLibre uses for visible imagery.
+    fetch(url, { headers: { Accept: 'image/webp,*/*' }, priority: 'low', signal: controller.signal })
+      .then(async response => {
+        if (!response.ok) return;
+        await response.arrayBuffer();
+        satelliteRecentlyPrefetched.delete(url);
+        satelliteRecentlyPrefetched.set(url, Date.now());
+        if (satelliteRecentlyPrefetched.size > 128) {
+          satelliteRecentlyPrefetched.delete(satelliteRecentlyPrefetched.keys().next().value);
+        }
+      }).catch(() => {
+        // A failed preload can be retried on the next pan or normal tile load.
+      }).finally(() => {
+        satellitePrefetchInFlight.delete(url);
+        drainSatellitePrefetchQueue();
+      });
+  }
+}
+
+function updateSatellitePrefetch() {
+  const zoom = map.getZoom();
+  satellitePrefetchEnabled = zoom >= HD_IMAGERY_MAP_ZOOM;
+  satellitePrefetchQueue = satellitePrefetchEnabled
+    ? nearbySatelliteTileUrls(map.getBounds(), zoom).slice(0, isMobile ? 24 : 40)
+    : [];
+  if (!satellitePrefetchEnabled) {
+    for (const controller of satellitePrefetchInFlight.values()) controller.abort();
+  }
+  drainSatellitePrefetchQueue();
+}
+
+map.on('zoom', () => {
+  if ((map.getZoom() >= HD_IMAGERY_MAP_ZOOM) !== satellitePrefetchEnabled) updateSatellitePrefetch();
+});
+map.on('moveend', updateSatellitePrefetch);
+map.once('load', updateSatellitePrefetch);
+map.once('remove', () => {
+  satellitePrefetchQueue = [];
+  for (const controller of satellitePrefetchInFlight.values()) controller.abort();
+});
+
 map.on('click', (event) => {
   if (!dropPinMode) return;
 
