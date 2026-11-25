@@ -1046,6 +1046,8 @@ const savedLocationsGroup = document.querySelector('#savedLocationsGroup');
 const savedLocationsStatus = document.querySelector('#savedLocationsStatus');
 const SAVED_LOCATIONS_STORAGE_KEY = 'az-prospecting-map.saved-locations.v1';
 let researchLocationRequest = 0;
+let researchPointerRequest;
+let selectedResearchPin = null;
 let activeResearchLocation = null;
 let pendingSavedLocation = null;
 let dropPinMode = false;
@@ -1155,7 +1157,7 @@ function renderSavedLocations() {
 
 function openSaveLocationForm(location) {
   pendingSavedLocation = location;
-  researchLocationCard.hidden = true;
+  closeResearchLocation();
   saveLocationCoordinates.textContent = `${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}`;
   saveLocationName.value = location.name || '';
   saveLocationDescription.value = '';
@@ -1265,9 +1267,31 @@ function appendWithdrawalResults(nodes, label, features) {
   });
 }
 
+function closeResearchLocation() {
+  if (researchLocationCard.hidden) return;
+  researchLocationCard.hidden = true;
+  researchLocationRequest += 1;
+  activeResearchLocation = null;
+  selectedResearchPin?.remove();
+  selectedResearchPin = null;
+}
+
 async function openResearchLocation(lngLat, selectedFeature = null) {
+  const lng = Number(lngLat?.lng);
+  const lat = Number(lngLat?.lat);
+  if (!Number.isFinite(lng) || !Number.isFinite(lat)) return;
+
+  if (selectedResearchPin) {
+    selectedResearchPin.setLngLat([lng, lat]);
+  } else {
+    const element = document.createElement('div');
+    element.className = 'aem-selected-pin-v13';
+    selectedResearchPin = new maplibregl.Marker({ element, anchor: 'bottom' })
+      .setLngLat([lng, lat]).addTo(map);
+  }
+
   researchNavigateLocationButton.hidden = !selectedFeature;
-  return aemOpenResearchV2(lngLat, selectedFeature);
+  return aemOpenResearchV2({ lng, lat }, selectedFeature);
 }
 
 function syncNotClosedClaimsPresentation() {
@@ -2377,17 +2401,24 @@ installAemUnifiedSearch({
   }
 });
 
-document.querySelector('#researchLocationClose').addEventListener('click', () => {
-  researchLocationCard.hidden = true;
-  researchLocationRequest += 1;
-});
+document.querySelector('#researchLocationClose').addEventListener('click', closeResearchLocation);
+
+document.addEventListener('pointerdown', () => {
+  researchPointerRequest = researchLocationRequest;
+}, { capture: true });
+
+document.addEventListener('click', (event) => {
+  if (researchLocationCard.hidden || researchLocationCard.contains(event.target)) return;
+  // A touch held to drop a pin can also produce a click when released.
+  if (event.detail > 0 && researchPointerRequest !== researchLocationRequest) return;
+  closeResearchLocation();
+}, { capture: true });
 
 researchNavigateLocationButton.addEventListener('click', () => {
   if (!activeResearchLocation) return;
   const { lng, lat, name } = activeResearchLocation;
   routeFinder.setDestination([lng, lat], name);
-  researchLocationCard.hidden = true;
-  researchLocationRequest += 1;
+  closeResearchLocation();
   const finder = document.querySelector('#routeFinderPanel');
   trackSaveMenu.open = true;
   closeMapPanels(finder);
@@ -3930,36 +3961,3 @@ function aemParcelAtPoint(point) {
     }
   });
 }
-
-// AEM_LAYOUT_PIN_V13
-(function () {
-  let selectedPin = null;
-  const originalResearch = openResearchLocation;
-
-  openResearchLocation = function (lngLat, selectedFeature = null) {
-    const lng = Number(lngLat?.lng);
-    const lat = Number(lngLat?.lat);
-
-    if (Number.isFinite(lng) && Number.isFinite(lat)) {
-      if (!selectedPin) {
-        const element = document.createElement('div');
-        element.className = 'aem-selected-pin-v13';
-
-        selectedPin = new maplibregl.Marker({
-          element,
-          anchor: 'bottom'
-        }).setLngLat([lng, lat]).addTo(map);
-      } else {
-        selectedPin.setLngLat([lng, lat]);
-      }
-    }
-
-    return originalResearch(lngLat, selectedFeature);
-  };
-
-  document.getElementById('researchLocationClose')
-    ?.addEventListener('click', () => {
-      selectedPin?.remove();
-      selectedPin = null;
-    });
-})();
