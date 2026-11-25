@@ -87,6 +87,8 @@ input[type="checkbox"] { width: 24px; height: 24px; accent-color: #8fd39c; }
 .account-panel__sign-out { width:100%; margin-top:3px; color:#ffd1ca; border-color:rgba(255,150,140,.28); background:rgba(79,34,30,.52); }
 .account-panel__sign-out:disabled { cursor:wait; opacity:.55; }
 .account-panel__status { margin:0; color:#ffc5be; font-size:12px; line-height:1.35; }
+#map .maplibregl-popup-content { color:#16382d; }
+#map .maplibregl-popup-content a { color:#215b46; }
 .hint a, .historic-mine-popup a { color:#aee8b9; font-weight:700; text-decoration:none; }
 .historic-mine-popup { min-width:190px; max-width:280px; color:#172219; font-size:13px; line-height:1.35; }
 .historic-mine-popup h3 { margin:0 0 5px; font-size:15px; }
@@ -2096,4 +2098,29 @@ body:has(#trackSaveMenu:not([open])) {
     bottom: auto !important;
     max-height: calc(100dvh - var(--aem-header-end) - 26px) !important;
   }
+}
+
+@media (min-width: 768px) and (hover: hover) and (pointer: fine) {
+  .aem-map-dock {
+    grid-template-columns: 336px 217px;
+    justify-content: space-between;
+    max-width: none;
+  }
+
+  .aem-track-save,
+  .aem-map-shortcuts { position: relative; }
+
+  .aem-map-dock .aem-map-panel {
+    right: auto;
+    width: 410px;
+  }
+
+  .aem-map-shortcuts .aem-map-panel {
+    right: 0;
+    left: auto;
+  }
+}
+
+@media (min-width: 768px) and (max-height: 510px) and (hover: hover) and (pointer: fine) {
+  .aem-map-shortcuts .aem-map-panel { right: max(6px, env(safe-area-inset-right)); }
 }
