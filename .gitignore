@@ -63,3 +63,5 @@ Downloads/
 *.save
 *.save.*
 *~
+
+/mobile-dist/
