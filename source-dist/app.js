@@ -418,7 +418,9 @@ const DEVICE = Object.freeze(isMobile ? {
   targetPitch: 45,
   targetBearing: -14,
   terrainTransition: 320,
-  initialTerrainTransition: 850,
+  initialTerrainPitch: 26,
+  initialTerrainBearing: -5,
+  initialTerrainTransition: 1200,
   terrainMaxZoom: 12,
   mapMaxZoom: 19,
   accessDebounce: 450,
@@ -430,7 +432,9 @@ const DEVICE = Object.freeze(isMobile ? {
   targetPitch: 52,
   targetBearing: -18,
   terrainTransition: 380,
-  initialTerrainTransition: 1100,
+  initialTerrainPitch: 32,
+  initialTerrainBearing: -7,
+  initialTerrainTransition: 1400,
   terrainMaxZoom: 15,
   mapMaxZoom: 22,
   // Keep post-pan work out of the interaction path. Visible road tiles render
@@ -1463,8 +1467,8 @@ map.once('style.load', () => {
     map.setTerrain({ source: 'terrain', exaggeration: 1.15 });
     syncTwoDHillshade();
     map.easeTo({
-      pitch: DEVICE.targetPitch,
-      bearing: DEVICE.targetBearing,
+      pitch: DEVICE.initialTerrainPitch,
+      bearing: DEVICE.initialTerrainBearing,
       duration: DEVICE.initialTerrainTransition,
       easing: (progress) => progress * progress * (3 - 2 * progress),
       essential: false
