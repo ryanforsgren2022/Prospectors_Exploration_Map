@@ -2197,21 +2197,6 @@ const AEM_SEARCH_API =
 const AEM_SEARCH_STATE_CODES = new Set([
   'az', 'ca', 'co', 'id', 'mt', 'nv', 'nm', 'or', 'ut', 'wa', 'wy'
 ]);
-const aemSearchDiscoveredBounds = new Map();
-
-async function prepareAemSearchStateBounds() {
-  const discovered = await loadStateDiscovery();
-  for (const [rawCode, state] of Object.entries(discovered.states || {})) {
-    const code = rawCode.toLowerCase();
-    const bounds = state?.bounds;
-    if (!AEM_SEARCH_STATE_CODES.has(code) ||
-        !Array.isArray(bounds) || bounds.length !== 4 ||
-        !bounds.every(Number.isFinite) ||
-        bounds[0] >= bounds[2] || bounds[1] >= bounds[3]) continue;
-    aemSearchDiscoveredBounds.set(code, bounds);
-  }
-}
-
 function aemSearchState() {
   const center = map.getCenter();
   return aemSearchStateAtPoint([center.lng, center.lat]);
@@ -2222,14 +2207,9 @@ function aemSearchStateAtPoint(point) {
   const lat = Array.isArray(point) ? Number(point[1]) : Number(point?.lat);
   if (!Number.isFinite(lng) || !Number.isFinite(lat)) return null;
 
-  // Prefer verified state-discovery bounds, including Arizona, so the same
-  // routing path applies to all supported states.
-  const discovered = aemSearchDiscoveredBounds.size
-    ? aemSearchDiscoveredBounds
-    : new Map([...prospectorStateRegistry]
-      .filter(([code]) => AEM_SEARCH_STATE_CODES.has(code))
-      .map(([code, state]) => [code, state?.bounds]));
-  for (const [code, b] of discovered) {
+  for (const [code, state] of prospectorStateRegistry) {
+    if (!AEM_SEARCH_STATE_CODES.has(code)) continue;
+    const b = state?.bounds;
     if (
       Array.isArray(b) && b.length === 4 &&
       lng >= b[0] && lng <= b[2] &&
@@ -2346,6 +2326,74 @@ async function aemSearchClaim(state, value) {
   return aemSearchApi(state, 'claims', { value });
 }
 
+async function findClaimBySerial(value, selectedState, signal) {
+  const serial = aemClaimSerial(value);
+  if (!serial) return null;
+  const prefix = serial.match(/^[A-Z]+/)[0];
+  // Legacy case prefixes do not always begin with the state's postal code.
+  const legacyStates = { AMC: 'az', NMC: 'nv', NVN: 'nv', UMC: 'ut', UTU: 'ut' };
+  const state = selectedState || legacyStates[prefix] || prefix.slice(0, 2).toLowerCase();
+  if (!AEM_SEARCH_STATE_CODES.has(state)) return null;
+
+  const url = new URL(`${AEM_SEARCH_API}/${state}/claims`);
+  url.searchParams.set('value', serial);
+  const response = await fetch(url, { signal });
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error('Claim lookup is temporarily unavailable.');
+  const { features } = await response.json();
+  const feature = features?.find(({ properties = {} }) =>
+    ['CSE_NR', 'LEG_CSE_NR'].some(key => aemClaimSerial(String(properties[key] ?? '')) === serial));
+  if (!feature) return null;
+
+  return {
+    ...feature,
+    properties: {
+      ...feature.properties,
+      display_label: feature.properties.CSE_NAME || serial,
+      state_code: state,
+      search_type: 'claims'
+    }
+  };
+}
+
+function searchPinPoint(geometry) {
+  if (geometry?.type === 'Point') return geometry.coordinates?.slice(0, 2);
+  const polygons = geometry?.type === 'Polygon' ? [geometry.coordinates]
+    : geometry?.type === 'MultiPolygon' ? geometry.coordinates : [];
+  let point = null;
+  let widest = 0;
+  for (const rings of polygons) {
+    const latitudes = [...new Set(rings.flatMap(ring => ring.map(([, lat]) => lat)))].sort((a, b) => a - b);
+    let gap = 0;
+    let lat;
+    for (let i = 1; i < latitudes.length; i++) {
+      const height = latitudes[i] - latitudes[i - 1];
+      if (height <= gap) continue;
+      gap = height;
+      lat = (latitudes[i] + latitudes[i - 1]) / 2;
+    }
+    if (!gap) continue;
+
+    // A scan line between vertices pairs boundary crossings, including holes.
+    const crossings = [];
+    for (const ring of rings) {
+      for (let i = 1; i < ring.length; i++) {
+        const [x1, y1] = ring[i - 1];
+        const [x2, y2] = ring[i];
+        if ((y1 > lat) !== (y2 > lat)) crossings.push(x1 + (lat - y1) * (x2 - x1) / (y2 - y1));
+      }
+    }
+    crossings.sort((a, b) => a - b);
+    for (let i = 1; i < crossings.length; i += 2) {
+      const width = crossings[i] - crossings[i - 1];
+      if (width <= widest) continue;
+      widest = width;
+      point = [(crossings[i] + crossings[i - 1]) / 2, lat];
+    }
+  }
+  return point;
+}
+
 let aemSearchRequestId = 0;
 let aemSearchLastMapState;
 let aemSearchNavigating = false;
@@ -2374,12 +2422,22 @@ function aemNavigateToSearchResult(lngLat) {
 installAemUnifiedSearch({
   form: mapSearchForm, input: mapSearchInput, status: setSearchStatus, map,
   stateSelect: document.querySelector('#aemSearchScope'), countyInput: document.querySelector('#aemSearchCounty'),
-  prepare: prepareAemSearchStateBounds, parseState: aemParseStateSearch,
+  parseState: aemParseStateSearch, findClaimBySerial,
   parseCoordinates, parsePlss, geocode: searchAddress, fetch: window.fetch.bind(window),
   navigate: async (feature, isCurrent) => {
     if (!isCurrent()) return;
-    const point = feature.geometry?.coordinates;
-    if (!Array.isArray(point) || point.length !== 2 || !point.every(Number.isFinite)) throw new Error('Search returned invalid coordinates.');
+    const point = searchPinPoint(feature.geometry);
+    if (!point || point.length !== 2 || !point.every(Number.isFinite)) throw new Error('Search returned invalid coordinates.');
+    mapSearchPanel.open = false;
+    setSearchStatus('Location found.', 'success');
+    const research = openResearchLocation({ lng: point[0], lat: point[1] }, feature);
+
+    const bounds = feature.bbox || (feature.geometry.type !== 'Point' ? featureBounds(feature)?.toArray().flat() : null);
+    const { clientWidth, clientHeight } = map.getContainer();
+    // Leave room for the research card on narrow screens.
+    const offset = clientWidth <= 560 && clientHeight > 510 ? [0, -Math.round(clientHeight * 0.2)] : [0, 0];
+    const hasArea = bounds?.length === 4 && bounds.every(Number.isFinite)
+      && bounds[0] < bounds[2] && bounds[1] < bounds[3];
     aemSearchNavigating = true;
     aemSearchLastMapState = undefined;
     try {
@@ -2389,15 +2447,12 @@ installAemUnifiedSearch({
         map.once('moveend', done);
         timer = setTimeout(done, 2000);
         try {
-          if (Array.isArray(feature.bbox) && feature.bbox.length === 4) map.fitBounds([[feature.bbox[0], feature.bbox[1]], [feature.bbox[2], feature.bbox[3]]], { padding: 72, maxZoom: searchResultMaxZoom(), duration: 650, linear: true });
-          else map.easeTo({ center: point, zoom: searchResultMaxZoom(), duration: 650 });
+          if (hasArea) map.fitBounds([[bounds[0], bounds[1]], [bounds[2], bounds[3]]], { padding: 72, offset, maxZoom: searchResultMaxZoom(), duration: 650, linear: true });
+          else map.easeTo({ center: point, offset, zoom: searchResultMaxZoom(), duration: 650 });
         } catch (error) { clearTimeout(timer); map.off('moveend', done); reject(error); }
       });
     } finally { aemSearchNavigating = false; }
-    if (!isCurrent()) return;
-    setSearchStatus('Loading current location details…');
-    await openResearchLocation({ lng: point[0], lat: point[1] }, feature);
-    if (isCurrent()) setSearchStatus('Location found.', 'success');
+    await research;
   }
 });
 

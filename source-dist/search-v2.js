@@ -1,10 +1,19 @@
 /* Shared search interaction: resolve, choose, navigate, then research a fresh pin. */
+function aemClaimSerial(value) {
+  return value.toUpperCase().replace(/\s+/g, '').match(/^([A-Z]{2,4})(\d{4,})$/)?.[0];
+}
+
 function aemUnifiedQuery(value, parsePlss) {
   const match = value.match(/^(APN|PARCEL|CLAIM|BLM|CASE|ROAD|MINE)(?:\s*[:#]\s*|\s+)(.+)$/i);
   const kinds = { APN: 'parcels', PARCEL: 'parcels', CLAIM: 'claims', BLM: 'claims', CASE: 'claims', ROAD: 'roads', MINE: 'historic-mines' };
   if (match) return { q: match[2].trim(), kind: kinds[match[1].toUpperCase()] };
   const plss = parsePlss(value);
   if (plss) return { q: `T${plss.township}${plss.townshipDirection} R${plss.range}${plss.rangeDirection}${plss.section ? ` S${plss.section}` : ''}`, kind: plss.section ? 'sections' : 'townships' };
+  const serial = aemClaimSerial(value);
+  if (serial && (/^(?:AZ|CA|CO|ID|MT|NM|NV|OR|UT|WA|WY)\d{9}$/.test(serial)
+      || /^(?:AMC|AZA|AZAR|NMC|NVN|UMC|UTU)\d+$/.test(serial))) {
+    return { q: value, kind: 'claims' };
+  }
   return { q: value };
 }
 
@@ -71,6 +80,11 @@ function installAemUnifiedSearch(options) {
       if (!isCurrent()) return;
       const features = result.features || [];
       if (features.length) return await choose(features, result.truncated, isCurrent);
+      if (query.kind === 'claims' && options.findClaimBySerial && !options.countyInput?.value.trim()) {
+        const claim = await options.findClaimBySerial(query.q, state, signal);
+        if (!isCurrent()) return;
+        if (claim) return await navigate(claim, isCurrent);
+      }
       // Explicit references must never silently become an unrelated address.
       if (query.kind) throw new Error(result.pending?.length ? 'This search category is still being indexed. Please try again when it is ready.' : 'No matching record found. Check the state and reference.');
       const addresses = await geocode(context.value, signal);

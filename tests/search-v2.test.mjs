@@ -73,6 +73,22 @@ test('state and county filters are shared for all supported states', async () =>
     await h.submit('APN 001');assert.equal(h.calls[0].searchParams.get('state'), state);assert.equal(h.calls[0].searchParams.get('county'), 'Example County');
   }
 });
+test('a missing claim serial uses the state lookup before considering an address', async () => {
+  const claim = { ...feature('Nevada claim'), properties: { search_type: 'claims' } };
+  const lookups = [];
+  const h = harness([], {
+    findClaimBySerial: async (serial, state) => {
+      lookups.push([serial, state]);
+      return claim;
+    }
+  });
+  await h.submit('NV105216280');
+  assert.equal(h.calls[0].searchParams.get('kind'), 'claims');
+  assert.deepEqual(lookups, [['NV105216280', '']]);
+  assert.deepEqual(h.navigations, [claim]);
+  assert.equal(h.geocodes(), 0);
+});
+
 test('late search responses cannot navigate after the user changes the query', async () => {
   let release;
   const h = harness([], { fetch: () => new Promise(resolve => { release = () => resolve({ ok: true, json: async () => ({ features: [feature('Old')] }) }); }) });
